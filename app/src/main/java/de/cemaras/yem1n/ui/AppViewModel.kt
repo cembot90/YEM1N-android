@@ -13,7 +13,9 @@ import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.logik.Runde
 import de.cemaras.yem1n.logik.RundenStand
+import de.cemaras.yem1n.logik.Sonderrunden
 import de.cemaras.yem1n.logik.Stand
+import de.cemaras.yem1n.ui.theme.Farbwelt
 import de.cemaras.yem1n.speicher.Speicher
 
 /** Wo die App gerade ist. */
@@ -24,6 +26,9 @@ sealed interface Ansicht {
     data object Einstellungen : Ansicht
 }
 
+/** Runden, die nicht aus einer Arbeit der Liste kommen. */
+enum class SonderArt { FEHLERHEFT, PROBE, TRAINING }
+
 /** Platzhalter für die Arbeit, die nicht in der Liste steht (das Fehlerheft). */
 private const val SONDER = -1
 
@@ -32,6 +37,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     private var alleArbeiten: List<Arbeit> = emptyList()
     private var sonderArbeit: Arbeit? = null
+    private var sonderArt: SonderArt? = null
+
+    /** Beginn der Probearbeit in Millisekunden, für die Uhr. */
+    var probeStart: Long by mutableStateOf(0L)
+        private set
 
     /** Die sichtbaren Arbeiten (ohne die, die das Kind gelöscht hat). */
     var arbeiten: List<Arbeit> by mutableStateOf(emptyList())
@@ -52,6 +62,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     init {
         alleArbeiten = speicher.ladeArbeiten()
         fortschritt = speicher.ladeFortschritt()
+        Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
     }
 
@@ -71,7 +82,15 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         fachFilter = fach
     }
 
-    val istFehlerheft: Boolean get() = (ansicht as? Ansicht.Ueben)?.arbeit == SONDER
+    /** Die Runde kommt nicht aus der Arbeitenliste (Fehlerheft, Probearbeit oder Training). */
+    val imSonder: Boolean
+        get() = when (val a = ansicht) {
+            is Ansicht.Ueben -> a.arbeit == SONDER
+            is Ansicht.Uebungen -> a.arbeit == SONDER
+            else -> false
+        }
+    val istFehlerheft: Boolean get() = imSonder && sonderArt == SonderArt.FEHLERHEFT
+    val istProbe: Boolean get() = imSonder && sonderArt == SonderArt.PROBE
 
     /** (fällig, wartend) für den Knopf auf der Startseite. */
     val fehlerStand: Pair<Int, Int>
@@ -79,7 +98,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     val aktuelleArbeit: Arbeit?
         get() = when (val a = ansicht) {
-            is Ansicht.Uebungen -> arbeiten.getOrNull(a.arbeit)
+            is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen -> null
         }
@@ -101,14 +120,33 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun startFehlerheft() {
         val arbeit = Fehlerheft.baue(arbeiten, fortschritt.fehler, Tag.heute()) ?: return
         sonderArbeit = arbeit
+        sonderArt = SonderArt.FEHLERHEFT
         runde = Runde.start(arbeit.uebungen[0].aufgaben)
         verdient = 0
         ansicht = Ansicht.Ueben(SONDER, 0)
     }
 
+    /** Zwanzig neue gemischte Aufgaben mit Uhr, am Ende gibt es eine Note. */
+    fun startProbe() {
+        val arbeit = Sonderrunden.probe(arbeiten)
+        sonderArbeit = arbeit
+        sonderArt = SonderArt.PROBE
+        runde = Runde.start(arbeit.uebungen[0].aufgaben)
+        verdient = 0
+        probeStart = System.currentTimeMillis()
+        ansicht = Ansicht.Ueben(SONDER, 0)
+    }
+
+    /** Neue Aufgaben zu den zwei Bereichen, die am schwersten fallen. */
+    fun startTraining() {
+        sonderArbeit = Sonderrunden.training(arbeiten, fortschritt.anteile())
+        sonderArt = SonderArt.TRAINING
+        ansicht = Ansicht.Uebungen(SONDER)
+    }
+
     fun startUebung(uebung: Int) {
         val a = ansicht as? Ansicht.Uebungen ?: return
-        val u = arbeiten.getOrNull(a.arbeit)?.uebungen?.getOrNull(uebung) ?: return
+        val u = aktuelleArbeit?.uebungen?.getOrNull(uebung) ?: return
         runde = Runde.start(u.aufgaben)
         verdient = 0
         ansicht = Ansicht.Ueben(a.arbeit, uebung)
@@ -127,7 +165,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         when (val a = ansicht) {
             is Ansicht.Ueben -> {
                 runde = null
-                ansicht = if (a.arbeit == SONDER) Ansicht.Start else Ansicht.Uebungen(a.arbeit)
+                ansicht = if (a.arbeit != SONDER || sonderArt == SonderArt.TRAINING) {
+                    Ansicht.Uebungen(a.arbeit)
+                } else {
+                    Ansicht.Start
+                }
             }
             is Ansicht.Uebungen, Ansicht.Einstellungen -> ansicht = Ansicht.Start
             Ansicht.Start -> Unit
@@ -158,7 +200,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun schluesselVon(s: RundenStand, i: Int): String? {
-        if (istFehlerheft) return s.aufgaben.getOrNull(i)?.quellKey
+        if (imSonder) return s.aufgaben.getOrNull(i)?.quellKey?.ifEmpty { null }
         val arbeit = aktuelleArbeit ?: return null
         val uebung = aktuelleUebung ?: return null
         return Fehlerheft.schluessel(arbeit.schluessel, uebung.titel, i)
@@ -176,7 +218,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val arbeit = aktuelleArbeit ?: return
         val uebung = aktuelleUebung ?: return
         val (neu, muenzen) = fortschritt.nachRundeMit(
-            istFehlerheft, arbeit.schluessel, uebung.titel, s.staende, Tag.heute(),
+            imSonder, arbeit.schluessel, uebung.titel, s.staende, Tag.heute(),
         )
         verdient = muenzen
         behalte(neu)
@@ -185,6 +227,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     // Einstellungen
 
     fun setzeName(name: String) = behalte(fortschritt.copy(name = name.trim().take(30)))
+
+    fun setzeFarbwelt(rosa: Boolean) {
+        Farbwelt.rosa = rosa
+        behalte(fortschritt.copy(rosa = rosa))
+    }
 
     fun setzeTagesziel(ziel: Int) = behalte(fortschritt.copy(tagesziel = ziel.coerceIn(1, 5)))
 

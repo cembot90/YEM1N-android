@@ -30,6 +30,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableLongStateOf
+import kotlinx.coroutines.delay
+import de.cemaras.yem1n.logik.Sonderrunden
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,10 +79,11 @@ fun UebenScreen(vm: AppViewModel) {
         }
         if (s.fertig) {
             Ergebnis(
-                s, vm.fortschritt.name, vm.verdient, !vm.istFehlerheft,
+                s, vm.fortschritt.name, vm.verdient, !(vm.istFehlerheft || vm.istProbe), vm.istProbe,
                 onNochmal = vm::nochmal, onFertig = vm::zurueck,
             )
         } else {
+            if (vm.istProbe) ProbeUhr(vm.probeStart)
             val anteil = s.index.toFloat() / s.aufgaben.size
             LinearProgressIndicator(
                 progress = { anteil },
@@ -95,6 +99,21 @@ fun UebenScreen(vm: AppViewModel) {
             Aufgabenansicht(s, vm)
         }
     }
+}
+
+/** Die Uhr der Probearbeit zählt von 30 Minuten herunter. Danach darf das Kind trotzdem weitermachen. */
+@Composable
+private fun ProbeUhr(start: Long) {
+    var jetzt by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(start) {
+        while (true) {
+            delay(1000)
+            jetzt = System.currentTimeMillis()
+        }
+    }
+    val rest = Sonderrunden.PROBE_MINUTEN * 60L - (jetzt - start) / 1000
+    val text = if (rest > 0) "⏱ %d:%02d".format(rest / 60, rest % 60) else "⏱ Die Zeit ist um, mach in Ruhe fertig."
+    Text(text, color = if (rest > 0) Gelb else Koralle, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp))
 }
 
 @Composable
@@ -148,7 +167,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         }
         Spacer(Modifier.height(14.dp))
 
-        if (a.hinweis.isNotEmpty() && !s.bewertet) {
+        if (a.hinweis.isNotEmpty() && !s.bewertet && !vm.istProbe) {
             if (tippSichtbar) {
                 Text(a.hinweis, color = Himmel, fontSize = 18.sp, textAlign = TextAlign.Center)
             } else {
@@ -348,7 +367,7 @@ private fun Rueckmeldung(s: RundenStand, name: String) {
 
 @Composable
 private fun Ergebnis(
-    s: RundenStand, name: String, muenzen: Int, nochmalMoeglich: Boolean,
+    s: RundenStand, name: String, muenzen: Int, nochmalMoeglich: Boolean, mitNote: Boolean,
     onNochmal: () -> Unit, onFertig: () -> Unit,
 ) {
     val ende = remember(s.richtig, s.aufgaben.size) { Lob.fuerEnde(s.richtig, s.aufgaben.size, name) }
@@ -362,6 +381,12 @@ private fun Ergebnis(
         Text(sterneText(s.sterne), fontSize = 52.sp, color = Gelb)
         Spacer(Modifier.height(12.dp))
         Text("${s.richtig} von ${s.aufgaben.size} richtig", fontSize = 22.sp, color = Color.White)
+        if (mitNote) {
+            Text(
+                "Note ${Sonderrunden.note(s.richtig, s.aufgaben.size)}",
+                fontSize = 28.sp, fontWeight = FontWeight.Black, color = Gelb,
+            )
+        }
         if (s.angeschaut > 0) {
             Text("${s.angeschaut} Lösungen angeschaut", fontSize = 16.sp, color = Himmel)
         }

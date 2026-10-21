@@ -132,6 +132,14 @@ class RundeAbschlussTest {
         assertEquals(0, f2.rundenHeute(8))
     }
 
+    @Test fun leistungWirdProBereichSummiert() {
+        val r1 = listOf(Stand.RICHTIG, Stand.FALSCH, Stand.RICHTIG, Stand.RICHTIG)
+        val (f1, _) = Fortschritt().nachRundeMit(false, "A", "Einmaleins", r1, 5)
+        val (f2, _) = f1.nachRundeMit(true, "B", "Einmaleins", List(4) { Stand.FALSCH }, 6)
+        assertEquals(3.0 / 8, f2.anteile().getValue("Einmaleins"), 0.0001)
+        assertTrue("Sonderrunde gibt keine Sterne", f2.eintraege.keys.none { it.startsWith("B") })
+    }
+
     @Test fun fortschrittBleibtBeiAltemJsonLesbar() {
         val f = Fortschritt.ausJson("""{"eintraege":{"a#b":{"beste":3,"sterne":2,"runden":1}}}""")
         assertEquals(2, f.eintraege.getValue("a#b").sterne)

@@ -53,5 +53,7 @@ Android soll später über die CloudKit-Web-Services-REST-API an dieselbe Datenb
 Meilenstein 1: Arbeiten laden, üben (alle Aufgabenarten), Fortschritt speichern, Arbeit einfügen.
 Meilenstein 2a: Lob wie iOS, Münzen, Serie mit freiem Tag, Tagesziel, Fehlerheft mit Wiederholplan,
 Einstellungen (Name, Tagesziel, Arbeiten löschen), Fach-Filter.
-Offen in 2b: Probearbeit, Abzeichen, Rosa-Modus, Vorschule-Feinheiten, JSON-Datei öffnen, Training.
+Meilenstein 2b-1: Aufgaben-Generator (Port von MatheGenerator), Probearbeit mit Uhr und Note,
+Training (zwei schwächste Bereiche), Rosa-Modus, JSON-Datei öffnen.
+Offen in 2b-2: Abzeichen, Wochenziel, Vorschule-Feinheiten, JSON von anderen Apps teilen.
 Danach: Anleitung, Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.

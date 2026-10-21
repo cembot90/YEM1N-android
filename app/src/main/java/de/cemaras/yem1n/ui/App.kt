@@ -1,6 +1,9 @@
 package de.cemaras.yem1n.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -91,6 +94,19 @@ internal fun KartenZeile(onClick: () -> Unit, inhalt: @Composable RowScope.() ->
 @Composable
 fun StartScreen(vm: AppViewModel) {
     var einfuegen by remember { mutableStateOf(false) }
+    var dateiMeldung by remember { mutableStateOf<String?>(null) }
+    val kontext = LocalContext.current
+    val oeffner = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            val text = try {
+                kontext.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
+            } catch (e: Exception) {
+                null
+            }
+            dateiMeldung = if (text == null) "Die Datei konnte nicht gelesen werden."
+            else vm.fuegeArbeitEin(text) ?: "Die Arbeit wurde importiert."
+        }
+    }
     val heute = Tag.heute()
     val (serie, _) = vm.fortschritt.serie(heute)
     val runden = vm.fortschritt.rundenHeute(heute)
@@ -120,6 +136,11 @@ fun StartScreen(vm: AppViewModel) {
         }
         Spacer(Modifier.height(10.dp))
         FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() }
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SonderKnopf("📝", "Probearbeit", "30 Minuten", Modifier.weight(1f)) { vm.startProbe() }
+            SonderKnopf("🎯", "Training", "deine Schwächen", Modifier.weight(1f)) { vm.startTraining() }
+        }
         val faecher = vm.faecher
         if (faecher.size > 1) {
             Spacer(Modifier.height(10.dp))
@@ -150,15 +171,48 @@ fun StartScreen(vm: AppViewModel) {
             }
         }
         Spacer(Modifier.height(8.dp))
-        OutlinedButton(
-            onClick = { einfuegen = true },
-            modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, Gelb),
-        ) { Text("Arbeit einfügen", color = Gelb) }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = { einfuegen = true },
+                modifier = Modifier.weight(1f),
+                border = BorderStroke(1.dp, Gelb),
+            ) { Text("Arbeit einfügen", color = Gelb) }
+            OutlinedButton(
+                onClick = { oeffner.launch(arrayOf("*/*")) },
+                modifier = Modifier.weight(1f),
+                border = BorderStroke(1.dp, Gelb),
+            ) { Text("Datei öffnen", color = Gelb) }
+        }
         Spacer(Modifier.height(12.dp))
     }
     if (einfuegen) {
         EinfuegenDialog(vm) { einfuegen = false }
+    }
+    dateiMeldung?.let {
+        AlertDialog(
+            onDismissRequest = { dateiMeldung = null },
+            text = { Text(it) },
+            confirmButton = { TextButton(onClick = { dateiMeldung = null }) { Text("OK") } },
+        )
+    }
+}
+
+@Composable
+private fun SonderKnopf(symbol: String, titel: String, untertitel: String, modifier: Modifier, onClick: () -> Unit) {
+    Row(
+        modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(Karte)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(symbol, fontSize = 24.sp)
+        Spacer(Modifier.size(10.dp))
+        Column {
+            Text(titel, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+            Text(untertitel, fontSize = 13.sp, color = TextSanft)
+        }
     }
 }
 

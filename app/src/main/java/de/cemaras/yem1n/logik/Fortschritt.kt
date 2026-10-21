@@ -7,6 +7,10 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class UebungsStand(val beste: Int = 0, val sterne: Int = 0, val runden: Int = 0)
 
+/** Wie viele Aufgaben eines Bereichs bisher richtig waren, für das Training. */
+@Serializable
+data class Leistung(val richtig: Int = 0, val gesamt: Int = 0)
+
 /** Alles, was die App über den Lernfortschritt auf diesem Gerät weiß. */
 @Serializable
 data class Fortschritt(
@@ -22,6 +26,9 @@ data class Fortschritt(
     val tagesziel: Int = 1,
     /** Arbeiten, die das Kind nicht mehr sehen soll (mitgelieferte lassen sich nicht löschen). */
     val versteckt: List<String> = emptyList(),
+    /** Richtig und gesamt je Übungsname (zum Beispiel "Einmaleins"), über alle Runden. */
+    val leistung: Map<String, Leistung> = emptyMap(),
+    val rosa: Boolean = false,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
@@ -63,7 +70,8 @@ data class Fortschritt(
     }
 
     /**
-     * Trägt eine fertige Runde ein: Sterne, Münzen, Serie und Tagesziel. Die Fehler sind schon
+     * Trägt eine fertige Runde ein: Sterne, Münzen, Serie und Tagesziel. Bei Sonderrunden
+     * (Fehlerheft, Probearbeit, Training, [fehlerheft] = true) gibt es keine Sterne. Die Fehler sind schon
      * bei jeder Antwort eingetragen worden. Gibt den neuen Stand und die verdienten Münzen zurück.
      */
     fun nachRundeMit(
@@ -74,13 +82,19 @@ data class Fortschritt(
         val angeschaut = staende.count { it == Stand.ANGESCHAUT }
         val verdient = Muenzen.verdient(richtig, staende.size, angeschaut)
         val basis = if (fehlerheft) this else nachRunde(arbeitSchluessel, uebung, richtig, staende.size)
+        val alt = leistung[uebung] ?: Leistung()
         return basis.copy(
+            leistung = leistung + (uebung to Leistung(alt.richtig + richtig, alt.gesamt + staende.size)),
             muenzen = muenzen + verdient,
             tage = if (heute in tage) tage else tage + heute,
             letzterTag = heute,
             rundenAmLetztenTag = rundenHeute(heute) + 1,
         ) to verdient
     }
+
+    /** Anteil richtiger Aufgaben je Übungsname von 0.0 bis 1.0. */
+    fun anteile(): Map<String, Double> =
+        leistung.filter { it.value.gesamt > 0 }.mapValues { it.value.richtig.toDouble() / it.value.gesamt }
 
     fun rundenHeute(heute: Long): Int = if (letzterTag == heute) rundenAmLetztenTag else 0
 

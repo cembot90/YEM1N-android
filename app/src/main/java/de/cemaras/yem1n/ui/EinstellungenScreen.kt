@@ -61,6 +61,22 @@ fun EinstellungenScreen(vm: AppViewModel) {
         )
         Text("Damit lobt dich die App mit deinem Namen.", color = TextSanft, fontSize = 14.sp)
 
+        Abschnitt("Farbwelt")
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            val rosa = vm.fortschritt.rosa
+            if (!rosa) {
+                Button(onClick = { vm.setzeFarbwelt(false) }) { Text("Blau und Gelb") }
+                OutlinedButton(onClick = { vm.setzeFarbwelt(true) }, border = BorderStroke(1.dp, Gelb)) {
+                    Text("Rosa", color = Gelb)
+                }
+            } else {
+                OutlinedButton(onClick = { vm.setzeFarbwelt(false) }, border = BorderStroke(1.dp, Gelb)) {
+                    Text("Blau und Gelb", color = Gelb)
+                }
+                Button(onClick = { vm.setzeFarbwelt(true) }) { Text("Rosa") }
+            }
+        }
+
         Abschnitt("Tagesziel")
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedButton(

@@ -5,7 +5,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val NavyFarben = darkColorScheme(
+private fun navyFarben() = darkColorScheme(
     primary = Gelb,
     onPrimary = TiefNavy,
     secondary = Himmel,
@@ -26,7 +26,7 @@ private val NavyFarben = darkColorScheme(
 @Composable
 fun YEM1NTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = NavyFarben,
+        colorScheme = navyFarben(),
         typography = Typography,
         content = content,
     )

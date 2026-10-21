@@ -10,10 +10,13 @@ import java.net.URL
 
 /** Zugang zur CloudKit-Datenbank. Der API-Token ist öffentlich, mit ihm allein darf man nur lesen. */
 object CloudKonfig {
-    const val API_TOKEN = "1a871a85aea9944bde5f238aead6482a580e523faa6f558879781aa6cd30dac1"
+    const val API_TOKEN = "866221c746d62d9f4f42bc7572da920249c950ef0a0b5164d91d22fca855d5d6"
 
-    /** "development" zum Testen. Für die fertige App auf "production" stellen (mit eigenem Token). */
-    const val UMGEBUNG = "development"
+    /**
+     * "production" ist die echte Datenbank, die auch die iOS-App aus TestFlight und dem App Store benutzt.
+     * Der API-Token gilt nur für diese Umgebung. Zum Testen in "development" braucht es den Token von dort.
+     */
+    const val UMGEBUNG = "production"
 }
 
 /** Spricht mit den CloudKit-Web-Services und merkt sich den Anmelde-Schlüssel des Nutzers auf dem Gerät. */

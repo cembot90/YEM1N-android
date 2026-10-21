@@ -6,7 +6,7 @@ preview_urls = false
 
 [vars]
 CK_CONTAINER = "iCloud.de.cemaras.yem1n"
-CK_UMGEBUNG = "development"
+CK_UMGEBUNG = "production"
 
 # Eine Ablage für die Geräte (Familiencode, Rolle, Push-Kennung).
 # Anlegen mit: npx wrangler kv namespace create GERAETE, dann die ausgegebene id hier eintragen.

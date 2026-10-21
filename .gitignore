@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Geheime Schlüssel gehören nie ins Repo
+*.pem
+*.p8
+.dev.vars

@@ -844,6 +844,24 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         verdient = muenzen
         haustierText = Haustier.ereignis(fortschritt.haustier, neu.haustier)?.let { neu.haustier?.meldung(it) }
         behalte(neu)
+        if (!imSonder) ergebnisMelden(arbeit.klasse, arbeit.fach, arbeit.titel, uebung.titel, s)
+    }
+
+    /**
+     * Schickt das Ergebnis der Runde an die Eltern (über den Server), wenn ein Familiencode gesetzt ist und
+     * dieses Gerät dem Kind gehört. Klappt es nicht, geht die Runde trotzdem in den Fortschritt, nur die Eltern sehen sie nicht.
+     */
+    private fun ergebnisMelden(klasse: String, fach: String, arbeit: String, uebung: String, s: RundenStand) {
+        val code = fortschritt.familiencode
+        if (code.isEmpty() || fortschritt.jokerRolle != "kind") return
+        val jetzt = System.currentTimeMillis()
+        val e = de.cemaras.yem1n.logik.RundenErgebnisEintrag(
+            eintragId = java.util.UUID.randomUUID().toString(), klasse = klasse, fach = fach, arbeit = arbeit,
+            uebung = uebung, richtig = s.richtig, gesamt = s.aufgaben.size, angesehen = s.angeschaut,
+            sterne = s.sterne, kind = fortschritt.name.trim(), zeitpunkt = jetzt,
+        )
+        val koerper = ServerAnfrage.ergebnis(code, e)
+        viewModelScope.launch(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
     }
 
     /** Wochenbelohnung abholen. Gibt die Münzen zurück, 0 wenn es nichts abzuholen gab. */

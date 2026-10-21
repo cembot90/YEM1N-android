@@ -72,7 +72,12 @@ Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datens
 Beta und Haftung, Feedback per Mail, Versionsinfo).
 Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
 
-## Geplant nach allen Meilensteinen: Designüberarbeitung
+## Designüberarbeitung (begonnen)
+
+Schon da: Glas-Karten als Verlauf mit feiner Kante (`ui/theme/Glas.kt`, ohne echte Unschärfe, weil das auf Kinder-Tablets zu viel Leistung braucht), Lichtflecken im Hintergrund, federnde Karten auf dem Startbildschirm, Fortschrittsring für das Tagesziel, Sparmodus (Schalter in den Einstellungen, an bei schwachen Geräten).
+Noch offen: Federn und Ringe auch in den übrigen Bildschirmen.
+
+Ursprünglicher Plan:
 
 Moderneres Aussehen wie die iOS-App: Glas-Karten (Unschärfe und feine Kante, ab Android 12 per Blur,
 darunter flache Karten), weichere Hintergründe mit Lichtflecken, federnde Knöpfe, Fortschrittsringe,

@@ -52,10 +52,12 @@ import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
 import de.cemaras.yem1n.ui.theme.TiefNavy
+import de.cemaras.yem1n.ui.theme.feder
 
 /** Wurzel der App: Hintergrund, Zurück-Taste und die drei Bildschirme. */
 @Composable
@@ -71,6 +73,7 @@ fun App(vm: AppViewModel) {
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Navy, TiefNavy))),
     ) {
+        de.cemaras.yem1n.ui.theme.LichtFlecken()
         vm.meldung?.let {
             AlertDialog(
                 onDismissRequest = vm::meldungGelesen,
@@ -101,12 +104,13 @@ internal fun sterneText(n: Int): String = "★".repeat(n.coerceIn(0, 3)) + "☆"
 
 @Composable
 internal fun KartenZeile(onClick: () -> Unit, inhalt: @Composable RowScope.() -> Unit) {
+    val quelle = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(Karte)
-            .clickable(onClick = onClick)
+            .feder(quelle)
+            .glas(18.dp)
+            .clickable(interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) { inhalt() }
@@ -152,14 +156,20 @@ fun StartScreen(vm: AppViewModel) {
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Karte)
+                .glas(18.dp)
                 .clickable(onClick = vm::oeffneErfolge)
                 .padding(14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")
             Kennzahl("🪙", "${vm.fortschritt.muenzen}", "Münzen")
-            Kennzahl("🎯", "${minOf(runden, ziel)} / $ziel", "heute")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                de.cemaras.yem1n.ui.theme.Fortschrittsring(
+                    anteil = if (ziel > 0) minOf(runden, ziel).toFloat() / ziel else 1f,
+                    groesse = 52.dp, strich = 6.dp,
+                ) { Text("🎯", fontSize = 18.sp) }
+                Text("${minOf(runden, ziel)} / $ziel heute", color = TextSanft, fontSize = 13.sp)
+            }
         }
         Spacer(Modifier.height(10.dp))
         FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() }
@@ -240,11 +250,12 @@ fun StartScreen(vm: AppViewModel) {
 
 @Composable
 private fun SonderKnopf(symbol: String, titel: String, untertitel: String, modifier: Modifier, onClick: () -> Unit) {
+    val quelle = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(Karte)
-            .clickable(onClick = onClick)
+            .feder(quelle)
+            .glas(18.dp)
+            .clickable(interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

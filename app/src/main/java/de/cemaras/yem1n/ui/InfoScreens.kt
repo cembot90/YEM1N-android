@@ -47,6 +47,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import de.cemaras.yem1n.daten.InfoTexte
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
 
@@ -124,7 +125,7 @@ private fun InfoZeile(symbol: String, titel: String, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(Karte)
+            .glas(18.dp)
             .clickable(onClick = onClick)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -161,7 +162,7 @@ private fun TextSeite(vm: AppViewModel, titel: String, abschnitte: List<Pair<Str
         Text(titel, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
         abschnitte.forEach { (kopf, text) ->
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Karte).padding(16.dp),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).glas(18.dp).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(kopf, fontSize = 17.sp, fontWeight = FontWeight.Black, color = Gelb)
@@ -257,7 +258,7 @@ private fun KurzAnleitung() {
         Text("Kein Internet. Das ist die Kurzfassung.", color = Gelb, fontWeight = FontWeight.Bold)
         InfoTexte.kurzAnleitung.forEach { (kopf, text) ->
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Karte).padding(14.dp),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).glas(16.dp).padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(kopf, fontSize = 16.sp, fontWeight = FontWeight.Black, color = Gelb)

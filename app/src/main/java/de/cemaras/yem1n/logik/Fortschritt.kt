@@ -65,6 +65,8 @@ data class Fortschritt(
     val spieleProTag: Int = 3,
     /** Töne und Vibration in den Spielen. */
     val spielTon: Boolean = true,
+    /** Weniger Bewegung und Effekte für schwache Geräte. */
+    val sparmodus: Boolean = false,
     val spielHaptik: Boolean = true,
     /** Das Haustier, null solange noch keins gewählt wurde. */
     val haustier: Haustier? = null,

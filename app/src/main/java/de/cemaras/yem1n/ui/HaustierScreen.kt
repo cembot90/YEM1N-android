@@ -52,6 +52,7 @@ import de.cemaras.yem1n.logik.HaustierStufe
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
@@ -232,7 +233,7 @@ private fun Tierbild(tier: Haustier) {
 private fun Sprechblase(text: String) {
     Text(
         text,
-        modifier = Modifier.clip(RoundedCornerShape(18.dp)).background(Karte).padding(horizontal = 16.dp, vertical = 10.dp),
+        modifier = Modifier.clip(RoundedCornerShape(18.dp)).glas(18.dp).padding(horizontal = 16.dp, vertical = 10.dp),
         color = Color.White, textAlign = TextAlign.Center, fontSize = 16.sp,
     )
 }

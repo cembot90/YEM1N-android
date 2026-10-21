@@ -38,6 +38,7 @@ import de.cemaras.yem1n.logik.SpielArt
 import de.cemaras.yem1n.logik.SpielRegeln
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
 
@@ -57,7 +58,7 @@ fun SpieleScreen(vm: AppViewModel) {
         TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
         Text("Spiele", fontSize = 34.sp, fontWeight = FontWeight.Black, color = Gelb)
         Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Karte).padding(16.dp),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).glas(20.dp).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text("🪙 ${f.muenzen} Münzen", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
@@ -69,7 +70,7 @@ fun SpieleScreen(vm: AppViewModel) {
         SpielArt.entries.forEach { art ->
             val bestwert = f.bestwerte[art.schluessel] ?: 0
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Karte).padding(16.dp),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).glas(24.dp).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -100,7 +101,7 @@ fun SpieleScreen(vm: AppViewModel) {
         if (sperre != null) {
             Text(
                 sperre, color = Gelb, fontWeight = FontWeight.SemiBold, fontSize = 15.sp,
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Karte).padding(16.dp),
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).glas(20.dp).padding(16.dp),
             )
         }
         Spacer(Modifier.height(24.dp))

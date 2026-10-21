@@ -175,6 +175,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         fortschritt = speicher.ladeFortschritt()
         sprecher.an = fortschritt.vorlesen
         SpielEffekte.ton = fortschritt.spielTon
+        val schwach = (app.getSystemService(android.content.Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true
+        de.cemaras.yem1n.ui.theme.Sparmodus.an = fortschritt.sparmodus || schwach
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
@@ -323,6 +325,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** Nach der Frage nach der Erlaubnis noch einmal planen. */
     fun erinnerungNeuPlanen() {
         Erinnerung.planen(getApplication(), fortschritt.haustier, fortschritt.haustierErinnerung)
+    }
+
+    fun setzeSparmodus(an: Boolean) {
+        de.cemaras.yem1n.ui.theme.Sparmodus.an = an
+        behalte(fortschritt.copy(sparmodus = an))
     }
 
     fun setzeSpielTon(an: Boolean) {

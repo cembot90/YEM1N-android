@@ -128,6 +128,11 @@ fun EinstellungenScreen(vm: AppViewModel) {
             androidx.compose.material3.Switch(checked = vm.fortschritt.spielHaptik, onCheckedChange = vm::setzeSpielHaptik)
         }
 
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Sparmodus (weniger Bewegung, für ältere Geräte)", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.sparmodus, onCheckedChange = vm::setzeSparmodus)
+        }
+
         Abschnitt("Haustier")
         val frageErinnerung = rememberErinnerungsFrage(vm)
         Row(verticalAlignment = Alignment.CenterVertically) {

@@ -41,6 +41,7 @@ import de.cemaras.yem1n.logik.Erfolge
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
@@ -106,7 +107,7 @@ fun ErfolgeScreen(vm: AppViewModel) {
         }
 
         Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Karte).padding(16.dp),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -137,7 +138,7 @@ fun ErfolgeScreen(vm: AppViewModel) {
 
         val geschafft = pokale.count { it.erreicht }
         Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Karte).padding(16.dp),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Abzeichen: $geschafft von ${pokale.size}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Gelb)
@@ -172,7 +173,7 @@ fun ErfolgeScreen(vm: AppViewModel) {
 @Composable
 private fun KarteMit(inhalt: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Karte).padding(16.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) { inhalt() }
 }

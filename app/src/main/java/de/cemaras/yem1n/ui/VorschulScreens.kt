@@ -53,6 +53,7 @@ import de.cemaras.yem1n.logik.VorschulFrage
 import de.cemaras.yem1n.logik.VorschulStand
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
@@ -132,7 +133,7 @@ fun VorschulScreen(vm: AppViewModel) {
             Abschnitt("Eigene Pakete")
             pakete.forEach { (nr, a) ->
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Karte)
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).glas(20.dp)
                         .clickable { vm.oeffneVorschulPaket(nr) }.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -163,7 +164,7 @@ fun VorschulPaketScreen(vm: AppViewModel, nr: Int) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             arbeit?.uebungen?.forEachIndexed { i, u ->
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Karte)
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).glas(20.dp)
                         .clickable { vm.startVorschulPaket(nr, i) }.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -194,7 +195,7 @@ private fun SpielRaster(arten: List<VorschulArt>, vm: AppViewModel) {
                             .weight(1f)
                             .heightIn(min = 120.dp)
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Karte)
+                            .glas(24.dp)
                             .clickable { vm.startVorschul(art) }
                             .padding(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -225,7 +226,7 @@ private fun EnglischRaster(vm: AppViewModel) {
                             .weight(1f)
                             .heightIn(min = 110.dp)
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Karte)
+                            .glas(24.dp)
                             .clickable { vm.oeffneEnglisch(thema) }
                             .padding(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -310,7 +311,7 @@ private fun SchulstartPass(stempel: Set<VorschulArt>) {
     val stationen = VorschulArt.stationen
     val anzahl = stationen.count { it in stempel }
     Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Karte).padding(16.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).glas(24.dp).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -397,7 +398,7 @@ private fun FragenSpiel(vm: AppViewModel, s: VorschulStand) {
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(22.dp))
-                .background(Karte)
+                .glas(22.dp)
                 .clickable { vm.frageVorlesen() }
                 .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,

@@ -14,6 +14,8 @@ import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.MemoryStand
+import de.cemaras.yem1n.logik.SpielArt
+import de.cemaras.yem1n.logik.SpielRegeln
 import de.cemaras.yem1n.logik.VorschulArt
 import de.cemaras.yem1n.logik.VorschulGenerator
 import de.cemaras.yem1n.logik.VorschulStand
@@ -34,6 +36,8 @@ sealed interface Ansicht {
     data object Erfolge : Ansicht
     data object Info : Ansicht
     data object Vorschule : Ansicht
+    data object Spiele : Ansicht
+    data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class InfoSeite(val seite: de.cemaras.yem1n.ui.InfoSeite) : Ansicht
 }
@@ -129,7 +133,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulSpiel -> null
+            Ansicht.Vorschule, is Ansicht.VorschulSpiel, Ansicht.Spiele, is Ansicht.Spiel -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -144,6 +148,37 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun oeffneErfolge() {
         ansicht = Ansicht.Erfolge
     }
+
+    // Spiele
+
+    /** True, wenn das Spiel gerade einen neuen Bestwert geschafft hat. */
+    var rekord: Boolean by mutableStateOf(false)
+        private set
+
+    /** Grund, warum gerade nicht gespielt werden kann, sonst null. */
+    val spielSperre: String? get() = SpielRegeln.sperre(fortschritt, Tag.heute())
+
+    fun oeffneSpiele() {
+        ansicht = Ansicht.Spiele
+    }
+
+    /** Bezahlt ein Spiel mit Münzen und öffnet es, wenn gerade gespielt werden darf. */
+    fun startSpiel(art: SpielArt) {
+        if (!art.verfuegbar || spielSperre != null) return
+        behalte(fortschritt.spielBezahlt(Tag.heute()))
+        rekord = false
+        ansicht = Ansicht.Spiel(art)
+    }
+
+    fun spielEnde(art: SpielArt, punkte: Int) {
+        val (neu, istRekord) = fortschritt.mitBestwert(art.schluessel, punkte)
+        rekord = istRekord
+        if (istRekord) behalte(neu)
+    }
+
+    fun setzeSpieleErlaubt(erlaubt: Boolean) = behalte(fortschritt.copy(spieleErlaubt = erlaubt))
+
+    fun setzeSpieleProTag(anzahl: Int) = behalte(fortschritt.copy(spieleProTag = anzahl.coerceIn(1, 10)))
 
     // Vorschule
 
@@ -309,7 +344,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele -> ansicht = Ansicht.Start
+            is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {
                 sprecher.stopp()
                 vorschul = null

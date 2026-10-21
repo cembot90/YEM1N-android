@@ -51,6 +51,14 @@ data class Fortschritt(
     val vorschulStufe: Int = 2,
     /** Liest die App Fragen und Lob vor? */
     val vorlesen: Boolean = true,
+    /** Bester Punktestand je Spiel, Schlüssel siehe [SpielArt.schluessel]. */
+    val bestwerte: Map<String, Int> = emptyMap(),
+    /** Tag, an dem zuletzt ein Spiel bezahlt wurde, und wie viele es an dem Tag waren. */
+    val spieleTag: Long = 0,
+    val spieleAnzahl: Int = 0,
+    /** Eltern können die Spiele ausschalten oder die Zahl pro Tag begrenzen. */
+    val spieleErlaubt: Boolean = true,
+    val spieleProTag: Int = 3,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
@@ -123,6 +131,21 @@ data class Fortschritt(
     /** Wie viele Spiele der Vorschule schon mit mindestens einem Stern geschafft sind. */
     fun vorschulStempel(): Set<VorschulArt> =
         VorschulArt.stationen.filter { stand(VORSCHUL_ARBEIT, it.uebungName).sterne >= 1 }.toSet()
+
+    fun spieleHeute(heute: Long): Int = if (spieleTag == heute) spieleAnzahl else 0
+
+    /** Mindestens eine Übungsrunde heute fertig? Erst dann darf gespielt werden. */
+    fun heuteGeuebt(heute: Long): Boolean = rundenHeute(heute) > 0
+
+    /** Zieht den Preis für ein Spiel ab und zählt es für heute mit. */
+    fun spielBezahlt(heute: Long): Fortschritt =
+        copy(muenzen = muenzen - SpielRegeln.PREIS, spieleTag = heute, spieleAnzahl = spieleHeute(heute) + 1)
+
+    /** Merkt sich den Punktestand, wenn er der beste ist. Zweiter Wert: neuer Rekord? */
+    fun mitBestwert(spiel: String, punkte: Int): Pair<Fortschritt, Boolean> {
+        if (punkte <= (bestwerte[spiel] ?: 0)) return this to false
+        return copy(bestwerte = bestwerte + (spiel to punkte)) to true
+    }
 
     fun rundenHeute(heute: Long): Int = if (letzterTag == heute) rundenAmLetztenTag else 0
 

@@ -95,6 +95,30 @@ fun EinstellungenScreen(vm: AppViewModel) {
             ) { Text("+", color = Gelb, fontSize = 20.sp) }
         }
 
+        Abschnitt("Spiele")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Spiele erlauben", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.spieleErlaubt, onCheckedChange = vm::setzeSpieleErlaubt)
+        }
+        if (vm.fortschritt.spieleErlaubt) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(
+                    onClick = { vm.setzeSpieleProTag(vm.fortschritt.spieleProTag - 1) },
+                    border = BorderStroke(1.dp, Gelb),
+                ) { Text("-", color = Gelb, fontSize = 20.sp) }
+                Text(
+                    "${vm.fortschritt.spieleProTag} ${if (vm.fortschritt.spieleProTag == 1) "Spiel" else "Spiele"} am Tag",
+                    color = Color.White, fontSize = 18.sp,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                )
+                OutlinedButton(
+                    onClick = { vm.setzeSpieleProTag(vm.fortschritt.spieleProTag + 1) },
+                    border = BorderStroke(1.dp, Gelb),
+                ) { Text("+", color = Gelb, fontSize = 20.sp) }
+            }
+        }
+        Text("Ein Spiel kostet 15 Münzen und gibt es erst, wenn heute eine Übung geschafft ist.", color = TextSanft, fontSize = 13.sp)
+
         Abschnitt("Vorlesen")
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(

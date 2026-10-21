@@ -58,7 +58,9 @@ Training (zwei schwächste Bereiche), Rosa-Modus, JSON-Datei öffnen.
 Meilenstein 2b-2: Erfolge-Bildschirm (Serie, Tagesziel, Wochenziel mit Belohnung, 24 Abzeichen),
 JSON aus anderen Apps annehmen (Teilen und Öffnen).
 Offen in Meilenstein 2: Vorschule-Feinheiten (Rosa-Modus ist schon da).
-Danach: Anleitung, Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
+Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
+Beta und Haftung, Feedback per Mail, Versionsinfo).
+Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
 
 ## Geplant nach allen Meilensteinen: Designüberarbeitung
 

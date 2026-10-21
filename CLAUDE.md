@@ -46,7 +46,9 @@ Farben: Lacivert und Sarı (Navy `#00205B`, Gelb `#FFED00`), wie bei iOS.
 ## Cloud-Entscheidung
 
 Keine eigene Android-Cloud (kein Firebase). iOS nutzt nur die öffentliche CloudKit-Datenbank.
-Android soll später über die CloudKit-Web-Services-REST-API an dieselbe Datenbank, also eine Cloud für beide Systeme.
+Android soll über die CloudKit-Web-Services-REST-API an dieselbe Datenbank, also eine Cloud für beide Systeme.
+Entschieden (21.10.2026): Android-Nutzer melden sich mit ihrer Apple-ID an (CloudKit-Web-Anmeldung), damit sie auch schreiben dürfen.
+Mitteilungen (Joker, Antworten) soll es auch auf Android geben. Der Weg dafür ist noch offen, weil CloudKit nur Apples Push-Dienst bedient.
 
 ## Stand und nächste Schritte
 

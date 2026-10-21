@@ -72,6 +72,10 @@ data class Fortschritt(
     val haustier: Haustier? = null,
     /** Erinnerung am Nachmittag, wenn das Haustier hungrig würde. */
     val haustierErinnerung: Boolean = true,
+    /** Familiencode für Joker und Ergebnisse, leer solange keiner eingegeben wurde. */
+    val familiencode: String = "",
+    /** "kind" oder "eltern": wer dieses Gerät benutzt (für die Joker-Seite). */
+    val jokerRolle: String = "kind",
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =

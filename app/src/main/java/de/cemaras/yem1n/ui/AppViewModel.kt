@@ -24,6 +24,11 @@ import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.speicher.CloudClient
+import de.cemaras.yem1n.speicher.ServerClient
+import de.cemaras.yem1n.logik.Familiencode
+import de.cemaras.yem1n.logik.JokerCloud
+import de.cemaras.yem1n.logik.JokerFrage
+import de.cemaras.yem1n.logik.ServerAnfrage
 import de.cemaras.yem1n.logik.CloudAdresse
 import de.cemaras.yem1n.speicher.Erinnerung
 import de.cemaras.yem1n.speicher.HaustierWidget
@@ -57,6 +62,7 @@ sealed interface Ansicht {
     data class VorschulPakete(val arbeit: Int) : Ansicht
     data object Spiele : Ansicht
     data object HaustierSeite : Ansicht
+    data object Joker : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -222,7 +228,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -377,6 +383,101 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         cloud.merkeToken(null)
         cloudAngemeldet = false
         cloudText = "Abgemeldet."
+    }
+
+    // Joker: Fragen der Kinder und Antworten der Eltern über den eigenen Server
+
+    var jokerFragen: List<JokerFrage> by mutableStateOf(emptyList())
+        private set
+    var jokerMeldung: String by mutableStateOf("")
+        private set
+    var jokerBeschaeftigt: Boolean by mutableStateOf(false)
+        private set
+
+    fun oeffneJoker() {
+        ansicht = Ansicht.Joker
+        if (fortschritt.familiencode.isNotEmpty()) jokerLaden()
+    }
+
+    /** Nimmt einen eingegebenen Familiencode an. Gibt false zurück, wenn er nicht passt. */
+    fun setzeFamiliencode(eingabe: String): Boolean {
+        val code = Familiencode.pruefe(eingabe) ?: return false
+        behalte(fortschritt.copy(familiencode = code))
+        jokerFragen = emptyList()
+        jokerLaden()
+        return true
+    }
+
+    fun neuerFamiliencode() {
+        behalte(fortschritt.copy(familiencode = Familiencode.neu()))
+        jokerFragen = emptyList()
+        jokerMeldung = "Neuer Familiencode. Gib ihn auch auf dem Gerät der Eltern ein."
+    }
+
+    fun vergissFamiliencode() {
+        behalte(fortschritt.copy(familiencode = ""))
+        jokerFragen = emptyList()
+        jokerMeldung = ""
+    }
+
+    fun setzeJokerRolle(rolle: String) {
+        if (rolle == "kind" || rolle == "eltern") behalte(fortschritt.copy(jokerRolle = rolle))
+    }
+
+    fun jokerLaden() {
+        val code = fortschritt.familiencode
+        if (code.isEmpty() || jokerBeschaeftigt) return
+        jokerBeschaeftigt = true
+        viewModelScope.launch {
+            val liste = withContext(Dispatchers.IO) {
+                val f = cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_FRAGE, code))
+                val a = cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_ANTWORT, code))
+                val d = cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_DAUMEN, code))
+                if (f == null) null
+                else JokerCloud.fragen(
+                    JokerCloud.datensaetze(f), JokerCloud.datensaetze(a.orEmpty()), JokerCloud.datensaetze(d.orEmpty()),
+                )
+            }
+            if (liste == null) {
+                jokerMeldung = "Keine Verbindung. Ist das Internet an?"
+            } else {
+                jokerFragen = liste
+                jokerMeldung = if (liste.isEmpty()) "Noch keine Fragen." else ""
+            }
+            jokerBeschaeftigt = false
+        }
+    }
+
+    private fun jokerSenden(koerper: String) {
+        if (jokerBeschaeftigt) return
+        jokerBeschaeftigt = true
+        viewModelScope.launch {
+            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
+            jokerBeschaeftigt = false
+            if (e.ok) {
+                jokerMeldung = "Gesendet."
+                // CloudKit braucht einen Moment, bis neue Einträge abfragbar sind.
+                kotlinx.coroutines.delay(1500)
+                jokerLaden()
+            } else {
+                jokerMeldung = e.meldung
+            }
+        }
+    }
+
+    fun jokerFrageSenden(fach: String, uebung: String, text: String) {
+        if (text.isBlank() || fortschritt.familiencode.isEmpty()) return
+        jokerSenden(ServerAnfrage.frage(fortschritt.familiencode, fortschritt.name, fach, uebung, text))
+    }
+
+    fun jokerAntwortSenden(frageId: String, emoji: String, text: String) {
+        if (text.isBlank() || fortschritt.familiencode.isEmpty()) return
+        jokerSenden(ServerAnfrage.antwort(fortschritt.familiencode, frageId, fortschritt.name.ifBlank { "Eltern" }, emoji, text))
+    }
+
+    fun jokerDaumen(frageId: String, antwortId: String) {
+        if (fortschritt.familiencode.isEmpty()) return
+        jokerSenden(ServerAnfrage.daumen(fortschritt.familiencode, frageId, antwortId, fortschritt.name))
     }
 
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
@@ -666,7 +767,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {

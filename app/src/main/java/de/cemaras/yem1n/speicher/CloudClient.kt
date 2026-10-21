@@ -57,6 +57,27 @@ class CloudClient(context: Context) {
         }
     }
 
+    /**
+     * Liest öffentliche Daten, nur mit dem API-Token und ohne Anmeldung. Gibt den rohen Text der Antwort zurück,
+     * oder null, wenn keine Verbindung zustande kam. Nie auf dem Haupt-Thread aufrufen.
+     */
+    fun lesen(operation: String, koerper: String): String? {
+        val adresse = CloudAdresse.url(operation, CloudKonfig.API_TOKEN, null, CloudKonfig.UMGEBUNG)
+        return try {
+            val c = URL(adresse).openConnection() as HttpURLConnection
+            c.connectTimeout = 15000
+            c.readTimeout = 20000
+            c.requestMethod = "POST"
+            c.doOutput = true
+            c.setRequestProperty("Content-Type", "application/json")
+            c.outputStream.use { it.write(koerper.toByteArray(Charsets.UTF_8)) }
+            val strom = if (c.responseCode in 200..299) c.inputStream else (c.errorStream ?: c.inputStream)
+            strom.bufferedReader(Charsets.UTF_8).use { it.readText() }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     /** Wer ist angemeldet? Ohne Anmeldung kommt `anmeldungNoetig` mit der Anmelde-Adresse zurück. */
     fun aktuellerNutzer(): CloudAntwort = anfrage("users/current")
 }

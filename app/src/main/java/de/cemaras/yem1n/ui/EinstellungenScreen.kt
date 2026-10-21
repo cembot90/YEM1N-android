@@ -128,6 +128,16 @@ fun EinstellungenScreen(vm: AppViewModel) {
             androidx.compose.material3.Switch(checked = vm.fortschritt.spielHaptik, onCheckedChange = vm::setzeSpielHaptik)
         }
 
+        Abschnitt("Haustier")
+        val frageErinnerung = rememberErinnerungsFrage(vm)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Erinnerung am Nachmittag, wenn das Haustier hungrig wird", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.haustierErinnerung, onCheckedChange = {
+                vm.setzeErinnerung(it)
+                if (it) frageErinnerung()
+            })
+        }
+
         Abschnitt("Vorlesen")
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(

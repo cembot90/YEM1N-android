@@ -56,6 +56,19 @@ import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
 
+/** Gibt eine Funktion zurück, die (ab Android 13) einmal um die Erlaubnis für Mitteilungen bittet. */
+@Composable
+fun rememberErinnerungsFrage(vm: AppViewModel): () -> Unit {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val starter = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { vm.erinnerungNeuPlanen() }
+    return {
+        if (!de.cemaras.yem1n.speicher.Erinnerung.erlaubt(ctx)) starter.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        else vm.erinnerungNeuPlanen()
+    }
+}
+
 @Composable
 fun HaustierScreen(vm: AppViewModel) {
     val tier = vm.haustier
@@ -76,6 +89,7 @@ fun HaustierScreen(vm: AppViewModel) {
 private fun HaustierWahl(vm: AppViewModel) {
     var art by remember { mutableStateOf("katze") }
     var name by remember { mutableStateOf("") }
+    val frage = rememberErinnerungsFrage(vm)
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -112,7 +126,10 @@ private fun HaustierWahl(vm: AppViewModel) {
             singleLine = true,
         )
         Button(
-            onClick = { vm.neuesHaustier(name, art) },
+            onClick = {
+                vm.neuesHaustier(name, art)
+                if (vm.fortschritt.haustierErinnerung) frage()
+            },
             modifier = Modifier.fillMaxWidth().height(56.dp),
         ) { Text("Das ist meins!", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
     }

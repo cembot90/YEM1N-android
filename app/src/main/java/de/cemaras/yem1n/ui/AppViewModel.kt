@@ -23,6 +23,7 @@ import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Haustier
+import de.cemaras.yem1n.speicher.Erinnerung
 import de.cemaras.yem1n.logik.HaustierHut
 import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.MemoryStand
@@ -173,6 +174,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         fortschritt = speicher.ladeFortschritt()
         sprecher.an = fortschritt.vorlesen
         SpielEffekte.ton = fortschritt.spielTon
+        Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
@@ -186,6 +188,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun behalte(neu: Fortschritt) {
         fortschritt = neu
         speicher.speichereFortschritt(neu)
+        Erinnerung.planen(getApplication(), neu.haustier, neu.haustierErinnerung)
     }
 
     val faecher: List<String> get() = arbeiten.map { it.fach }.distinct()
@@ -311,6 +314,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
         val wunsch = vorschulSpracheAktiv
         sprecher.sprich(t.text(wunsch), sprache = t.sprache(wunsch))
+    }
+
+    fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
+
+    /** Nach der Frage nach der Erlaubnis noch einmal planen. */
+    fun erinnerungNeuPlanen() {
+        Erinnerung.planen(getApplication(), fortschritt.haustier, fortschritt.haustierErinnerung)
     }
 
     fun setzeSpielTon(an: Boolean) {

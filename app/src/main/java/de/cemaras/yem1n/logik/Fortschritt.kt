@@ -68,6 +68,8 @@ data class Fortschritt(
     val spielHaptik: Boolean = true,
     /** Das Haustier, null solange noch keins gewählt wurde. */
     val haustier: Haustier? = null,
+    /** Erinnerung am Nachmittag, wenn das Haustier hungrig würde. */
+    val haustierErinnerung: Boolean = true,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =

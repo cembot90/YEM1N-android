@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Damit die Sprachausgabe des Geräts ab Android 11 gefunden wird -->
     <queries>
@@ -48,6 +49,7 @@
                 <data android:mimeType="application/json" />
             </intent-filter>
         </activity>
+        <receiver android:name=".speicher.ErinnerungEmpfaenger" android:exported="false" />
     </application>
 
 </manifest>

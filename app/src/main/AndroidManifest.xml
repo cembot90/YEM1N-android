@@ -49,6 +49,12 @@
                 <data android:mimeType="application/json" />
             </intent-filter>
         </activity>
+        <receiver android:name=".speicher.HaustierWidget" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_haustier_info" />
+        </receiver>
         <receiver android:name=".speicher.ErinnerungEmpfaenger" android:exported="false" />
     </application>
 

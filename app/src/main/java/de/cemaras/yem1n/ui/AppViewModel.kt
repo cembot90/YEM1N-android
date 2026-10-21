@@ -24,6 +24,7 @@ import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.speicher.Erinnerung
+import de.cemaras.yem1n.speicher.HaustierWidget
 import de.cemaras.yem1n.logik.HaustierHut
 import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.MemoryStand
@@ -189,6 +190,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         fortschritt = neu
         speicher.speichereFortschritt(neu)
         Erinnerung.planen(getApplication(), neu.haustier, neu.haustierErinnerung)
+        HaustierWidget.aktualisieren(getApplication(), neu)
     }
 
     val faecher: List<String> get() = arbeiten.map { it.fach }.distinct()

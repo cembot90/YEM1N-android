@@ -14,20 +14,21 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
-/** Familiencode wie in der iOS-App: 10 Zeichen, gezeigt als XXXXX-XXXXX. */
+/** Familiencode wie in der iOS-App: 10 Zeichen, gespeichert und abgefragt als XXXXX-XXXXX (mit Strich). */
 object Familiencode {
     const val ZEICHEN = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
-    /** Bringt eine Eingabe in die Form ohne Strich und mit Großbuchstaben. Null, wenn sie nicht passt. */
+    /** Bringt eine Eingabe in die Form XXXXX-XXXXX. Null, wenn sie nicht passt. */
     fun pruefe(eingabe: String): String? {
         val s = eingabe.uppercase().filter { it != '-' && !it.isWhitespace() }
-        return if (s.length == 10 && s.all { it in ZEICHEN }) s else null
+        return if (s.length == 10 && s.all { it in ZEICHEN }) s.take(5) + "-" + s.drop(5) else null
     }
 
-    fun zeige(code: String): String = code.take(5) + "-" + code.drop(5)
+    /** Zum Anzeigen, auch für einen älteren Code ohne Strich. */
+    fun zeige(code: String): String = pruefe(code) ?: code
 
     fun neu(zufall: kotlin.random.Random = kotlin.random.Random.Default): String =
-        String(CharArray(10) { ZEICHEN[zufall.nextInt(ZEICHEN.length)] })
+        pruefe(String(CharArray(10) { ZEICHEN[zufall.nextInt(ZEICHEN.length)] }))!!
 }
 
 /** Eine Frage eines Kindes (Datensatz "JokerAnfrage"). */

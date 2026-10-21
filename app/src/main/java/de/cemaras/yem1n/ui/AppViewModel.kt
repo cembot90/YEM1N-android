@@ -387,6 +387,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     // Joker: Fragen der Kinder und Antworten der Eltern über den eigenen Server
 
+    /** Der Familiencode in der Form XXXXX-XXXXX, leer ohne gültigen Code (auch ältere Codes ohne Strich gehen). */
+    val jokerCode: String get() = Familiencode.pruefe(fortschritt.familiencode) ?: ""
+
     var jokerFragen: List<JokerFrage> by mutableStateOf(emptyList())
         private set
     var jokerMeldung: String by mutableStateOf("")
@@ -396,7 +399,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun oeffneJoker() {
         ansicht = Ansicht.Joker
-        if (fortschritt.familiencode.isNotEmpty()) jokerLaden()
+        if (jokerCode.isNotEmpty()) jokerLaden()
     }
 
     /** Nimmt einen eingegebenen Familiencode an. Gibt false zurück, wenn er nicht passt. */
@@ -425,7 +428,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun jokerLaden() {
-        val code = fortschritt.familiencode
+        val code = jokerCode
         if (code.isEmpty() || jokerBeschaeftigt) return
         jokerBeschaeftigt = true
         viewModelScope.launch {
@@ -466,18 +469,18 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun jokerFrageSenden(fach: String, uebung: String, text: String) {
-        if (text.isBlank() || fortschritt.familiencode.isEmpty()) return
-        jokerSenden(ServerAnfrage.frage(fortschritt.familiencode, fortschritt.name, fach, uebung, text))
+        if (text.isBlank() || jokerCode.isEmpty()) return
+        jokerSenden(ServerAnfrage.frage(jokerCode, fortschritt.name, fach, uebung, text))
     }
 
     fun jokerAntwortSenden(frageId: String, emoji: String, text: String) {
-        if (text.isBlank() || fortschritt.familiencode.isEmpty()) return
-        jokerSenden(ServerAnfrage.antwort(fortschritt.familiencode, frageId, fortschritt.name.ifBlank { "Eltern" }, emoji, text))
+        if (text.isBlank() || jokerCode.isEmpty()) return
+        jokerSenden(ServerAnfrage.antwort(jokerCode, frageId, fortschritt.name.ifBlank { "Eltern" }, emoji, text))
     }
 
     fun jokerDaumen(frageId: String, antwortId: String) {
-        if (fortschritt.familiencode.isEmpty()) return
-        jokerSenden(ServerAnfrage.daumen(fortschritt.familiencode, frageId, antwortId, fortschritt.name))
+        if (jokerCode.isEmpty()) return
+        jokerSenden(ServerAnfrage.daumen(jokerCode, frageId, antwortId, fortschritt.name))
     }
 
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
@@ -852,7 +855,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
      * dieses Gerät dem Kind gehört. Klappt es nicht, geht die Runde trotzdem in den Fortschritt, nur die Eltern sehen sie nicht.
      */
     private fun ergebnisMelden(klasse: String, fach: String, arbeit: String, uebung: String, s: RundenStand) {
-        val code = fortschritt.familiencode
+        val code = jokerCode
         if (code.isEmpty() || fortschritt.jokerRolle != "kind") return
         val jetzt = System.currentTimeMillis()
         val e = de.cemaras.yem1n.logik.RundenErgebnisEintrag(

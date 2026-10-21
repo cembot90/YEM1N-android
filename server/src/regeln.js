@@ -1,13 +1,14 @@
 // Was der Server annimmt. Alles andere wird abgelehnt.
-// Der Familiencode steht in der iOS-App als 10 Zeichen aus diesem Alphabet.
+// Der Familiencode steht in der iOS-App als 10 Zeichen aus diesem Alphabet, gespeichert mit Strich in der Mitte.
 
 const ALPHABET = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{10}$/;
 const ROLLEN = ["kind", "eltern"];
 
+/** Gibt den Code in der Form XXXXX-XXXXX zurück, so wie ihn die iOS-App speichert und abfragt. */
 export function pruefeCode(eingabe) {
   if (typeof eingabe !== "string") return null;
   const s = eingabe.toUpperCase().replace(/[-\s]/g, "");
-  return ALPHABET.test(s) ? s : null;
+  return ALPHABET.test(s) ? s.slice(0, 5) + "-" + s.slice(5) : null;
 }
 
 function text(wert, max, pflicht = true) {

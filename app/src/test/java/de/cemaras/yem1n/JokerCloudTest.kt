@@ -19,15 +19,22 @@ class JokerCloudTest {
         .jsonArray[0].jsonObject["record"]!!.jsonObject
 
     @Test fun codePruefen() {
-        assertEquals("ABCDE23456", Familiencode.pruefe("abcde-23456"))
-        assertEquals("ABCDE23456", Familiencode.pruefe(" ABCDE 23456 "))
+        assertEquals("ABCDE-23456", Familiencode.pruefe("abcde-23456"))
+        assertEquals("ABCDE-23456", Familiencode.pruefe(" ABCDE 23456 "))
+        assertEquals("ABCDE-23456", Familiencode.pruefe("ABCDE23456"))
         assertNull(Familiencode.pruefe("ABCDE-2345"))
         assertNull(Familiencode.pruefe("ABCDE-2345O"))
         assertEquals("ABCDE-23456", Familiencode.zeige("ABCDE23456"))
+        assertEquals("ABCDE-23456", Familiencode.zeige("ABCDE-23456"))
     }
 
     @Test fun codeNeuIstGueltig() {
-        repeat(50) { assertNotNull(Familiencode.pruefe(Familiencode.neu(Random(it)))) }
+        repeat(50) {
+            val c = Familiencode.neu(Random(it))
+            assertNotNull(Familiencode.pruefe(c))
+            assertEquals(11, c.length)
+            assertEquals('-', c[5])
+        }
     }
 
     @Test fun sterneWieIos() {

@@ -54,7 +54,7 @@ private fun chipFarbenJoker() = FilterChipDefaults.filterChipColors(
 @Composable
 fun JokerScreen(vm: AppViewModel) {
     val f = vm.fortschritt
-    val code = f.familiencode
+    val code = vm.jokerCode
     val eltern = f.jokerRolle == "eltern"
 
     Column(

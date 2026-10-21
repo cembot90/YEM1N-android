@@ -6,10 +6,11 @@ import { pruefeCode, pruefeGeraet, pruefeSenden } from "../src/regeln.js";
 import { neueBremse } from "../src/limit.js";
 import { behandle } from "../src/index.js";
 
-const CODE = "ABCDE23456";
+const CODE = "ABCDE-23456";
 
 test("Code wird normalisiert und geprüft", () => {
   assert.equal(pruefeCode("abcde-23456"), CODE);
+  assert.equal(pruefeCode("ABCDE23456"), CODE);
   assert.equal(pruefeCode("ABCDE-2345O"), null);
   assert.equal(pruefeCode(5), null);
 });

@@ -80,7 +80,7 @@ fun UebenScreen(vm: AppViewModel) {
         if (s.fertig) {
             Ergebnis(
                 s, vm.fortschritt.name, vm.verdient, !(vm.istFehlerheft || vm.istProbe), vm.istProbe,
-                vm.neuePokale.map { "${it.emoji} ${it.titel}" },
+                vm.neuePokale.map { "${it.emoji} ${it.titel}" }, vm.haustierText,
                 onNochmal = vm::nochmal, onFertig = vm::zurueck,
             )
         } else {
@@ -369,7 +369,7 @@ private fun Rueckmeldung(s: RundenStand, name: String) {
 @Composable
 private fun Ergebnis(
     s: RundenStand, name: String, muenzen: Int, nochmalMoeglich: Boolean, mitNote: Boolean,
-    neueAbzeichen: List<String>, onNochmal: () -> Unit, onFertig: () -> Unit,
+    neueAbzeichen: List<String>, haustier: String?, onNochmal: () -> Unit, onFertig: () -> Unit,
 ) {
     val ende = remember(s.richtig, s.aufgaben.size) { Lob.fuerEnde(s.richtig, s.aufgaben.size, name) }
     Column(
@@ -399,6 +399,10 @@ private fun Ergebnis(
         if (muenzen > 0) {
             Spacer(Modifier.height(8.dp))
             Text("🪙 +$muenzen Münzen", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Gelb)
+        }
+        if (haustier != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(haustier, fontSize = 18.sp, color = Color.White, textAlign = TextAlign.Center)
         }
         if (neueAbzeichen.isNotEmpty()) {
             Spacer(Modifier.height(14.dp))

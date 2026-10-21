@@ -82,6 +82,7 @@ fun App(vm: AppViewModel) {
             Ansicht.Info -> InfoScreen(vm)
             Ansicht.Vorschule -> VorschulScreen(vm)
             Ansicht.Spiele -> SpieleScreen(vm)
+            Ansicht.HaustierSeite -> HaustierScreen(vm)
             is Ansicht.Spiel -> SpielScreen(vm, (vm.ansicht as Ansicht.Spiel).art)
             is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)
             is Ansicht.Englisch -> EnglischScreen(vm, (vm.ansicht as Ansicht.Englisch).thema)
@@ -165,6 +166,15 @@ fun StartScreen(vm: AppViewModel) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SonderKnopf("📝", "Probearbeit", "30 Minuten", Modifier.weight(1f)) { vm.startProbe() }
             SonderKnopf("🎯", "Training", "deine Schwächen", Modifier.weight(1f)) { vm.startTraining() }
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val tier = vm.haustier
+            SonderKnopf(
+                tier?.emoji ?: "🥚", if (tier == null) "Haustier" else tier.name,
+                if (tier == null) "such dir eins aus" else tier.stufe.titel, Modifier.weight(1f),
+            ) { vm.oeffneHaustier() }
+            Spacer(Modifier.weight(1f))
         }
         val faecher = vm.faecher
         if (faecher.size > 1) {

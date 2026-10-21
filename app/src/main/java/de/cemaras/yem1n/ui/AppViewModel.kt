@@ -22,6 +22,8 @@ import de.cemaras.yem1n.logik.VorschulEnglisch
 import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
+import de.cemaras.yem1n.logik.Haustier
+import de.cemaras.yem1n.logik.HaustierHut
 import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.MemoryStand
 import de.cemaras.yem1n.logik.SpielArt
@@ -48,6 +50,7 @@ sealed interface Ansicht {
     data object Info : Ansicht
     data object Vorschule : Ansicht
     data object Spiele : Ansicht
+    data object HaustierSeite : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -286,6 +289,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun startEnglisch(thema: EnglischThema) {
         englischThema = thema
         verdient = 0
+        haustierText = null
         neuePokale = emptyList()
         memory = null
         val s = VorschulStand(VorschulEnglisch.fragen(thema))
@@ -314,6 +318,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         vorschulArt = art
         englischThema = null
         verdient = 0
+        haustierText = null
         neuePokale = emptyList()
         if (art == VorschulArt.MEMORY) {
             vorschul = null
@@ -388,12 +393,60 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         )
         neuePokale = Erfolge.pokale(neu).filter { it.erreicht && it.id !in vorher }
         verdient = muenzen
+        haustierText = Haustier.ereignis(fortschritt.haustier, neu.haustier)?.let { neu.haustier?.meldung(it) }
         behalte(neu)
     }
 
     override fun onCleared() {
         sprecher.schliessen()
         super.onCleared()
+    }
+
+    /** Meldung vom Haustier für die Ergebnisseite, null ohne Haustier. */
+    var haustierText: String? by mutableStateOf(null)
+
+    fun oeffneHaustier() {
+        ansicht = Ansicht.HaustierSeite
+    }
+
+    /** Das Tier mit dem heutigen Hunger und der heutigen Laune. */
+    val haustier: Haustier? get() = fortschritt.haustier?.aktualisiert(System.currentTimeMillis())
+
+    private fun setzeHaustier(h: Haustier, muenzen: Int = fortschritt.muenzen) {
+        behalte(fortschritt.copy(haustier = h, muenzen = muenzen))
+    }
+
+    fun neuesHaustier(name: String, art: String) {
+        setzeHaustier(Haustier.neu(name, art, System.currentTimeMillis()))
+    }
+
+    fun haustierLeckerli() {
+        val h = haustier ?: return
+        h.leckerli(fortschritt.muenzen)?.let { setzeHaustier(it, fortschritt.muenzen - Haustier.LECKERLI_PREIS) }
+    }
+
+    fun haustierSpielen() {
+        val h = haustier ?: return
+        h.spielen(fortschritt.muenzen)?.let { setzeHaustier(it, fortschritt.muenzen - Haustier.SPIELZEUG_PREIS) }
+    }
+
+    fun haustierKaufen(id: String) {
+        val h = haustier ?: return
+        val preis = HaustierHut.finde(id)?.preis ?: return
+        h.kaufe(id, fortschritt.muenzen)?.let { setzeHaustier(it, fortschritt.muenzen - preis) }
+    }
+
+    fun haustierTragen(id: String) {
+        val h = haustier ?: return
+        setzeHaustier(h.trage(id))
+    }
+
+    /** Tagesgeschenk abholen. Gibt die Münzen zurück, 0 wenn heute schon abgeholt. */
+    fun haustierGeschenk(): Int {
+        val h = haustier ?: return 0
+        val neu = h.holeGeschenk(Tag.heute()) ?: return 0
+        setzeHaustier(neu, fortschritt.muenzen + Haustier.GESCHENK_MUENZEN)
+        return Haustier.GESCHENK_MUENZEN
     }
 
     fun oeffneInfo() {
@@ -415,6 +468,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         sonderArt = SonderArt.FEHLERHEFT
         runde = Runde.start(arbeit.uebungen[0].aufgaben)
         verdient = 0
+        haustierText = null
         ansicht = Ansicht.Ueben(SONDER, 0)
     }
 
@@ -425,6 +479,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         sonderArt = SonderArt.PROBE
         runde = Runde.start(arbeit.uebungen[0].aufgaben)
         verdient = 0
+        haustierText = null
         probeStart = System.currentTimeMillis()
         ansicht = Ansicht.Ueben(SONDER, 0)
     }
@@ -441,6 +496,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val u = aktuelleArbeit?.uebungen?.getOrNull(uebung) ?: return
         runde = Runde.start(u.aufgaben)
         verdient = 0
+        haustierText = null
         neuePokale = emptyList()
         ansicht = Ansicht.Ueben(a.arbeit, uebung)
     }
@@ -451,6 +507,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val u = aktuelleUebung ?: return
         runde = Runde.start(u.aufgaben)
         verdient = 0
+        haustierText = null
         ansicht = a
     }
 
@@ -464,7 +521,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite -> ansicht = Ansicht.Start
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {
                 sprecher.stopp()
@@ -532,6 +589,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         )
         neuePokale = Erfolge.pokale(neu).filter { it.erreicht && it.id !in vorher }
         verdient = muenzen
+        haustierText = Haustier.ereignis(fortschritt.haustier, neu.haustier)?.let { neu.haustier?.meldung(it) }
         behalte(neu)
     }
 

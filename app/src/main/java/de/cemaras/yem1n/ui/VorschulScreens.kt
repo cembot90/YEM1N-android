@@ -509,6 +509,10 @@ private fun VorschulErgebnis(
             Spacer(Modifier.height(8.dp))
             Text("🪙 +${vm.verdient} Münzen", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Gelb)
         }
+        vm.haustierText?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, fontSize = 18.sp, color = Color.White, textAlign = TextAlign.Center)
+        }
         if (vm.neuePokale.isNotEmpty()) {
             Spacer(Modifier.height(14.dp))
             Text("Neues Abzeichen!", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Gelb)

@@ -40,4 +40,25 @@ class FortschrittTest {
         assertEquals(Fortschritt(), Fortschritt.ausJson(""))
         assertEquals(Fortschritt(), Fortschritt.ausJson(null))
     }
+
+    @Test fun ohneHaustierBleibtEsLeer() {
+        val (neu, _) = Fortschritt().nachRundeMit(false, arbeit, "Einmaleins", List(3) { de.cemaras.yem1n.logik.Stand.RICHTIG }, 100L, "Mathe", 12, 0L)
+        assertEquals(null, neu.haustier)
+    }
+
+    @Test fun haustierWaechstNachRundeUndBleibtImJson() {
+        val ei = de.cemaras.yem1n.logik.Haustier.neu("Momo", "hase", 0L)
+        val start = Fortschritt(haustier = ei)
+        val (neu, _) = start.nachRundeMit(false, arbeit, "Einmaleins", List(5) { de.cemaras.yem1n.logik.Stand.RICHTIG }, 100L, "Mathe", 12, 0L)
+        val h = neu.haustier!!
+        assertEquals(true, h.xp > 0)
+        assertEquals(true, h.stufe != de.cemaras.yem1n.logik.HaustierStufe.EI)
+        val ereignis = de.cemaras.yem1n.logik.Haustier.ereignis(ei, h)!!
+        assertEquals(true, ereignis.geschluepft)
+        assertEquals(h, Fortschritt.ausJson(neu.zuJson()).haustier)
+    }
+
+    @Test fun altesJsonOhneHaustierWirdGelesen() {
+        assertEquals(null, Fortschritt.ausJson("{\"muenzen\": 5}").haustier)
+    }
 }

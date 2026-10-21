@@ -63,6 +63,8 @@ data class Fortschritt(
     /** Eltern können die Spiele ausschalten oder die Zahl pro Tag begrenzen. */
     val spieleErlaubt: Boolean = true,
     val spieleProTag: Int = 3,
+    /** Das Haustier, null solange noch keins gewählt wurde. */
+    val haustier: Haustier? = null,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
@@ -111,6 +113,7 @@ data class Fortschritt(
     fun nachRundeMit(
         fehlerheft: Boolean, arbeitSchluessel: String, uebung: String,
         staende: List<Stand>, heute: Long, fach: String = "", stunde: Int = 12,
+        jetzt: Long = System.currentTimeMillis(),
     ): Pair<Fortschritt, Int> {
         val richtig = staende.count { it == Stand.RICHTIG }
         val angeschaut = staende.count { it == Stand.ANGESCHAUT }
@@ -125,6 +128,7 @@ data class Fortschritt(
             tage = if (heute in tage) tage else tage + heute,
             letzterTag = heute,
             rundenAmLetztenTag = rundenHeute(heute) + 1,
+            haustier = haustier?.lernrunde(richtig, staende.size, angeschaut, jetzt)?.first,
         ) to verdient
     }
 

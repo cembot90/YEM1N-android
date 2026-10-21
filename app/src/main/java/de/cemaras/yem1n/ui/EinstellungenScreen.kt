@@ -133,29 +133,18 @@ fun EinstellungenScreen(vm: AppViewModel) {
             androidx.compose.material3.Switch(checked = vm.fortschritt.sparmodus, onCheckedChange = vm::setzeSparmodus)
         }
 
-        Abschnitt("Cloud mit Apple-ID")
-        val ctxCloud = androidx.compose.ui.platform.LocalContext.current
-        vm.cloudBrowserUrl?.let { adr ->
-            androidx.compose.runtime.LaunchedEffect(adr) {
-                try {
-                    ctxCloud.startActivity(
-                        android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(adr))
-                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
-                    )
-                } catch (e: Exception) {
-                    // Kein Browser gefunden, der Text unten sagt es.
-                }
-                vm.cloudBrowserGeoeffnet()
-            }
-        }
-        Text(vm.cloudText, color = Color.White, fontSize = 16.sp)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = vm::cloudPruefen, enabled = !vm.cloudBeschaeftigt) {
-                Text(if (vm.cloudAngemeldet) "Verbindung prüfen" else "Mit Apple-ID anmelden")
-            }
-            if (vm.cloudAngemeldet) OutlinedButton(onClick = vm::cloudAbmelden) { Text("Abmelden") }
-        }
-        Text("Für Joker, Duell und Ergebnisse zwischen Geräten. Ohne Anmeldung läuft die App wie bisher nur auf diesem Gerät.", color = TextSanft, fontSize = 13.sp)
+        Abschnitt("Familie und Joker")
+        val familie = vm.jokerCode
+        Text(
+            if (familie.isEmpty()) "Noch kein Familiencode. Ohne ihn läuft die App nur auf diesem Gerät."
+            else "Familiencode: $familie",
+            color = Color.White, fontSize = 16.sp,
+        )
+        Button(onClick = vm::oeffneJoker) { Text(if (familie.isEmpty()) "Familiencode einrichten" else "Joker und Ergebnisse öffnen") }
+        Text(
+            "Für Joker und Ergebnisse zwischen den Geräten der Familie. Dafür ist keine Apple-ID nötig.",
+            color = TextSanft, fontSize = 13.sp,
+        )
 
         Abschnitt("Haustier")
         val frageErinnerung = rememberErinnerungsFrage(vm)

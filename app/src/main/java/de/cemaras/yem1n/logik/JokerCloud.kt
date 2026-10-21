@@ -141,7 +141,8 @@ object JokerCloud {
 
     // Lesen
 
-    fun abfrage(typ: String, code: String, limit: Int = 200): String = buildJsonObject {
+    /** [neuesterZuerstNach]: Feld, nach dem absteigend sortiert wird, damit bei vielen Treffern die neuesten kommen. */
+    fun abfrage(typ: String, code: String, limit: Int = 200, neuesterZuerstNach: String? = null): String = buildJsonObject {
         put("query", buildJsonObject {
             put("recordType", typ)
             put("filterBy", buildJsonArray {
@@ -152,6 +153,14 @@ object JokerCloud {
                 })
             })
         })
+        if (neuesterZuerstNach != null) {
+            put("sortBy", buildJsonArray {
+                add(buildJsonObject {
+                    put("fieldName", neuesterZuerstNach)
+                    put("ascending", false)
+                })
+            })
+        }
         put("resultsLimit", limit)
     }.toString()
 

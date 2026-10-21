@@ -504,7 +504,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         ergebnisseBeschaeftigt = true
         viewModelScope.launch {
             val text = withContext(Dispatchers.IO) {
-                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_ERGEBNIS, code, 300))
+                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_ERGEBNIS, code, 300, "zeitpunkt"))
             }
             if (text == null) {
                 ergebnisseMeldung = "Keine Verbindung. Ist das Internet an?"

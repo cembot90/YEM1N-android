@@ -72,6 +72,14 @@ class JokerCloudTest {
         assertEquals("200", o["resultsLimit"]!!.jsonPrimitive.content)
     }
 
+    @Test fun abfrageKannNeuesteZuerstSortieren() {
+        val o = Json.parseToJsonElement(JokerCloud.abfrage("RundenErgebnis", "ABC", 300, "zeitpunkt")).jsonObject
+        val sortierung = o["sortBy"]!!.jsonArray[0].jsonObject
+        assertEquals("zeitpunkt", sortierung["fieldName"]!!.jsonPrimitive.content)
+        assertEquals("false", sortierung["ascending"]!!.jsonPrimitive.content)
+        assertTrue("sortBy" !in Json.parseToJsonElement(JokerCloud.abfrage("JokerAnfrage", "ABC")).jsonObject)
+    }
+
     private fun rec(name: String, zeit: Long, vararg f: Pair<String, String>): String {
         val felder = f.joinToString(",") { "\"${it.first}\":{\"value\":\"${it.second}\",\"type\":\"STRING\"}" }
         return "{\"recordName\":\"$name\",\"created\":{\"timestamp\":$zeit},\"fields\":{$felder}}"

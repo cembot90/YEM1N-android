@@ -142,3 +142,29 @@ test("Senden: Apples Fehlergrund wird weitergegeben", async () => {
   assert.equal(j.code, "AUTHENTICATION_FAILED");
   assert.equal(j.grund, "Signature");
 });
+
+test("Senden: abgelehnter Eintrag trotz 200 wird gemeldet", async () => {
+  const env = await umgebung();
+  const q = { code: CODE, art: "frage", daten: { kind: "Y", text: "x" } };
+  const a = await behandle(post("/v1/senden", q, "7.7.7.7"), env,
+    async () => new Response('{"records":[{"serverErrorCode":"ACCESS_DENIED","reason":"CREATE operation not permitted"}]}', { status: 200 }));
+  const j = await a.json();
+  assert.equal(a.status, 502);
+  assert.equal(j.code, "ACCESS_DENIED");
+});
+
+test("Senden: Konflikt im Eintrag gilt als geschafft", async () => {
+  const env = await umgebung();
+  const q = { code: CODE, art: "daumen", daten: { frageId: "a", antwortId: "w", absender: "M" } };
+  const a = await behandle(post("/v1/senden", q, "8.8.8.8"), env,
+    async () => new Response('{"records":[{"serverErrorCode":"CONFLICT","reason":"exists"}]}', { status: 200 }));
+  assert.equal(a.status, 200);
+});
+
+test("Senden: normaler Erfolg bleibt Erfolg", async () => {
+  const env = await umgebung();
+  const q = { code: CODE, art: "frage", daten: { kind: "Y", text: "x" } };
+  const a = await behandle(post("/v1/senden", q, "8.8.4.4"), env,
+    async () => new Response('{"records":[{"recordName":"abc","recordType":"JokerAnfrage"}]}', { status: 200 }));
+  assert.equal(a.status, 200);
+});

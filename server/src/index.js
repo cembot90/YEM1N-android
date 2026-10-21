@@ -17,6 +17,17 @@ async function schluessel(env) {
   return schluesselCache;
 }
 
+/** Sucht in der Antwort von records/modify nach einem abgelehnten Eintrag. */
+export function ersterFehler(text) {
+  try {
+    const a = JSON.parse(text);
+    for (const r of a.records || []) {
+      if (r.serverErrorCode) return { code: r.serverErrorCode, grund: r.reason };
+    }
+  } catch { /* nicht lesbar */ }
+  return null;
+}
+
 export async function behandle(request, env, holen = fetch) {
   const url = new URL(request.url);
   if (url.pathname === "/v1/ping") return antwort(200, { ok: true });
@@ -35,8 +46,14 @@ export async function behandle(request, env, holen = fetch) {
     if (p.fehler) return antwort(400, { fehler: p.fehler });
     if (!proCode(p.code)) return antwort(429, { fehler: "Zu viele Anfragen für diese Familie" });
     const r = await anfrage(env, await schluessel(env), "records/modify", JSON.stringify(p.operation), holen);
-    // "Gibt es schon" (feste Namen bei Daumen und Ergebnis) gilt als geschafft, wie in der iOS-App.
-    if (r.status === 200 || r.status === 409) return antwort(200, { ok: true });
+    if (r.status === 200) {
+      // CloudKit antwortet auch dann mit 200, wenn ein einzelner Eintrag abgelehnt wurde. Das steht in der Antwort.
+      const f = ersterFehler(r.text);
+      // "Gibt es schon" (feste Namen bei Daumen und Ergebnis) gilt als geschafft, wie in der iOS-App.
+      if (!f || f.code === "CONFLICT") return antwort(200, { ok: true });
+      return antwort(502, { fehler: "CloudKit hat den Eintrag abgelehnt", status: 200, code: f.code, grund: f.grund });
+    }
+    if (r.status === 409) return antwort(200, { ok: true });
     let grund = {};
     try {
       const a = JSON.parse(r.text);

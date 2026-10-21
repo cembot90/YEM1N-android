@@ -47,9 +47,13 @@ Farben: Lacivert und Sarı (Navy `#00205B`, Gelb `#FFED00`), wie bei iOS.
 
 Keine eigene Android-Cloud (kein Firebase). iOS nutzt nur die öffentliche CloudKit-Datenbank.
 Android soll über die CloudKit-Web-Services-REST-API an dieselbe Datenbank, also eine Cloud für beide Systeme.
-Entschieden (21.10.2026): Android-Nutzer melden sich mit ihrer Apple-ID an (CloudKit-Web-Anmeldung), damit sie auch schreiben dürfen.
-Zugang: `speicher/CloudClient.kt` (Token in `CloudKonfig`, Umgebung development), Plan und Grenzen in `cloud/CLOUDKIT-ANDROID.md`. Angemeldet wird in den Einstellungen.
-Mitteilungen (Joker, Antworten) soll es auch auf Android geben. Der Weg dafür ist noch offen, weil CloudKit nur Apples Push-Dienst bedient.
+Entschieden (21.10.2026, nach Problemen mit der Apple-Anmeldung auf Android): Android-Nutzer brauchen keine Apple-ID.
+Lesen geht direkt bei CloudKit mit dem API-Token (`speicher/CloudClient.kt`, `logik/JokerCloud.kt`).
+Schreiben und Mitteilungen laufen über einen kleinen Server auf Cloudflare Workers (`server/`) mit CloudKit-Server-Schlüssel.
+Mitteilungen auf Android kommen über Googles FCM (nur als Postbote, keine Firebase-Datenbank).
+Plan und Grenzen: `cloud/SERVER-KONZEPT.md`. Die Apple-Anmeldung in den Einstellungen bleibt vorerst als Zweitweg.
+Records vom Server gehören dem Entwickler: iOS kann sie lesen und neue anlegen, aber nicht ändern.
+Deshalb werden nur Joker, Antworten, Daumen, Ergebnisse und Duelle geteilt (alles nur neu anlegen). Haustier und Pakete bleiben je System getrennt.
 
 ## Stand und nächste Schritte
 

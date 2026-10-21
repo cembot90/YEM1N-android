@@ -1,0 +1,18 @@
+name = "yem1n-server"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+CK_CONTAINER = "iCloud.de.cemaras.yem1n"
+CK_UMGEBUNG = "development"
+
+# Eine Ablage für die Geräte (Familiencode, Rolle, Push-Kennung).
+# Anlegen mit: npx wrangler kv namespace create GERAETE, dann die ausgegebene id hier eintragen.
+[[kv_namespaces]]
+binding = "GERAETE"
+id = "HIER_DIE_ID_EINTRAGEN"
+
+# Geheim (nicht in diese Datei schreiben), setzen mit "npx wrangler secret put NAME":
+#   CK_KEY_ID        Key-ID des Server-Schlüssels aus dem CloudKit-Dashboard
+#   CK_PRIVATE_KEY   privater Schlüssel im PKCS8-Format (PEM)
+#   FCM_DIENSTKONTO  JSON des Google-Dienstkontos (für Push, später)

@@ -1,0 +1,10 @@
+{
+  "name": "yem1n-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kleiner Vermittler zwischen der Android-App und CloudKit",
+  "scripts": {
+    "test": "node --test test/server.test.js"
+  }
+}

@@ -1,0 +1,100 @@
+// Was der Server annimmt. Alles andere wird abgelehnt.
+// Der Familiencode steht in der iOS-App als 10 Zeichen aus diesem Alphabet.
+
+const ALPHABET = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{10}$/;
+const ROLLEN = ["kind", "eltern"];
+
+export function pruefeCode(eingabe) {
+  if (typeof eingabe !== "string") return null;
+  const s = eingabe.toUpperCase().replace(/[-\s]/g, "");
+  return ALPHABET.test(s) ? s : null;
+}
+
+function text(wert, max, pflicht = true) {
+  if (wert === undefined || wert === null || wert === "") return pflicht ? null : "";
+  if (typeof wert !== "string" || wert.length > max) return null;
+  return wert;
+}
+
+function zahl(wert, min, max) {
+  return Number.isInteger(wert) && wert >= min && wert <= max ? wert : null;
+}
+
+function feldFehler(...werte) {
+  return werte.some((w) => w === null);
+}
+
+function s(v) { return { value: v }; }
+
+/**
+ * Prüft eine Sendeanfrage. Rückgabe: { operation } mit dem fertigen CloudKit-Befehl,
+ * oder { fehler } mit einem kurzen Grund.
+ */
+export function pruefeSenden(body) {
+  if (!body || typeof body !== "object") return { fehler: "Anfrage unlesbar" };
+  const code = pruefeCode(body.code);
+  if (!code) return { fehler: "Familiencode ungültig" };
+  const d = body.daten;
+  if (!d || typeof d !== "object") return { fehler: "Daten fehlen" };
+
+  let typ, name = null, felder;
+  switch (body.art) {
+    case "frage": {
+      const kind = text(d.kind, 40), fach = text(d.fach, 40, false), uebung = text(d.uebung, 80, false), t = text(d.text, 500);
+      if (feldFehler(kind, fach, uebung, t)) return { fehler: "Frage ungültig" };
+      typ = "JokerAnfrage";
+      felder = { familienCode: s(code), kind: s(kind), fach: s(fach), uebung: s(uebung), text: s(t), status: s("offen") };
+      break;
+    }
+    case "antwort": {
+      const id = text(d.frageId, 80), absender = text(d.absender, 40), emoji = text(d.emoji, 16, false), t = text(d.text, 500);
+      if (feldFehler(id, absender, emoji, t)) return { fehler: "Antwort ungültig" };
+      typ = "JokerAntwort";
+      felder = { familienCode: s(code), anfrageID: s(id), absender: s(absender), emoji: s(emoji || "🙂"), text: s(t) };
+      break;
+    }
+    case "daumen": {
+      const frage = text(d.frageId, 80), antwort = text(d.antwortId, 80), absender = text(d.absender, 40);
+      if (feldFehler(frage, antwort, absender)) return { fehler: "Daumen ungültig" };
+      typ = "JokerDaumen";
+      name = "daumen-" + antwort;
+      felder = { familienCode: s(code), anfrageID: s(frage), antwortID: s(antwort), absender: s(absender) };
+      break;
+    }
+    case "ergebnis": {
+      const id = text(d.eintragId, 80), klasse = text(d.klasse, 40, false), fach = text(d.fach, 40, false);
+      const arbeit = text(d.arbeit, 120, false), uebung = text(d.uebung, 120, false), kind = text(d.kind, 40, false);
+      const details = text(d.details, 20000, false);
+      const richtig = zahl(d.richtig, 0, 1000), gesamt = zahl(d.gesamt, 0, 1000), angesehen = zahl(d.angesehen, 0, 1000);
+      const sterne = zahl(d.sterne, 0, 3), zeit = zahl(d.zeitpunkt, 0, 4102444800000);
+      if (feldFehler(id, klasse, fach, arbeit, uebung, kind, details, richtig, gesamt, angesehen, sterne, zeit)) {
+        return { fehler: "Ergebnis ungültig" };
+      }
+      typ = "RundenErgebnis";
+      name = "erg-" + id;
+      felder = {
+        familienCode: s(code), eintragID: s(id), klasse: s(klasse), fach: s(fach), arbeit: s(arbeit),
+        uebung: s(uebung), richtig: s(richtig), gesamt: s(gesamt), angesehen: s(angesehen),
+        sterne: s(sterne), kind: s(kind), zeitpunkt: s(zeit),
+      };
+      if (details) felder.details = s(details);
+      break;
+    }
+    default:
+      return { fehler: "Unbekannte Art" };
+  }
+  const record = { recordType: typ, fields: felder };
+  if (name) record.recordName = name;
+  return { code, typ, operation: { operations: [{ operationType: "create", record }] } };
+}
+
+/** Prüft die Meldung eines Geräts für Mitteilungen. */
+export function pruefeGeraet(body) {
+  if (!body || typeof body !== "object") return { fehler: "Anfrage unlesbar" };
+  const code = pruefeCode(body.code);
+  if (!code) return { fehler: "Familiencode ungültig" };
+  if (!ROLLEN.includes(body.rolle)) return { fehler: "Rolle ungültig" };
+  const token = text(body.token, 400);
+  if (!token) return { fehler: "Push-Kennung ungültig" };
+  return { code, rolle: body.rolle, token };
+}

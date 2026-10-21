@@ -27,3 +27,13 @@ jobs:
         with:
           name: testbericht
           path: app/build/reports/tests/
+
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Server-Tests
+        run: cd server && npm test

@@ -95,6 +95,13 @@ fun EinstellungenScreen(vm: AppViewModel) {
             ) { Text("+", color = Gelb, fontSize = 20.sp) }
         }
 
+        Abschnitt("Hilfe")
+        OutlinedButton(
+            onClick = vm::oeffneInfo,
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, Gelb),
+        ) { Text("Info, Anleitung und Datenschutz", color = Gelb) }
+
         Abschnitt("Arbeiten")
         if (vm.arbeiten.isEmpty()) {
             Text("Keine Arbeiten vorhanden. Auf der Startseite lassen sich neue einfügen.", color = TextSanft)

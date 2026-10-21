@@ -27,6 +27,8 @@ sealed interface Ansicht {
     data class Ueben(val arbeit: Int, val uebung: Int) : Ansicht
     data object Einstellungen : Ansicht
     data object Erfolge : Ansicht
+    data object Info : Ansicht
+    data class InfoSeite(val seite: de.cemaras.yem1n.ui.InfoSeite) : Ansicht
 }
 
 /** Runden, die nicht aus einer Arbeit der Liste kommen. */
@@ -109,7 +111,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         get() = when (val a = ansicht) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
-            Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge -> null
+            Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -123,6 +125,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun oeffneErfolge() {
         ansicht = Ansicht.Erfolge
+    }
+
+    fun oeffneInfo() {
+        ansicht = Ansicht.Info
+    }
+
+    fun oeffneInfoSeite(seite: InfoSeite) {
+        ansicht = Ansicht.InfoSeite(seite)
     }
 
     fun oeffneEinstellungen() {
@@ -186,6 +196,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
             is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge -> ansicht = Ansicht.Start
+            Ansicht.Info -> ansicht = Ansicht.Einstellungen
+            is Ansicht.InfoSeite -> ansicht = Ansicht.Info
             Ansicht.Start -> Unit
         }
     }

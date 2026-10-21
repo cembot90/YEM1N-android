@@ -79,6 +79,8 @@ fun App(vm: AppViewModel) {
             is Ansicht.Ueben -> UebenScreen(vm)
             Ansicht.Einstellungen -> EinstellungenScreen(vm)
             Ansicht.Erfolge -> ErfolgeScreen(vm)
+            Ansicht.Info -> InfoScreen(vm)
+            is Ansicht.InfoSeite -> InfoSeiteScreen(vm, (vm.ansicht as Ansicht.InfoSeite).seite)
         }
     }
 }

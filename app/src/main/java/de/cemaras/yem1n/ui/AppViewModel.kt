@@ -63,6 +63,7 @@ sealed interface Ansicht {
     data object Spiele : Ansicht
     data object HaustierSeite : Ansicht
     data object Joker : Ansicht
+    data object ErgebnisseEltern : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -228,7 +229,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -481,6 +482,38 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun jokerDaumen(frageId: String, antwortId: String) {
         if (jokerCode.isEmpty()) return
         jokerSenden(ServerAnfrage.daumen(jokerCode, frageId, antwortId, fortschritt.name))
+    }
+
+    // Ergebnisse der Kinder für die Eltern
+
+    var ergebnisse: List<de.cemaras.yem1n.logik.RundenErgebnisEintrag> by mutableStateOf(emptyList())
+        private set
+    var ergebnisseMeldung: String by mutableStateOf("")
+        private set
+    var ergebnisseBeschaeftigt: Boolean by mutableStateOf(false)
+        private set
+
+    fun oeffneErgebnisse() {
+        ansicht = Ansicht.ErgebnisseEltern
+        ergebnisseLaden()
+    }
+
+    fun ergebnisseLaden() {
+        val code = jokerCode
+        if (code.isEmpty() || ergebnisseBeschaeftigt) return
+        ergebnisseBeschaeftigt = true
+        viewModelScope.launch {
+            val text = withContext(Dispatchers.IO) {
+                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_ERGEBNIS, code, 300))
+            }
+            if (text == null) {
+                ergebnisseMeldung = "Keine Verbindung. Ist das Internet an?"
+            } else {
+                ergebnisse = JokerCloud.ergebnisse(JokerCloud.datensaetze(text))
+                ergebnisseMeldung = if (ergebnisse.isEmpty()) "Noch keine Runden angekommen." else ""
+            }
+            ergebnisseBeschaeftigt = false
+        }
     }
 
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
@@ -770,7 +803,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {

@@ -88,6 +88,11 @@ fun JokerScreen(vm: AppViewModel) {
         }
 
         if (!eltern) FrageFormular(vm)
+        if (eltern) {
+            Button(onClick = vm::oeffneErgebnisse, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text("📊 Ergebnisse der Kinder", fontWeight = FontWeight.Bold)
+            }
+        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = vm::jokerLaden, enabled = !vm.jokerBeschaeftigt) {

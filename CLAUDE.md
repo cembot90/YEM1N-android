@@ -67,7 +67,7 @@ Vorschule kann Englisch und Türkisch anbieten (Schalter in den Einstellungen, U
 Englisch für Kleine (8 Themen, anhören und spielen) ist da, sobald Englisch in den Einstellungen an ist.
 Konfetti gibt es auf den Vorschul-Ergebnisseiten ab einem Stern.
 Eigene Vorschul-Pakete (Arbeiten mit Fach "Vorschule" und Aufgaben der Art "wahl") erscheinen in der Vorschule unter "Eigene Pakete" und laufen wie die Spiele (`logik/VorschulPaket.kt`).
-Meilenstein 5: Haustier (Ei wählen, schlüpft nach der ersten Runde, wächst in 5 Stufen, Hunger und Laune, Leckerli 5, Spielen 8, 6 Hüte, Tagesgeschenk, Meldung auf der Ergebnisseite). Alles bleibt auf dem Gerät. Erinnerung um 17 Uhr, wenn das Tier hungrig würde (Schalter in den Einstellungen, Mitteilungen ab Android 13 nach Frage). Offen: Widget, Abschied und Neustart wie iOS.
+Meilenstein 5: Haustier (Ei wählen, schlüpft nach der ersten Runde, wächst in 5 Stufen, Hunger und Laune, Leckerli 5, Spielen 8, 6 Hüte, Tagesgeschenk, Meldung auf der Ergebnisseite). Alles bleibt auf dem Gerät. Erinnerung um 17 Uhr, wenn das Tier hungrig würde (Schalter in den Einstellungen, Mitteilungen ab Android 13 nach Frage). Man kann ein anderes Haustier aussuchen. Offen: Widget.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
 Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.

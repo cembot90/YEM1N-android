@@ -492,6 +492,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         setzeHaustier(Haustier.neu(name, art, System.currentTimeMillis()))
     }
 
+    /** Das Haustier geht, ein neues Ei kann ausgesucht werden. Münzen bleiben. */
+    fun haustierWechseln() {
+        behalte(fortschritt.copy(haustier = null))
+    }
+
     fun haustierLeckerli() {
         val h = haustier ?: return
         h.leckerli(fortschritt.muenzen)?.let { setzeHaustier(it, fortschritt.muenzen - Haustier.LECKERLI_PREIS) }

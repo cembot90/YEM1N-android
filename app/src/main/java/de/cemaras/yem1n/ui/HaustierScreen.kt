@@ -181,11 +181,32 @@ private fun HaustierStall(vm: AppViewModel, tier: Haustier) {
             }
         }
         hinweis?.let { Text(it, color = Gelb, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
+        var frageWechsel by remember { mutableStateOf(false) }
+        if (frageWechsel) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { frageWechsel = false },
+                title = { Text("Anderes Haustier aussuchen?") },
+                text = { Text("Dein jetziges Haustier und alle Hüte sind dann weg.") },
+                confirmButton = {
+                    TextButton(onClick = { frageWechsel = false; vm.haustierWechseln() }) { Text("Ja, mein Haustier geht") }
+                },
+                dismissButton = { TextButton(onClick = { frageWechsel = false }) { Text("Nein, behalten") } },
+            )
+        }
         if (tier.stufe == HaustierStufe.EI) {
             Text("Leckerli, Spielen und Hüte gibt es, sobald ${tier.name} geschlüpft ist.", color = TextSanft, textAlign = TextAlign.Center, fontSize = 13.sp)
         } else {
             Hutladen(vm, tier)
         }
+        val frageErinnerung = rememberErinnerungsFrage(vm)
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text("Erinnere mich, wenn mein Haustier Hunger hat", color = Color.White, fontSize = 14.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.haustierErinnerung, onCheckedChange = {
+                vm.setzeErinnerung(it)
+                if (it) frageErinnerung()
+            })
+        }
+        TextButton(onClick = { frageWechsel = true }) { Text("Anderes Haustier aussuchen", color = TextSanft) }
     }
 }
 

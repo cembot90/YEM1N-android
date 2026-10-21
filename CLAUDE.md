@@ -64,7 +64,8 @@ Alle fünf Spiele sind da: Einhorn-Flug, Zahlenlauf, Münzjagd (Stick links, Spr
 Offen bei den Spielen: Ton, Haptik und Partikel wie bei iOS.
 Meilenstein 4b: Natürliche Stimmen (Piper über sherpa-onnx 1.13.8, Pakete aus dem iOS-Release `stimmen-1`, Laden und Probehören in den Einstellungen, danach offline). Das Projekt steht deshalb unter GPL-3.0 (`LICENSE`, `THIRD-PARTY.md`).
 Vorschule kann Englisch und Türkisch anbieten (Schalter in den Einstellungen, Umschalter in der Vorschule).
-Offen in Vorschule: Englisch-Lektionen "Englisch für Kleine", eigene Vorschul-Pakete, Konfetti.
+Englisch für Kleine (8 Themen, anhören und spielen) ist da, sobald Englisch in den Einstellungen an ist.
+Offen in Vorschule: eigene Vorschul-Pakete, Konfetti.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
 Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.

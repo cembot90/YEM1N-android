@@ -15,7 +15,10 @@ import kotlinx.coroutines.withContext
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.PaketLeser
 import de.cemaras.yem1n.daten.Uebung
+import de.cemaras.yem1n.logik.EnglischThema
+import de.cemaras.yem1n.logik.EnglischWort
 import de.cemaras.yem1n.logik.Erfolge
+import de.cemaras.yem1n.logik.VorschulEnglisch
 import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
@@ -47,6 +50,7 @@ sealed interface Ansicht {
     data object Spiele : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
+    data class Englisch(val thema: EnglischThema) : Ansicht
     data class InfoSeite(val seite: de.cemaras.yem1n.ui.InfoSeite) : Ansicht
 }
 
@@ -202,7 +206,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulSpiel, Ansicht.Spiele, is Ansicht.Spiel -> null
+            Ansicht.Vorschule, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -267,8 +271,35 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setzeVorschulTuerkisch(an: Boolean) = behalte(fortschritt.copy(vorschulTuerkisch = an))
 
+    /** Das Thema, wenn gerade eine Runde "Englisch für Kleine" läuft, sonst null. */
+    var englischThema: EnglischThema? by mutableStateOf(null)
+        private set
+
+    fun oeffneEnglisch(thema: EnglischThema) {
+        sprecher.sprich(thema.titelEn, sprache = "en")
+        ansicht = Ansicht.Englisch(thema)
+    }
+
+    /** Ein Wort anhören und nachsprechen. */
+    fun sageWort(w: EnglischWort) = sprecher.sprich(VorschulEnglisch.anhoeren(w), sprache = "en")
+
+    fun startEnglisch(thema: EnglischThema) {
+        englischThema = thema
+        verdient = 0
+        neuePokale = emptyList()
+        memory = null
+        val s = VorschulStand(VorschulEnglisch.fragen(thema))
+        vorschul = s
+        s.aktuelle?.let { sageFrage(it.text) }
+        ansicht = Ansicht.VorschulSpiel(VorschulArt.MIX)
+    }
+
     /** Liest eine Frage in der gewählten Sprache vor. */
     private fun sageFrage(t: de.cemaras.yem1n.logik.VorschulText) {
+        if (englischThema != null) {
+            sprecher.sprich(t.en ?: t.de, sprache = "en")
+            return
+        }
         val wunsch = vorschulSpracheAktiv
         sprecher.sprich(t.text(wunsch), sprache = t.sprache(wunsch))
     }
@@ -281,6 +312,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun startVorschul(art: VorschulArt) {
         vorschulArt = art
+        englischThema = null
         verdient = 0
         neuePokale = emptyList()
         if (art == VorschulArt.MEMORY) {
@@ -295,7 +327,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         ansicht = Ansicht.VorschulSpiel(art)
     }
 
-    fun vorschulNochmal() = startVorschul(vorschulArt)
+    fun vorschulNochmal() {
+        val thema = englischThema
+        if (thema != null) startEnglisch(thema) else startVorschul(vorschulArt)
+    }
 
     /** Die aktuelle Frage noch einmal vorlesen (Lautsprecher-Knopf). */
     fun frageVorlesen() {
@@ -349,7 +384,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val stunde = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         val vorher = Erfolge.pokale(fortschritt).filter { it.erreicht }.map { it.id }.toSet()
         val (neu, muenzen) = fortschritt.nachRundeMit(
-            false, Fortschritt.VORSCHUL_ARBEIT, vorschulArt.uebungName, staende, Tag.heute(), "Vorschule", stunde,
+            false, Fortschritt.VORSCHUL_ARBEIT, englischThema?.uebungName ?: vorschulArt.uebungName, staende, Tag.heute(), "Vorschule", stunde,
         )
         neuePokale = Erfolge.pokale(neu).filter { it.erreicht && it.id !in vorher }
         verdient = muenzen
@@ -435,6 +470,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 sprecher.stopp()
                 vorschul = null
                 memory = null
+                val thema = englischThema
+                englischThema = null
+                ansicht = if (thema != null) Ansicht.Englisch(thema) else Ansicht.Vorschule
+            }
+            is Ansicht.Englisch -> {
+                sprecher.stopp()
                 ansicht = Ansicht.Vorschule
             }
             Ansicht.Info -> ansicht = Ansicht.Einstellungen

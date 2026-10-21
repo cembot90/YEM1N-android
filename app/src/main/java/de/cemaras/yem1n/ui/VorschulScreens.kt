@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,6 +32,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,7 @@ import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
+import de.cemaras.yem1n.logik.EnglischThema
 import de.cemaras.yem1n.logik.VorschulSprache
 import kotlinx.coroutines.delay
 
@@ -118,6 +122,10 @@ fun VorschulScreen(vm: AppViewModel) {
         SpielRaster(VorschulArt.sprache, vm)
         Abschnitt("Spielen und Entdecken")
         SpielRaster(VorschulArt.spielen, vm)
+        if (vm.fortschritt.vorschulEnglisch) {
+            Abschnitt("🇬🇧 Englisch für Kleine")
+            EnglischRaster(vm)
+        }
         Spacer(Modifier.height(24.dp))
     }
 }
@@ -156,6 +164,96 @@ private fun SpielRaster(arten: List<VorschulArt>, vm: AppViewModel) {
                 if (reihe.size == 1) Spacer(Modifier.weight(1f))
             }
         }
+    }
+}
+
+@Composable
+private fun EnglischRaster(vm: AppViewModel) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        EnglischThema.entries.chunked(2).forEach { reihe ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                reihe.forEach { thema ->
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .heightIn(min = 110.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(Karte)
+                            .clickable { vm.oeffneEnglisch(thema) }
+                            .padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(thema.emoji, fontSize = 42.sp)
+                        Text(
+                            thema.titel, color = Color.White, fontWeight = FontWeight.Black, fontSize = 15.sp,
+                            textAlign = TextAlign.Center, maxLines = 2,
+                        )
+                        Text(thema.titelEn, color = TextSanft, fontSize = 12.sp)
+                    }
+                }
+                if (reihe.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+/** Erst die Wörter anhören, dann spielen. */
+@Composable
+fun EnglischScreen(vm: AppViewModel, thema: EnglischThema) {
+    var zuletzt by remember { mutableStateOf<String?>(null) }
+    Column(
+        Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(thema.emoji, fontSize = 44.sp)
+            Spacer(Modifier.padding(start = 12.dp))
+            Column {
+                Text(thema.titel, fontSize = 30.sp, fontWeight = FontWeight.Black, color = Gelb)
+                Text("Erst anhören, dann spielen", color = TextSanft, fontSize = 15.sp)
+            }
+        }
+        Button(
+            onClick = { vm.startEnglisch(thema) },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Gelb, contentColor = Navy),
+        ) { Text("▶ Spielen", fontSize = 20.sp, fontWeight = FontWeight.Black) }
+        if (thema != EnglischThema.GEMISCHT) {
+            Text("Hör zu und sprich nach", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Gelb)
+            thema.woerter.chunked(3).forEach { reihe ->
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    reihe.forEach { w ->
+                        val aktiv = zuletzt == w.en
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .heightIn(min = 120.dp)
+                                .clip(RoundedCornerShape(22.dp))
+                                .background(if (aktiv) Gelb.copy(alpha = 0.22f) else Karte)
+                                .clickable {
+                                    zuletzt = w.en
+                                    vm.sageWort(w)
+                                }
+                                .padding(6.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text(w.bild, fontSize = 44.sp)
+                            Text(w.en, color = if (aktiv) Gelb else Color.White, fontWeight = FontWeight.Black, fontSize = 16.sp, textAlign = TextAlign.Center)
+                            Text(w.de, color = TextSanft, fontSize = 12.sp, textAlign = TextAlign.Center)
+                        }
+                    }
+                    repeat(3 - reihe.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
+        Text(
+            "Für Eltern: Tippt die Bilder zusammen an und sprecht die Wörter nach. Danach sucht euer Kind im Spiel das Bild zum Wort. Am schönsten klingt es mit der natürlichen englischen Stimme (Einstellungen).",
+            color = TextSanft, fontSize = 13.sp,
+        )
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -204,7 +302,7 @@ fun VorschulSpielScreen(vm: AppViewModel, art: VorschulArt) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
             Spacer(Modifier.weight(1f))
-            Text(art.titel, color = TextSanft, fontWeight = FontWeight.SemiBold)
+            Text(vm.englischThema?.titel ?: art.titel, color = TextSanft, fontWeight = FontWeight.SemiBold)
         }
         if (art == VorschulArt.MEMORY) {
             val m = vm.memory
@@ -259,7 +357,14 @@ private fun FragenSpiel(vm: AppViewModel, s: VorschulStand) {
         ) {
             Text("🔊", fontSize = 24.sp)
             Spacer(Modifier.padding(start = 10.dp))
-            Text(frage.text.text(vm.vorschulSpracheAktiv), fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
+            if (vm.englischThema != null) {
+                Column {
+                    Text(frage.text.en ?: frage.text.de, fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(frage.text.de, fontSize = 12.sp, color = TextSanft)
+                }
+            } else {
+                Text(frage.text.text(vm.vorschulSpracheAktiv), fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
+            }
         }
         FrageBild(frage)
         Optionen(frage, s) { vm.vorschulWahl(it) }

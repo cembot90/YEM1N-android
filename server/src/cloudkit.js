@@ -71,7 +71,7 @@ export async function anfrage(env, schluessel, operation, koerper, holen = fetch
     method: "POST",
     headers: {
       "Content-Type": "text/plain",
-      "X-Apple-CloudKit-Request-KeyID": env.CK_KEY_ID,
+      "X-Apple-CloudKit-Request-KeyID": String(env.CK_KEY_ID).trim(),
       "X-Apple-CloudKit-Request-ISO8601Date": datum,
       "X-Apple-CloudKit-Request-SignatureV1": sig,
     },

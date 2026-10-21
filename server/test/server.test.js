@@ -131,3 +131,14 @@ test("Zu viele Anfragen von einer Adresse werden gebremst", async () => {
   for (let i = 0; i < 31; i++) letzter = await behandle(post("/v1/geraet", { code: "x" }, "9.9.9.9"), env);
   assert.equal(letzter.status, 429);
 });
+
+test("Senden: Apples Fehlergrund wird weitergegeben", async () => {
+  const env = await umgebung();
+  const q = { code: CODE, art: "frage", daten: { kind: "Y", text: "x" } };
+  const a = await behandle(post("/v1/senden", q, "6.6.6.6"), env,
+    async () => new Response('{"serverErrorCode":"AUTHENTICATION_FAILED","reason":"Signature"}', { status: 401 }));
+  const j = await a.json();
+  assert.equal(a.status, 502);
+  assert.equal(j.code, "AUTHENTICATION_FAILED");
+  assert.equal(j.grund, "Signature");
+});

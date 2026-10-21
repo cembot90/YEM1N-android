@@ -13,7 +13,7 @@ function antwort(status, obj) {
 }
 
 async function schluessel(env) {
-  if (!schluesselCache) schluesselCache = await schluesselLaden(env.CK_PRIVATE_KEY);
+  if (!schluesselCache) schluesselCache = await schluesselLaden(env.CK_PRIVATE_KEY.trim());
   return schluesselCache;
 }
 
@@ -37,7 +37,12 @@ export async function behandle(request, env, holen = fetch) {
     const r = await anfrage(env, await schluessel(env), "records/modify", JSON.stringify(p.operation), holen);
     // "Gibt es schon" (feste Namen bei Daumen und Ergebnis) gilt als geschafft, wie in der iOS-App.
     if (r.status === 200 || r.status === 409) return antwort(200, { ok: true });
-    return antwort(502, { fehler: "CloudKit hat abgelehnt", status: r.status });
+    let grund = {};
+    try {
+      const a = JSON.parse(r.text);
+      grund = { code: a.serverErrorCode, grund: a.reason };
+    } catch { /* Antwort war kein JSON */ }
+    return antwort(502, { fehler: "CloudKit hat abgelehnt", status: r.status, ...grund });
   }
 
   if (url.pathname === "/v1/geraet") {

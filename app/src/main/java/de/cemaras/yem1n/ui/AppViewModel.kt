@@ -30,6 +30,7 @@ import de.cemaras.yem1n.logik.SpielArt
 import de.cemaras.yem1n.logik.SpielRegeln
 import de.cemaras.yem1n.logik.VorschulArt
 import de.cemaras.yem1n.logik.VorschulGenerator
+import de.cemaras.yem1n.logik.VorschulPaket
 import de.cemaras.yem1n.logik.VorschulSprache
 import de.cemaras.yem1n.logik.VorschulStand
 import de.cemaras.yem1n.logik.Tag
@@ -49,6 +50,7 @@ sealed interface Ansicht {
     data object Erfolge : Ansicht
     data object Info : Ansicht
     data object Vorschule : Ansicht
+    data class VorschulPakete(val arbeit: Int) : Ansicht
     data object Spiele : Ansicht
     data object HaustierSeite : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
@@ -211,7 +213,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -289,6 +291,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun sageWort(w: EnglischWort) = sprecher.sprich(VorschulEnglisch.anhoeren(w), sprache = "en")
 
     fun startEnglisch(thema: EnglischThema) {
+        paketStand = null
         englischThema = thema
         verdient = 0
         haustierText = null
@@ -327,6 +330,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun startVorschul(art: VorschulArt) {
+        paketStand = null
         vorschulArt = art
         englischThema = null
         verdient = 0
@@ -346,7 +350,48 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun vorschulNochmal() {
         val thema = englischThema
-        if (thema != null) startEnglisch(thema) else startVorschul(vorschulArt)
+        val paket = paketStand
+        when {
+            thema != null -> startEnglisch(thema)
+            paket != null -> startVorschulPaket(paket.first, paket.second)
+            else -> startVorschul(vorschulArt)
+        }
+    }
+
+    /** Eigene Vorschul-Pakete (Arbeiten mit dem Fach "Vorschule"), mit ihrer Stelle in der Arbeitenliste. */
+    val vorschulPakete: List<Pair<Int, Arbeit>>
+        get() = arbeiten.withIndex().filter { it.value.fach == "Vorschule" }.map { it.index to it.value }
+
+    /** Laufende Runde aus einem eigenen Paket: Stelle der Arbeit und der Übung, sonst null. */
+    var paketStand: Pair<Int, Int>? by mutableStateOf(null)
+        private set
+
+    fun oeffneVorschulPaket(arbeit: Int) {
+        ansicht = Ansicht.VorschulPakete(arbeit)
+    }
+
+    /** Titel der laufenden Paket-Übung, sonst null. */
+    val paketTitel: String?
+        get() = paketStand?.let { (a, u) -> arbeiten.getOrNull(a)?.uebungen?.getOrNull(u)?.titel }
+
+    fun startVorschulPaket(arbeit: Int, uebung: Int) {
+        val u = arbeiten.getOrNull(arbeit)?.uebungen?.getOrNull(uebung) ?: return
+        val fragen = VorschulPaket.fragen(u)
+        if (fragen.isEmpty()) {
+            meldung = "In dieser Übung gibt es keine Fragen zum Antippen."
+            return
+        }
+        paketStand = arbeit to uebung
+        vorschulArt = VorschulArt.MIX
+        englischThema = null
+        verdient = 0
+        haustierText = null
+        neuePokale = emptyList()
+        memory = null
+        val s = VorschulStand(fragen)
+        vorschul = s
+        s.aktuelle?.let { sageFrage(it.text) }
+        ansicht = Ansicht.VorschulSpiel(VorschulArt.MIX)
     }
 
     /** Die aktuelle Frage noch einmal vorlesen (Lautsprecher-Knopf). */
@@ -400,9 +445,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun speichereVorschulRunde(staende: List<Stand>) {
         val stunde = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         val vorher = Erfolge.pokale(fortschritt).filter { it.erreicht }.map { it.id }.toSet()
-        val (neu, muenzen) = fortschritt.nachRundeMit(
-            false, Fortschritt.VORSCHUL_ARBEIT, englischThema?.uebungName ?: vorschulArt.uebungName, staende, Tag.heute(), "Vorschule", stunde,
-        )
+        val paket = paketStand?.let { (a, u) -> arbeiten.getOrNull(a)?.let { it to it.uebungen.getOrNull(u) } }
+        val (neu, muenzen) = if (paket?.second != null) {
+            fortschritt.nachRundeMit(false, paket.first.schluessel, paket.second!!.titel, staende, Tag.heute(), "Vorschule", stunde)
+        } else {
+            fortschritt.nachRundeMit(
+                false, Fortschritt.VORSCHUL_ARBEIT, englischThema?.uebungName ?: vorschulArt.uebungName, staende, Tag.heute(), "Vorschule", stunde,
+            )
+        }
         neuePokale = Erfolge.pokale(neu).filter { it.erreicht && it.id !in vorher }
         verdient = muenzen
         haustierText = Haustier.ereignis(fortschritt.haustier, neu.haustier)?.let { neu.haustier?.meldung(it) }
@@ -534,6 +584,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
             is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite -> ansicht = Ansicht.Start
+            is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {
                 sprecher.stopp()
@@ -541,7 +592,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 memory = null
                 val thema = englischThema
                 englischThema = null
-                ansicht = if (thema != null) Ansicht.Englisch(thema) else Ansicht.Vorschule
+                val paket = paketStand
+                paketStand = null
+                ansicht = when {
+                    thema != null -> Ansicht.Englisch(thema)
+                    paket != null -> Ansicht.VorschulPakete(paket.first)
+                    else -> Ansicht.Vorschule
+                }
             }
             is Ansicht.Englisch -> {
                 sprecher.stopp()

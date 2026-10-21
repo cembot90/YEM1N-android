@@ -87,6 +87,7 @@ fun App(vm: AppViewModel) {
             Ansicht.Info -> InfoScreen(vm)
             Ansicht.Vorschule -> VorschulScreen(vm)
             Ansicht.Spiele -> SpieleScreen(vm)
+            is Ansicht.VorschulPakete -> VorschulPaketScreen(vm, (vm.ansicht as Ansicht.VorschulPakete).arbeit)
             Ansicht.HaustierSeite -> HaustierScreen(vm)
             is Ansicht.Spiel -> SpielScreen(vm, (vm.ansicht as Ansicht.Spiel).art)
             is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)

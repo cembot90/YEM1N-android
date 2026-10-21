@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -126,7 +127,53 @@ fun VorschulScreen(vm: AppViewModel) {
             Abschnitt("🇬🇧 Englisch für Kleine")
             EnglischRaster(vm)
         }
+        val pakete = vm.vorschulPakete
+        if (pakete.isNotEmpty()) {
+            Abschnitt("Eigene Pakete")
+            pakete.forEach { (nr, a) ->
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Karte)
+                        .clickable { vm.oeffneVorschulPaket(nr) }.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("📦", fontSize = 32.sp)
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(a.titel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("${a.uebungen.size} Übungen", color = TextSanft, fontSize = 13.sp)
+                    }
+                    Text("›", color = Gelb, fontSize = 24.sp)
+                }
+            }
+        }
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+/** Die Übungen eines eigenen Vorschul-Pakets. */
+@Composable
+fun VorschulPaketScreen(vm: AppViewModel, nr: Int) {
+    val arbeit = vm.arbeiten.getOrNull(nr)
+    Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
+            Spacer(Modifier.weight(1f))
+            Text(arbeit?.titel ?: "", color = TextSanft, fontWeight = FontWeight.SemiBold)
+        }
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            arbeit?.uebungen?.forEachIndexed { i, u ->
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Karte)
+                        .clickable { vm.startVorschulPaket(nr, i) }.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(u.symbol.ifEmpty { "🧸" }, fontSize = 32.sp)
+                    Spacer(Modifier.width(12.dp))
+                    Text(u.titel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.weight(1f))
+                    Text("›", color = Gelb, fontSize = 24.sp)
+                }
+            }
+        }
     }
 }
 
@@ -302,7 +349,7 @@ fun VorschulSpielScreen(vm: AppViewModel, art: VorschulArt) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
             Spacer(Modifier.weight(1f))
-            Text(vm.englischThema?.titel ?: art.titel, color = TextSanft, fontWeight = FontWeight.SemiBold)
+            Text(vm.paketTitel ?: vm.englischThema?.titel ?: art.titel, color = TextSanft, fontWeight = FontWeight.SemiBold)
         }
         if (art == VorschulArt.MEMORY) {
             val m = vm.memory

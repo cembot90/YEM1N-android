@@ -78,6 +78,8 @@ Meilenstein 5: Haustier (Ei wählen, schlüpft nach der ersten Runde, wächst in
 Veröffentlichung: `store/VEROEFFENTLICHUNG.md` sammelt Checkliste, Data-Safety-Antworten und Store-Texte für Cem.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
+Meilenstein 6 (Cloud ohne Apple-ID): Server läuft auf Cloudflare (`server/`, Adresse in `speicher/ServerClient.kt`), Schreiben mit Server-Schlüssel und Lesen mit API-Token sind bestätigt. Joker-Seite (Familiencode, Frage, Antwort, Daumen) und stilles Senden der Rundenergebnisse sind da (`ui/JokerScreen.kt`, `logik/JokerCloud.kt`, `logik/ServerAnfrage.kt`).
+Noch offen: Elternansicht der Ergebnisse, Mitteilungen über FCM, Duell, Wechsel auf die Production-Umgebung (eigener API-Token, Server-Schlüssel und Schema dort).
 Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
 
 ## Designüberarbeitung (begonnen)

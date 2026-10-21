@@ -48,6 +48,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:mimeType="application/json" />
             </intent-filter>
+
+            <!-- Rückkehr von der Apple-Anmeldung: yem1n://cloudkit?ckWebAuthToken=... -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="yem1n" android:host="cloudkit" />
+            </intent-filter>
         </activity>
         <receiver android:name=".speicher.HaustierWidget" android:exported="false">
             <intent-filter>

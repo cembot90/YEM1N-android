@@ -23,6 +23,8 @@ import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Haustier
+import de.cemaras.yem1n.speicher.CloudClient
+import de.cemaras.yem1n.logik.CloudAdresse
 import de.cemaras.yem1n.speicher.Erinnerung
 import de.cemaras.yem1n.speicher.HaustierWidget
 import de.cemaras.yem1n.logik.HaustierHut
@@ -318,6 +320,63 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
         val wunsch = vorschulSpracheAktiv
         sprecher.sprich(t.text(wunsch), sprache = t.sprache(wunsch))
+    }
+
+    // Cloud (Apple-ID)
+
+    private val cloud = CloudClient(app)
+
+    /** Kurzer Text für die Einstellungen: was der letzte Cloud-Test ergeben hat. */
+    var cloudText: String by mutableStateOf(if (cloud.angemeldet) "Mit Apple-ID angemeldet." else "Noch nicht angemeldet.")
+        private set
+    var cloudAngemeldet: Boolean by mutableStateOf(cloud.angemeldet)
+        private set
+    var cloudBeschaeftigt: Boolean by mutableStateOf(false)
+        private set
+
+    /** Adresse, die im Browser geöffnet werden soll (Apple-Anmeldung), sonst null. Die Oberfläche öffnet sie einmal. */
+    var cloudBrowserUrl: String? by mutableStateOf(null)
+        private set
+
+    fun cloudBrowserGeoeffnet() {
+        cloudBrowserUrl = null
+    }
+
+    /** Prüft die Verbindung. Ist eine Anmeldung nötig, kommt die Anmelde-Seite von Apple in `cloudBrowserUrl`. */
+    fun cloudPruefen() {
+        cloudBeschaeftigt = true
+        viewModelScope.launch {
+            val a = withContext(Dispatchers.IO) { cloud.aktuellerNutzer() }
+            cloudAngemeldet = cloud.angemeldet && a.ok
+            when {
+                a.ok -> cloudText = "Angemeldet bei Apple. Nutzerkennung: ${a.benutzer?.take(12) ?: "?"}..."
+                a.anmeldungNoetig && a.anmeldeUrl != null -> {
+                    cloudText = "Bitte bei Apple anmelden."
+                    cloudBrowserUrl = a.anmeldeUrl
+                }
+                else -> cloudText = "Fehler: ${a.fehlerCode ?: "?"}. ${a.grund.orEmpty()}"
+            }
+            cloudBeschaeftigt = false
+        }
+    }
+
+    /** Die App wurde von Apple über `yem1n://cloudkit?ckWebAuthToken=...` zurückgerufen. */
+    fun cloudRueckkehr(adresse: String) {
+        val token = CloudAdresse.tokenAusRueckkehr(adresse)
+        if (token == null) {
+            cloudText = "Die Anmeldung hat keinen Schlüssel gebracht."
+            return
+        }
+        cloud.merkeToken(token)
+        cloudAngemeldet = true
+        cloudText = "Schlüssel erhalten, prüfe die Verbindung..."
+        cloudPruefen()
+    }
+
+    fun cloudAbmelden() {
+        cloud.merkeToken(null)
+        cloudAngemeldet = false
+        cloudText = "Abgemeldet."
     }
 
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))

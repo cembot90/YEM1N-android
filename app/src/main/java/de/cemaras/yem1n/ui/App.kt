@@ -66,11 +66,19 @@ fun App(vm: AppViewModel) {
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Navy, TiefNavy))),
     ) {
+        vm.meldung?.let {
+            AlertDialog(
+                onDismissRequest = vm::meldungGelesen,
+                text = { Text(it) },
+                confirmButton = { TextButton(onClick = vm::meldungGelesen) { Text("OK") } },
+            )
+        }
         when (vm.ansicht) {
             Ansicht.Start -> StartScreen(vm)
             is Ansicht.Uebungen -> UebungenScreen(vm)
             is Ansicht.Ueben -> UebenScreen(vm)
             Ansicht.Einstellungen -> EinstellungenScreen(vm)
+            Ansicht.Erfolge -> ErfolgeScreen(vm)
         }
     }
 }
@@ -127,7 +135,12 @@ fun StartScreen(vm: AppViewModel) {
         }
         Spacer(Modifier.height(12.dp))
         Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Karte).padding(14.dp),
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Karte)
+                .clickable(onClick = vm::oeffneErfolge)
+                .padding(14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")

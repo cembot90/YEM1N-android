@@ -2,7 +2,9 @@ package de.cemaras.yem1n
 
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.Uebung
+import de.cemaras.yem1n.logik.Erfolge
 import de.cemaras.yem1n.logik.FehlerEintrag
+import de.cemaras.yem1n.logik.RundenEintrag
 import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Fehlerplan
 import de.cemaras.yem1n.logik.Fortschritt
@@ -204,5 +206,73 @@ class LobTest {
             assertFalse(t.contains("{name}"))
             assertFalse(Lob.fuerEnde(it % 11, 10, "").contains("{name}"))
         }
+    }
+}
+
+class AbzeichenTest {
+    private fun runde(tag: Long, richtig: Int = 5, gesamt: Int = 10, angesehen: Int = 0, uebung: String = "Einmaleins", stunde: Int = 15, fach: String = "Mathe") =
+        RundenEintrag(fach, uebung, richtig, gesamt, angesehen, tag, stunde)
+
+    @Test fun besteSerie() {
+        assertEquals(0, Erfolge.besteSerie(emptyList()))
+        assertEquals(3, Erfolge.besteSerie(listOf(1L, 2L, 3L, 7L, 8L)))
+        assertEquals(2, Erfolge.besteSerie(listOf(8L, 7L, 3L, 1L, 2L).filter { it != 3L && it != 1L }))
+    }
+
+    @Test fun wochenStartIstMontag() {
+        // 5.1.1970 war ein Montag (Tag 4), davor der Sonntag (Tag 3)
+        assertEquals(4L, Erfolge.wochenStart(4))
+        assertEquals(4L, Erfolge.wochenStart(10))
+        assertEquals(-3L, Erfolge.wochenStart(3))
+        // 21.10.2026 (Mittwoch) liegt in der Woche ab Montag 19.10.2026
+        val mittwoch = 20_747L
+        val montag = Erfolge.wochenStart(mittwoch)
+        assertEquals(mittwoch - 2, montag)
+    }
+
+    @Test fun wochenzielUndBelohnungNurEinmalProWoche() {
+        val heute = 20_747L
+        val wocheStart = Erfolge.wochenStart(heute)
+        val runden = (0 until 10).map { runde(wocheStart + it % 3) } // ziel 2 -> 10 Runden
+        val f = Fortschritt(runden = runden, tagesziel = 2)
+        assertEquals(10, Erfolge.wochenziel(2))
+        assertEquals(10, Erfolge.wochenRunden(f, heute))
+        assertTrue(Erfolge.belohnungAbholbar(f, heute))
+        val danach = Erfolge.belohnungHolen(f, heute)
+        assertEquals(Erfolge.WOCHEN_BELOHNUNG, danach.muenzen)
+        assertFalse(Erfolge.belohnungAbholbar(danach, heute))
+        assertEquals(danach, Erfolge.belohnungHolen(danach, heute))
+        // Nächste Woche gibt es wieder eine
+        assertTrue(Erfolge.belohnungAbholbar(danach.copy(runden = runden + (0 until 10).map { runde(wocheStart + 8) }), wocheStart + 8))
+    }
+
+    @Test fun rundenVorDerWocheZaehlenNicht() {
+        val heute = 20_747L
+        val f = Fortschritt(runden = listOf(runde(Erfolge.wochenStart(heute) - 1)), tagesziel = 1)
+        assertEquals(0, Erfolge.wochenRunden(f, heute))
+        assertFalse(Erfolge.belohnungAbholbar(f, heute))
+    }
+
+    @Test fun pokale() {
+        val leer = Erfolge.pokale(Fortschritt())
+        assertEquals(24, leer.size)
+        assertTrue(leer.none { it.erreicht })
+        val f = Fortschritt(
+            runden = listOf(runde(1, 10, 10, uebung = "Einmaleins", stunde = 7), runde(2, 3, 10), runde(3, 10, 10, angesehen = 1, uebung = "Teilen mit Rest")),
+            tage = listOf(1L, 2L, 3L),
+            tagesziel = 1,
+        )
+        val ids = Erfolge.pokale(f).filter { it.erreicht }.map { it.id }.toSet()
+        assertEquals(setOf("erste", "s3", "stern", "fehlerfrei", "m_einmaleins", "m_rest", "frueh"), ids)
+    }
+
+    @Test fun rundenVerlaufWirdGespeichertUndBegrenzt() {
+        var f = Fortschritt()
+        repeat(Fortschritt.MAX_RUNDEN + 5) {
+            f = f.nachRundeMit(false, "A", "U", List(2) { Stand.RICHTIG }, it.toLong(), "Mathe", 8).first
+        }
+        assertEquals(Fortschritt.MAX_RUNDEN, f.runden.size)
+        assertEquals("Mathe", f.runden.last().fach)
+        assertEquals(8, f.runden.last().stunde)
     }
 }

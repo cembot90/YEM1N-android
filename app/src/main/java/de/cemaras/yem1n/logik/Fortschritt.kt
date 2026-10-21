@@ -11,6 +11,20 @@ data class UebungsStand(val beste: Int = 0, val sterne: Int = 0, val runden: Int
 @Serializable
 data class Leistung(val richtig: Int = 0, val gesamt: Int = 0)
 
+/** Eine fertige Runde im Verlauf, für Abzeichen und Wochenziel. */
+@Serializable
+data class RundenEintrag(
+    val fach: String = "",
+    val uebung: String = "",
+    val richtig: Int = 0,
+    val gesamt: Int = 0,
+    val angesehen: Int = 0,
+    val tag: Long = 0,
+    val stunde: Int = 12,
+) {
+    val sterne: Int get() = Pruefer.sterneFuer(richtig, gesamt)
+}
+
 /** Alles, was die App über den Lernfortschritt auf diesem Gerät weiß. */
 @Serializable
 data class Fortschritt(
@@ -29,6 +43,10 @@ data class Fortschritt(
     /** Richtig und gesamt je Übungsname (zum Beispiel "Einmaleins"), über alle Runden. */
     val leistung: Map<String, Leistung> = emptyMap(),
     val rosa: Boolean = false,
+    /** Die letzten fertigen Runden (höchstens [MAX_RUNDEN]). */
+    val runden: List<RundenEintrag> = emptyList(),
+    /** Anfangstag der Woche, für die die Wochenbelohnung schon abgeholt wurde. */
+    val belohnungWoche: Long = -1,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
@@ -76,7 +94,7 @@ data class Fortschritt(
      */
     fun nachRundeMit(
         fehlerheft: Boolean, arbeitSchluessel: String, uebung: String,
-        staende: List<Stand>, heute: Long,
+        staende: List<Stand>, heute: Long, fach: String = "", stunde: Int = 12,
     ): Pair<Fortschritt, Int> {
         val richtig = staende.count { it == Stand.RICHTIG }
         val angeschaut = staende.count { it == Stand.ANGESCHAUT }
@@ -85,6 +103,8 @@ data class Fortschritt(
         val alt = leistung[uebung] ?: Leistung()
         return basis.copy(
             leistung = leistung + (uebung to Leistung(alt.richtig + richtig, alt.gesamt + staende.size)),
+            runden = (runden + RundenEintrag(fach, uebung, richtig, staende.size, angeschaut, heute, stunde))
+                .takeLast(MAX_RUNDEN),
             muenzen = muenzen + verdient,
             tage = if (heute in tage) tage else tage + heute,
             letzterTag = heute,
@@ -106,6 +126,8 @@ data class Fortschritt(
     fun zuJson(): String = json.encodeToString(serializer(), this)
 
     companion object {
+        const val MAX_RUNDEN = 2000
+
         private val json = Json { ignoreUnknownKeys = true }
 
         fun schluessel(arbeitSchluessel: String, uebung: String) = "$arbeitSchluessel#$uebung"

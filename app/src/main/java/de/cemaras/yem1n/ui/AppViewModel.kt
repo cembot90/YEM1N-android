@@ -8,7 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.PaketLeser
 import de.cemaras.yem1n.daten.Uebung
+import de.cemaras.yem1n.logik.Erfolge
 import de.cemaras.yem1n.logik.Fehlerheft
+import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.logik.Runde
@@ -24,6 +26,7 @@ sealed interface Ansicht {
     data class Uebungen(val arbeit: Int) : Ansicht
     data class Ueben(val arbeit: Int, val uebung: Int) : Ansicht
     data object Einstellungen : Ansicht
+    data object Erfolge : Ansicht
 }
 
 /** Runden, die nicht aus einer Arbeit der Liste kommen. */
@@ -51,6 +54,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         private set
     /** Münzen, die die letzte fertige Runde gebracht hat. */
     var verdient: Int by mutableStateOf(0)
+        private set
+    /** Abzeichen, die die letzte fertige Runde freigeschaltet hat. */
+    var neuePokale: List<Pokal> by mutableStateOf(emptyList())
+        private set
+    /** Meldung zu einer Arbeit, die von einer anderen App hereingeschickt wurde. */
+    var meldung: String? by mutableStateOf(null)
         private set
     var fortschritt: Fortschritt by mutableStateOf(Fortschritt())
         private set
@@ -100,7 +109,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         get() = when (val a = ansicht) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
-            Ansicht.Start, Ansicht.Einstellungen -> null
+            Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -110,6 +119,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun oeffne(arbeit: Int) {
         ansicht = Ansicht.Uebungen(arbeit)
+    }
+
+    fun oeffneErfolge() {
+        ansicht = Ansicht.Erfolge
     }
 
     fun oeffneEinstellungen() {
@@ -149,6 +162,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val u = aktuelleArbeit?.uebungen?.getOrNull(uebung) ?: return
         runde = Runde.start(u.aufgaben)
         verdient = 0
+        neuePokale = emptyList()
         ansicht = Ansicht.Ueben(a.arbeit, uebung)
     }
 
@@ -171,7 +185,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge -> ansicht = Ansicht.Start
             Ansicht.Start -> Unit
         }
     }
@@ -217,11 +231,31 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun rundeSpeichern(s: RundenStand) {
         val arbeit = aktuelleArbeit ?: return
         val uebung = aktuelleUebung ?: return
+        val stunde = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val vorher = Erfolge.pokale(fortschritt).filter { it.erreicht }.map { it.id }.toSet()
         val (neu, muenzen) = fortschritt.nachRundeMit(
-            imSonder, arbeit.schluessel, uebung.titel, s.staende, Tag.heute(),
+            imSonder, arbeit.schluessel, uebung.titel, s.staende, Tag.heute(), arbeit.fach, stunde,
         )
+        neuePokale = Erfolge.pokale(neu).filter { it.erreicht && it.id !in vorher }
         verdient = muenzen
         behalte(neu)
+    }
+
+    /** Wochenbelohnung abholen. Gibt die Münzen zurück, 0 wenn es nichts abzuholen gab. */
+    fun holeWochenBelohnung(): Int {
+        val neu = Erfolge.belohnungHolen(fortschritt, Tag.heute())
+        val plus = neu.muenzen - fortschritt.muenzen
+        if (plus > 0) behalte(neu)
+        return plus
+    }
+
+    /** Eine Arbeit, die eine andere App geschickt hat (Teilen oder Datei öffnen). */
+    fun importiereVonAussen(text: String) {
+        meldung = fuegeArbeitEin(text) ?: "Die Arbeit wurde importiert."
+    }
+
+    fun meldungGelesen() {
+        meldung = null
     }
 
     // Einstellungen

@@ -53,3 +53,94 @@ object Serie {
         return laenge to gerettet
     }
 }
+
+/** Ein Abzeichen (bei iOS "Pokal"). */
+data class Pokal(val id: String, val emoji: String, val titel: String, val erreicht: Boolean)
+
+/** Abzeichen, Tagesziel und Wochenziel, aus dem Rundenverlauf berechnet. */
+object Erfolge {
+    const val WOCHEN_BELOHNUNG = 10
+
+    /** Längste Serie aufeinanderfolgender Tage mit einer Runde. */
+    fun besteSerie(tage: Collection<Long>): Int {
+        var beste = 0
+        var aktuell = 0
+        var vorher: Long? = null
+        for (t in tage.toSortedSet()) {
+            aktuell = if (vorher != null && t == vorher + 1) aktuell + 1 else 1
+            beste = maxOf(beste, aktuell)
+            vorher = t
+        }
+        return beste
+    }
+
+    /** An so vielen Tagen wurde das Tagesziel erreicht. */
+    fun zieltage(runden: List<RundenEintrag>, ziel: Int): Int =
+        runden.groupingBy { it.tag }.eachCount().values.count { it >= ziel }
+
+    /** Eine Übung, deren Name das Stichwort enthält, wurde einmal komplett richtig gelöst. */
+    fun meister(runden: List<RundenEintrag>, stichwort: String): Boolean =
+        runden.any { it.uebung.contains(stichwort, ignoreCase = true) && it.gesamt > 0 && it.richtig == it.gesamt }
+
+    fun pokale(f: Fortschritt): List<Pokal> {
+        val runden = f.runden
+        val n = runden.size
+        val sterne = runden.sumOf { it.sterne }
+        val beste = besteSerie(f.tage)
+        val dreiSterne = runden.any { it.sterne == 3 }
+        val fehlerfrei = runden.any { it.gesamt > 0 && it.richtig == it.gesamt && it.angesehen == 0 }
+        val zielTage = zieltage(runden, f.tagesziel)
+        return listOf(
+            Pokal("erste", "🎯", "Erste Runde", n >= 1),
+            Pokal("r10", "🥉", "10 Runden", n >= 10),
+            Pokal("r50", "🥈", "50 Runden", n >= 50),
+            Pokal("r100", "🥇", "100 Runden", n >= 100),
+            Pokal("s3", "🔥", "3 Tage in Folge", beste >= 3),
+            Pokal("s7", "⚡", "7 Tage in Folge", beste >= 7),
+            Pokal("s14", "👑", "14 Tage in Folge", beste >= 14),
+            Pokal("s30", "🏆", "30 Tage in Folge", beste >= 30),
+            Pokal("stern", "⭐", "3 Sterne", dreiSterne),
+            Pokal("st50", "🌟", "50 Sterne", sterne >= 50),
+            Pokal("st150", "💫", "150 Sterne", sterne >= 150),
+            Pokal("fehlerfrei", "💯", "Ohne Fehler", fehlerfrei),
+            Pokal("ziel5", "🎉", "Tagesziel 5 Tage", zielTage >= 5),
+            Pokal("m_einmaleins", "🧮", "Einmaleins-Meister", meister(runden, "Einmaleins")),
+            Pokal("m_kern", "🧠", "Kernaufgaben-Profi", meister(runden, "Kernaufgaben")),
+            Pokal("m_nachbar", "🏘️", "Nachbar-Meister", meister(runden, "Nachbar")),
+            Pokal("m_geteilt", "➗", "Geteilt-Held", meister(runden, "Geteilt")),
+            Pokal("m_rest", "🧩", "Rest-Experte", meister(runden, "Rest")),
+            Pokal("m_mauer", "🧱", "Mauer-Baumeister", meister(runden, "Zahlenmauern")),
+            Pokal("m_raetsel", "🔍", "Rätsel-Knacker", meister(runden, "Zahlenrätsel")),
+            Pokal("m_sach", "✏️", "Sachaufgaben-Profi", meister(runden, "Sachaufgaben")),
+            Pokal("m_gemischt", "🎓", "Alles-gemischt-Meister", meister(runden, "Alles gemischt")),
+            Pokal(
+                "m_deutsch", "📚", "Deutsch-Held",
+                runden.any { it.fach == "Deutsch" && it.gesamt > 0 && it.richtig == it.gesamt },
+            ),
+            Pokal("frueh", "🌅", "Frühstarter", runden.any { it.stunde < 9 }),
+        )
+    }
+
+    // Wochenziel: fünf Tage pro Woche mit dem Tagesziel, der Rest ist Zugabe.
+    // Die Woche beginnt am Montag. Der Tag 0 (1.1.1970) war ein Donnerstag.
+
+    fun wochenStart(tag: Long): Long = tag - Math.floorMod(tag + 3, 7L)
+
+    fun wochenziel(tagesziel: Int): Int = maxOf(tagesziel, 1) * 5
+
+    fun wochenRunden(f: Fortschritt, heute: Long): Int {
+        val start = wochenStart(heute)
+        return f.runden.count { it.tag in start..heute }
+    }
+
+    fun belohnungAbholbar(f: Fortschritt, heute: Long): Boolean =
+        wochenRunden(f, heute) >= wochenziel(f.tagesziel) && f.belohnungWoche != wochenStart(heute)
+
+    /** Merkt sich die Woche und schreibt die Münzen gut. Ohne Anspruch bleibt alles, wie es ist. */
+    fun belohnungHolen(f: Fortschritt, heute: Long): Fortschritt =
+        if (belohnungAbholbar(f, heute)) {
+            f.copy(belohnungWoche = wochenStart(heute), muenzen = f.muenzen + WOCHEN_BELOHNUNG)
+        } else {
+            f
+        }
+}

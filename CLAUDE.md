@@ -55,7 +55,9 @@ Meilenstein 2a: Lob wie iOS, Münzen, Serie mit freiem Tag, Tagesziel, Fehlerhef
 Einstellungen (Name, Tagesziel, Arbeiten löschen), Fach-Filter.
 Meilenstein 2b-1: Aufgaben-Generator (Port von MatheGenerator), Probearbeit mit Uhr und Note,
 Training (zwei schwächste Bereiche), Rosa-Modus, JSON-Datei öffnen.
-Offen in 2b-2: Abzeichen, Wochenziel, Vorschule-Feinheiten, JSON von anderen Apps teilen.
+Meilenstein 2b-2: Erfolge-Bildschirm (Serie, Tagesziel, Wochenziel mit Belohnung, 24 Abzeichen),
+JSON aus anderen Apps annehmen (Teilen und Öffnen).
+Offen in Meilenstein 2: Vorschule-Feinheiten (Rosa-Modus ist schon da).
 Danach: Anleitung, Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
 
 ## Geplant nach allen Meilensteinen: Designüberarbeitung

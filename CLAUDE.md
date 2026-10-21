@@ -61,7 +61,7 @@ Meilenstein 2c: Vorschule (alle 23 Spiele plus Memory, Zahlenraum bis 5/10/20, S
 Vorlesen mit der Sprachausgabe des Geräts (Schalter in den Einstellungen).
 Meilenstein 4a: Spiele-Bereich (15 Münzen pro Spiel, Tageslimit, Bestwerte, Eltern-Schalter) Einhorn-Flug und Zahlenlauf (Spiele laufen im Querformat).
 Alle fünf Spiele sind da: Einhorn-Flug, Zahlenlauf, Münzjagd (Stick links, Sprungknopf rechts), Elfmeterschießen (Wischen, Torwart wird besser) und Münz-Hockey (Finger führt den Schläger, Computer wird pro Level besser).
-Offen bei den Spielen: Ton, Haptik und Partikel wie bei iOS.
+Die Spiele haben selbst erzeugte Töne (`logik/Klang.kt`) und Vibration (`ui/SpielEffekte.kt`), beides in den Einstellungen abschaltbar. Partikel gab es schon.
 Meilenstein 4b: Natürliche Stimmen (Piper über sherpa-onnx 1.13.8, Pakete aus dem iOS-Release `stimmen-1`, Laden und Probehören in den Einstellungen, danach offline). Das Projekt steht deshalb unter GPL-3.0 (`LICENSE`, `THIRD-PARTY.md`).
 Vorschule kann Englisch und Türkisch anbieten (Schalter in den Einstellungen, Umschalter in der Vorschule).
 Englisch für Kleine (8 Themen, anhören und spielen) ist da, sobald Englisch in den Einstellungen an ist.

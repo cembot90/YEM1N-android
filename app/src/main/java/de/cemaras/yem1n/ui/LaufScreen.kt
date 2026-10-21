@@ -81,6 +81,7 @@ fun LaufScreen(onEnde: (Int) -> Unit) {
                 letzte = t
                 spiel.schritt(dt)
                 for (e in spiel.ereignisse) {
+                    SpielEffekte.lauf(e)
                     when (e.art) {
                         LaufEreignis.Art.MUENZE -> effekte.add(LaufEffekt("✦", e.x, e.y, 26f))
                         LaufEreignis.Art.FLUEGEL -> effekte.add(LaufEffekt("✦", e.x, e.y, 34f))

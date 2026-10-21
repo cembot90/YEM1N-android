@@ -86,6 +86,7 @@ fun HockeyScreen(onEnde: (Int) -> Unit) {
                 letzte = t
                 spiel.schritt(dt)
                 for (e in spiel.ereignisse) {
+                    SpielEffekte.hockey(e)
                     when (e.art) {
                         HockeyEreignis.Art.SCHLAG -> streue(e.x, e.y, 8, listOf(Himmel, Color.White), 220f, 0.4f)
                         HockeyEreignis.Art.TOR_ICH -> {

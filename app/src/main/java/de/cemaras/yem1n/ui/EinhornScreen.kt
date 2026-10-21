@@ -78,6 +78,7 @@ fun EinhornScreen(onEnde: (Int) -> Unit) {
                 spur.add(spiel.y)
                 if (spur.size > 28) spur.removeAt(0)
                 for (e in spiel.ereignisse) {
+                    SpielEffekte.einhorn(e)
                     val text = when (e.ding) {
                         EinhornRegeln.Ding.REGENBOGEN -> "+3"
                         EinhornRegeln.Ding.STERN -> "+1"

@@ -91,6 +91,7 @@ fun JagdScreen(onEnde: (Int) -> Unit) {
                 spiel.eingabe(st.first, finger.sprungId != null, JagdStick.springt(st.second))
                 spiel.schritt(dt)
                 for (e in spiel.ereignisse) {
+                    SpielEffekte.jagd(e)
                     when (e.art) {
                         JagdEreignis.Art.FUNKEL -> effekte.add(JagdEffekt(e.text, e.x, e.y, if (e.text.length > 1) 34f else 26f))
                         JagdEreignis.Art.TREFFER -> blitz = 0.25f

@@ -63,6 +63,9 @@ data class Fortschritt(
     /** Eltern können die Spiele ausschalten oder die Zahl pro Tag begrenzen. */
     val spieleErlaubt: Boolean = true,
     val spieleProTag: Int = 3,
+    /** Töne und Vibration in den Spielen. */
+    val spielTon: Boolean = true,
+    val spielHaptik: Boolean = true,
     /** Das Haustier, null solange noch keins gewählt wurde. */
     val haustier: Haustier? = null,
 ) {

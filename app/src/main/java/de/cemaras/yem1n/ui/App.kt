@@ -61,6 +61,11 @@ import de.cemaras.yem1n.ui.theme.TiefNavy
 @Composable
 fun App(vm: AppViewModel) {
     BackHandler(enabled = vm.ansicht != Ansicht.Start) { vm.zurueck() }
+    val ansichtView = androidx.compose.ui.platform.LocalView.current
+    androidx.compose.runtime.DisposableEffect(ansichtView) {
+        SpielEffekte.ansicht = ansichtView
+        onDispose { SpielEffekte.ansicht = null }
+    }
     Box(
         Modifier
             .fillMaxSize()

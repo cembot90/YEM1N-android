@@ -82,6 +82,7 @@ fun ElfmeterScreen(onEnde: (Int) -> Unit) {
                 letzte = t
                 spiel.schritt(dt)
                 for (e in spiel.ereignisse) {
+                    SpielEffekte.elfmeter(e)
                     when (e.art) {
                         ElfmeterEreignis.Art.TOR -> {
                             regnen(e.x, e.y)

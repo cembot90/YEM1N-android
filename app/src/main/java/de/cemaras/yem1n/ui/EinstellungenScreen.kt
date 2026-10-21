@@ -119,6 +119,15 @@ fun EinstellungenScreen(vm: AppViewModel) {
         }
         Text("Ein Spiel kostet 15 Münzen und gibt es erst, wenn heute eine Übung geschafft ist.", color = TextSanft, fontSize = 13.sp)
 
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Töne in den Spielen", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.spielTon, onCheckedChange = vm::setzeSpielTon)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Vibration in den Spielen", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.spielHaptik, onCheckedChange = vm::setzeSpielHaptik)
+        }
+
         Abschnitt("Vorlesen")
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(

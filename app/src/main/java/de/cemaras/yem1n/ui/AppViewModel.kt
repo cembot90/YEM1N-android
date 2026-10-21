@@ -170,6 +170,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         alleArbeiten = speicher.ladeArbeiten()
         fortschritt = speicher.ladeFortschritt()
         sprecher.an = fortschritt.vorlesen
+        SpielEffekte.ton = fortschritt.spielTon
+        SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
     }
@@ -306,6 +308,16 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
         val wunsch = vorschulSpracheAktiv
         sprecher.sprich(t.text(wunsch), sprache = t.sprache(wunsch))
+    }
+
+    fun setzeSpielTon(an: Boolean) {
+        SpielEffekte.ton = an
+        behalte(fortschritt.copy(spielTon = an))
+    }
+
+    fun setzeSpielHaptik(an: Boolean) {
+        SpielEffekte.haptik = an
+        behalte(fortschritt.copy(spielHaptik = an))
     }
 
     fun setzeVorlesen(an: Boolean) {

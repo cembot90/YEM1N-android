@@ -57,7 +57,9 @@ Meilenstein 2b-1: Aufgaben-Generator (Port von MatheGenerator), Probearbeit mit 
 Training (zwei schwächste Bereiche), Rosa-Modus, JSON-Datei öffnen.
 Meilenstein 2b-2: Erfolge-Bildschirm (Serie, Tagesziel, Wochenziel mit Belohnung, 24 Abzeichen),
 JSON aus anderen Apps annehmen (Teilen und Öffnen).
-Offen in Meilenstein 2: Vorschule-Feinheiten (Rosa-Modus ist schon da).
+Meilenstein 2c: Vorschule (alle 23 Spiele plus Memory, Zahlenraum bis 5/10/20, Schulstart-Pass),
+Vorlesen mit der Sprachausgabe des Geräts (Schalter in den Einstellungen).
+Offen in Vorschule: Englisch und Türkisch für Kleine, eigene Vorschul-Pakete, Konfetti, bessere Stimmen.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
 Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.

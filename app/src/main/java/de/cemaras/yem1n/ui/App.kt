@@ -80,6 +80,8 @@ fun App(vm: AppViewModel) {
             Ansicht.Einstellungen -> EinstellungenScreen(vm)
             Ansicht.Erfolge -> ErfolgeScreen(vm)
             Ansicht.Info -> InfoScreen(vm)
+            Ansicht.Vorschule -> VorschulScreen(vm)
+            is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)
             is Ansicht.InfoSeite -> InfoSeiteScreen(vm, (vm.ansicht as Ansicht.InfoSeite).seite)
         }
     }
@@ -151,6 +153,8 @@ fun StartScreen(vm: AppViewModel) {
         }
         Spacer(Modifier.height(10.dp))
         FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() }
+        Spacer(Modifier.height(8.dp))
+        SonderKnopf("🧸", "Vorschule", "Spielen und fit für die Schule", Modifier.fillMaxWidth()) { vm.oeffneVorschule() }
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SonderKnopf("📝", "Probearbeit", "30 Minuten", Modifier.weight(1f)) { vm.startProbe() }

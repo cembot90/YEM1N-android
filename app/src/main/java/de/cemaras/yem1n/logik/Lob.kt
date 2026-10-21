@@ -28,6 +28,14 @@ object Lob {
         "Hoppla, nicht ganz.", "Noch nicht ganz.", "Nicht schlimm, weiter geht es.",
     )
 
+    /** Wenn es in der Vorschule noch nicht stimmt. Danach darf das Kind nochmal tippen. */
+    private val nochmal = listOf(
+        "Fast! Probier es noch einmal.", "Knapp daneben. Du schaffst das!", "Hmm, schau noch mal genau hin.",
+        "Noch nicht ganz. Versuch es noch mal!", "Oh, nicht ganz. Gleich hast du es!",
+        "Kein Problem, noch ein Versuch!", "Hoppla! Noch einmal?", "Das war es nicht. Probier ein anderes!",
+        "Fehler sind nicht schlimm. Noch mal!", "Überleg noch mal in Ruhe.",
+    )
+
     private val endePerfekt = listOf(
         "Alles richtig! Du bist ein Star!", "Keinen einzigen Fehler. Wahnsinn!", "Perfekte Runde, {name}!",
         "Alles geschafft und alles richtig. Super!", "Volle Punktzahl! Darauf kannst du stolz sein.",
@@ -64,6 +72,8 @@ object Lob {
         n >= 15 && n % 5 == 0 -> "Schon $n richtig hintereinander! Rekordverdächtig!"
         else -> null
     }
+
+    fun fuerNochmal(zufall: Random = Random.Default): String = waehle(nochmal, "nochmal", "", zufall)
 
     fun titelDaneben(zufall: Random = Random.Default): String = waehle(daneben, "daneben", "", zufall)
 

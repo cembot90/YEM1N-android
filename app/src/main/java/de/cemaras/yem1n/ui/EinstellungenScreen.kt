@@ -95,6 +95,16 @@ fun EinstellungenScreen(vm: AppViewModel) {
             ) { Text("+", color = Gelb, fontSize = 20.sp) }
         }
 
+        Abschnitt("Vorlesen")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Fragen und Lob laut vorlesen (Vorschule)", color = Color.White, fontSize = 16.sp,
+                modifier = Modifier.weight(1f).padding(end = 12.dp),
+            )
+            androidx.compose.material3.Switch(checked = vm.fortschritt.vorlesen, onCheckedChange = vm::setzeVorlesen)
+        }
+        Text("Dafür braucht das Gerät eine deutsche Sprachausgabe. Sie lässt sich in den Android-Einstellungen unter Sprache und Eingabe laden.", color = TextSanft, fontSize = 13.sp)
+
         Abschnitt("Hilfe")
         OutlinedButton(
             onClick = vm::oeffneInfo,

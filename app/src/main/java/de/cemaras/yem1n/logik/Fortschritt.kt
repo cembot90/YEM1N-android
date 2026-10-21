@@ -47,6 +47,10 @@ data class Fortschritt(
     val runden: List<RundenEintrag> = emptyList(),
     /** Anfangstag der Woche, für die die Wochenbelohnung schon abgeholt wurde. */
     val belohnungWoche: Long = -1,
+    /** Zahlenraum in der Vorschule: 1 bis 5, 2 bis 10, 3 bis 20. */
+    val vorschulStufe: Int = 2,
+    /** Liest die App Fragen und Lob vor? */
+    val vorlesen: Boolean = true,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
@@ -116,6 +120,10 @@ data class Fortschritt(
     fun anteile(): Map<String, Double> =
         leistung.filter { it.value.gesamt > 0 }.mapValues { it.value.richtig.toDouble() / it.value.gesamt }
 
+    /** Wie viele Spiele der Vorschule schon mit mindestens einem Stern geschafft sind. */
+    fun vorschulStempel(): Set<VorschulArt> =
+        VorschulArt.stationen.filter { stand(VORSCHUL_ARBEIT, it.uebungName).sterne >= 1 }.toSet()
+
     fun rundenHeute(heute: Long): Int = if (letzterTag == heute) rundenAmLetztenTag else 0
 
     fun serie(heute: Long): Pair<Int, Int> = Serie.mitSchutz(tage.toSet(), heute)
@@ -127,6 +135,9 @@ data class Fortschritt(
 
     companion object {
         const val MAX_RUNDEN = 2000
+
+        /** Schlüssel der Vorschul-Spiele im Fortschritt, wie "klasse|fach|titel" einer Arbeit. */
+        const val VORSCHUL_ARBEIT = "Vorschule|Vorschule|Übungen"
 
         private val json = Json { ignoreUnknownKeys = true }
 

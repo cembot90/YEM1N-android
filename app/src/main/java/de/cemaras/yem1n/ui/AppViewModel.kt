@@ -12,6 +12,11 @@ import de.cemaras.yem1n.logik.Erfolge
 import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
+import de.cemaras.yem1n.logik.Lob
+import de.cemaras.yem1n.logik.MemoryStand
+import de.cemaras.yem1n.logik.VorschulArt
+import de.cemaras.yem1n.logik.VorschulGenerator
+import de.cemaras.yem1n.logik.VorschulStand
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.logik.Runde
 import de.cemaras.yem1n.logik.RundenStand
@@ -28,6 +33,8 @@ sealed interface Ansicht {
     data object Einstellungen : Ansicht
     data object Erfolge : Ansicht
     data object Info : Ansicht
+    data object Vorschule : Ansicht
+    data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class InfoSeite(val seite: de.cemaras.yem1n.ui.InfoSeite) : Ansicht
 }
 
@@ -70,9 +77,19 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var runde: RundenStand? by mutableStateOf(null)
         private set
 
+    /** Die laufende Runde in der Vorschule (Fragen) oder Memory, sonst null. */
+    var vorschul: VorschulStand? by mutableStateOf(null)
+        private set
+    var memory: MemoryStand? by mutableStateOf(null)
+        private set
+    private var vorschulArt: VorschulArt = VorschulArt.MIX
+    /** Vorlesen mit der Sprachausgabe des Geräts. */
+    val sprecher = Sprecher(app)
+
     init {
         alleArbeiten = speicher.ladeArbeiten()
         fortschritt = speicher.ladeFortschritt()
+        sprecher.an = fortschritt.vorlesen
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
     }
@@ -111,7 +128,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         get() = when (val a = ansicht) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
-            Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite -> null
+            Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
+            Ansicht.Vorschule, is Ansicht.VorschulSpiel -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -125,6 +143,102 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun oeffneErfolge() {
         ansicht = Ansicht.Erfolge
+    }
+
+    // Vorschule
+
+    fun oeffneVorschule() {
+        ansicht = Ansicht.Vorschule
+    }
+
+    fun setzeVorschulStufe(stufe: Int) = behalte(fortschritt.copy(vorschulStufe = stufe.coerceIn(1, 3)))
+
+    fun setzeVorlesen(an: Boolean) {
+        sprecher.an = an
+        if (!an) sprecher.stopp()
+        behalte(fortschritt.copy(vorlesen = an))
+    }
+
+    fun startVorschul(art: VorschulArt) {
+        vorschulArt = art
+        verdient = 0
+        neuePokale = emptyList()
+        if (art == VorschulArt.MEMORY) {
+            vorschul = null
+            memory = MemoryStand.neu()
+        } else {
+            memory = null
+            val s = VorschulStand(VorschulGenerator.fragen(art, fortschritt.vorschulStufe))
+            vorschul = s
+            s.aktuelle?.let { sprecher.sprich(it.text.de) }
+        }
+        ansicht = Ansicht.VorschulSpiel(art)
+    }
+
+    fun vorschulNochmal() = startVorschul(vorschulArt)
+
+    /** Die aktuelle Frage noch einmal vorlesen (Lautsprecher-Knopf). */
+    fun frageVorlesen() {
+        vorschul?.aktuelle?.let { sprecher.sprich(it.text.de) }
+    }
+
+    fun vorschulWahl(i: Int) {
+        val s = vorschul ?: return
+        val neu = s.wahl(i)
+        if (neu == s) return
+        vorschul = neu
+        if (neu.richtigGewaehlt != null) {
+            sprecher.sprich(Lob.fuerRichtig(neu.serie, !neu.ersterVersuch, fortschritt.name), true)
+        } else {
+            sprecher.sprich(Lob.fuerNochmal())
+        }
+    }
+
+    /** Nach dem Treffer zur nächsten Frage, nach der letzten wird die Runde gespeichert. */
+    fun vorschulWeiter() {
+        val s = vorschul ?: return
+        val neu = s.weiter()
+        if (neu == s) return
+        vorschul = neu
+        val frage = neu.aktuelle
+        if (frage != null) {
+            sprecher.sprich(frage.text.de)
+        } else {
+            speichereVorschulRunde(neu.staende())
+            sprecher.sprich(Lob.fuerEnde(neu.perfekt, neu.fragen.size, fortschritt.name), true)
+        }
+    }
+
+    fun memoryTippe(i: Int) {
+        val s = memory ?: return
+        val neu = s.tippe(i)
+        if (neu == s) return
+        memory = neu
+        if (neu.fertig) {
+            val staende = List(neu.gesamt) { if (it < neu.paare) Stand.RICHTIG else Stand.FALSCH }
+            speichereVorschulRunde(staende)
+            sprecher.sprich(Lob.fuerEnde(neu.paare, neu.gesamt, fortschritt.name), true)
+        }
+    }
+
+    fun memoryZudecken() {
+        memory = memory?.zudecken()
+    }
+
+    private fun speichereVorschulRunde(staende: List<Stand>) {
+        val stunde = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val vorher = Erfolge.pokale(fortschritt).filter { it.erreicht }.map { it.id }.toSet()
+        val (neu, muenzen) = fortschritt.nachRundeMit(
+            false, Fortschritt.VORSCHUL_ARBEIT, vorschulArt.uebungName, staende, Tag.heute(), "Vorschule", stunde,
+        )
+        neuePokale = Erfolge.pokale(neu).filter { it.erreicht && it.id !in vorher }
+        verdient = muenzen
+        behalte(neu)
+    }
+
+    override fun onCleared() {
+        sprecher.schliessen()
+        super.onCleared()
     }
 
     fun oeffneInfo() {
@@ -195,7 +309,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule -> ansicht = Ansicht.Start
+            is Ansicht.VorschulSpiel -> {
+                sprecher.stopp()
+                vorschul = null
+                memory = null
+                ansicht = Ansicht.Vorschule
+            }
             Ansicht.Info -> ansicht = Ansicht.Einstellungen
             is Ansicht.InfoSeite -> ansicht = Ansicht.Info
             Ansicht.Start -> Unit

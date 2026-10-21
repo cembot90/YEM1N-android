@@ -10,7 +10,7 @@ CK_UMGEBUNG = "development"
 # Anlegen mit: npx wrangler kv namespace create GERAETE, dann die ausgegebene id hier eintragen.
 [[kv_namespaces]]
 binding = "GERAETE"
-id = "HIER_DIE_ID_EINTRAGEN"
+id = "7698527a37de41c782ebfdb7aae4eac9"
 
 # Geheim (nicht in diese Datei schreiben), setzen mit "npx wrangler secret put NAME":
 #   CK_KEY_ID        Key-ID des Server-Schlüssels aus dem CloudKit-Dashboard

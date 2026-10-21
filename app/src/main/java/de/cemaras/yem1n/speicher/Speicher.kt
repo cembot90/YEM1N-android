@@ -37,6 +37,14 @@ class Speicher(private val context: Context) {
         datei.writeText(PaketLeser.bereinigt(json), Charsets.UTF_8)
     }
 
+    /** Löscht eingefügte Dateien dieser Arbeit. Mitgelieferte Arbeiten werden nur ausgeblendet. */
+    fun loescheArbeit(schluessel: String) {
+        for (datei in ordnerPakete.listFiles { f -> f.extension == "json" }.orEmpty()) {
+            val a = try { PaketLeser.lese(datei.readText(Charsets.UTF_8)).arbeit } catch (e: Exception) { null }
+            if (a?.schluessel == schluessel) datei.delete()
+        }
+    }
+
     fun ladeFortschritt(): Fortschritt =
         Fortschritt.ausJson(
             try { dateiFortschritt.readText(Charsets.UTF_8) } catch (e: Exception) { null },

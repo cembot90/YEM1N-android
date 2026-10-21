@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import de.cemaras.yem1n.daten.Arbeit
+import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.Koralle
@@ -61,6 +67,7 @@ fun App(vm: AppViewModel) {
             Ansicht.Start -> StartScreen(vm)
             is Ansicht.Uebungen -> UebungenScreen(vm)
             is Ansicht.Ueben -> UebenScreen(vm)
+            Ansicht.Einstellungen -> EinstellungenScreen(vm)
         }
     }
 }
@@ -80,19 +87,65 @@ internal fun KartenZeile(onClick: () -> Unit, inhalt: @Composable RowScope.() ->
     ) { inhalt() }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StartScreen(vm: AppViewModel) {
     var einfuegen by remember { mutableStateOf(false) }
+    val heute = Tag.heute()
+    val (serie, _) = vm.fortschritt.serie(heute)
+    val runden = vm.fortschritt.rundenHeute(heute)
+    val ziel = vm.fortschritt.tagesziel
+    val (faellig, wartend) = vm.fehlerStand
+    val sichtbar = vm.arbeiten.withIndex().filter { vm.fachFilter == null || it.value.fach == vm.fachFilter }
     Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 16.dp)) {
-        Spacer(Modifier.height(16.dp))
-        Text("YEM1N", fontSize = 40.sp, fontWeight = FontWeight.Black, color = Gelb)
-        Text("Was wollen wir heute üben?", color = TextSanft, fontSize = 18.sp)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("YEM1N", fontSize = 40.sp, fontWeight = FontWeight.Black, color = Gelb)
+                val gruss = vm.fortschritt.name.trim().let {
+                    if (it.isEmpty()) "Was wollen wir heute üben?" else "Hallo $it! Was üben wir heute?"
+                }
+                Text(gruss, color = TextSanft, fontSize = 18.sp)
+            }
+            TextButton(onClick = vm::oeffneEinstellungen) { Text("⚙", fontSize = 28.sp, color = Gelb) }
+        }
+        Spacer(Modifier.height(12.dp))
+        Row(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Karte).padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")
+            Kennzahl("🪙", "${vm.fortschritt.muenzen}", "Münzen")
+            Kennzahl("🎯", "${minOf(runden, ziel)} / $ziel", "heute")
+        }
+        Spacer(Modifier.height(10.dp))
+        FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() }
+        val faecher = vm.faecher
+        if (faecher.size > 1) {
+            Spacer(Modifier.height(10.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = vm.fachFilter == null,
+                    onClick = { vm.waehleFach(null) },
+                    label = { Text("Alle") },
+                    colors = chipFarben(),
+                )
+                faecher.forEach { f ->
+                    FilterChip(
+                        selected = vm.fachFilter == f,
+                        onClick = { vm.waehleFach(f) },
+                        label = { Text(f) },
+                        colors = chipFarben(),
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
         LazyColumn(
             Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            itemsIndexed(vm.arbeiten) { i, arbeit ->
+            items(sichtbar, key = { it.value.schluessel }) { (i, arbeit) ->
                 ArbeitKarte(vm, arbeit) { vm.oeffne(i) }
             }
         }
@@ -106,6 +159,47 @@ fun StartScreen(vm: AppViewModel) {
     }
     if (einfuegen) {
         EinfuegenDialog(vm) { einfuegen = false }
+    }
+}
+
+@Composable
+private fun chipFarben() = FilterChipDefaults.filterChipColors(
+    labelColor = Color.White,
+    selectedContainerColor = Gelb,
+    selectedLabelColor = Navy,
+)
+
+@Composable
+private fun Kennzahl(symbol: String, wert: String, text: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("$symbol $wert", color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
+        Text(text, color = TextSanft, fontSize = 13.sp)
+    }
+}
+
+@Composable
+private fun FehlerheftKnopf(faellig: Int, wartend: Int, onClick: () -> Unit) {
+    val untertitel = when {
+        faellig > 0 -> "$faellig ${if (faellig == 1) "Fehler ist" else "Fehler sind"} dran"
+        wartend > 0 -> "Alles erledigt, $wartend kommen in ein paar Tagen wieder"
+        else -> "Noch keine Fehler. Super!"
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(if (faellig > 0) Gelb else Karte)
+            .clickable(enabled = faellig > 0, onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("📓", fontSize = 26.sp)
+        Spacer(Modifier.size(12.dp))
+        Column {
+            val farbe = if (faellig > 0) Navy else Color.White
+            Text("Fehlerheft", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = farbe)
+            Text(untertitel, fontSize = 14.sp, color = if (faellig > 0) Navy else TextSanft)
+        }
     }
 }
 

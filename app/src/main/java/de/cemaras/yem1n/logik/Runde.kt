@@ -25,6 +25,15 @@ data class RundenStand(
     val falsch: Int get() = staende.count { it == Stand.FALSCH }
     val angeschaut: Int get() = staende.count { it == Stand.ANGESCHAUT }
     val sterne: Int get() = Pruefer.sterneFuer(richtig, aufgaben.size)
+
+    /** So viele Aufgaben hintereinander waren richtig, die aktuelle mitgezählt. */
+    val serie: Int
+        get() {
+            var n = 0
+            var i = minOf(index, staende.size - 1)
+            while (i >= 0 && staende[i] == Stand.RICHTIG) { n++; i-- }
+            return n
+        }
 }
 
 object Runde {

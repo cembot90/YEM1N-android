@@ -9,7 +9,20 @@ data class UebungsStand(val beste: Int = 0, val sterne: Int = 0, val runden: Int
 
 /** Alles, was die App über den Lernfortschritt auf diesem Gerät weiß. */
 @Serializable
-data class Fortschritt(val eintraege: Map<String, UebungsStand> = emptyMap()) {
+data class Fortschritt(
+    val eintraege: Map<String, UebungsStand> = emptyMap(),
+    /** Fehler, die noch geübt werden müssen. Schlüssel siehe [Fehlerheft.schluessel]. */
+    val fehler: Map<String, FehlerEintrag> = emptyMap(),
+    val muenzen: Int = 0,
+    /** Tagesnummern (siehe [Tag]), an denen mindestens eine Runde fertig wurde. */
+    val tage: List<Long> = emptyList(),
+    val letzterTag: Long = 0,
+    val rundenAmLetztenTag: Int = 0,
+    val name: String = "",
+    val tagesziel: Int = 1,
+    /** Arbeiten, die das Kind nicht mehr sehen soll (mitgelieferte lassen sich nicht löschen). */
+    val versteckt: List<String> = emptyList(),
+) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
         eintraege[schluessel(arbeitSchluessel, uebung)] ?: UebungsStand()
@@ -25,6 +38,51 @@ data class Fortschritt(val eintraege: Map<String, UebungsStand> = emptyMap()) {
         )
         return copy(eintraege = eintraege + (key to neu))
     }
+
+    /**
+     * Trägt eine fertige Runde ein: Sterne, Fehlerplan, Münzen, Serie und Tagesziel.
+     * [keys] sind die Schlüssel der Originalaufgaben, in derselben Reihenfolge wie [staende].
+     * Im Fehlerheft ([fehlerheft] = true) zählt eine richtige Antwort erst nach der zweiten Wiederholung.
+     * Gibt den neuen Stand und die verdienten Münzen zurück.
+     */
+    fun nachRundeMit(
+        fehlerheft: Boolean, arbeitSchluessel: String, uebung: String,
+        keys: List<String>, staende: List<Stand>, heute: Long,
+    ): Pair<Fortschritt, Int> {
+        val offen = fehler.toMutableMap()
+        staende.forEachIndexed { i, st ->
+            val key = keys.getOrNull(i) ?: return@forEachIndexed
+            if (st == Stand.FALSCH) {
+                if (fehlerheft) {
+                    offen[key] = Fehlerplan.falsch(heute)
+                } else if (key !in offen) {
+                    offen[key] = FehlerEintrag()
+                }
+            } else if (st == Stand.RICHTIG) {
+                if (fehlerheft) {
+                    val neu = Fehlerplan.richtig(offen[key] ?: FehlerEintrag(), heute)
+                    if (neu == null) offen.remove(key) else offen[key] = neu
+                } else {
+                    offen.remove(key)
+                }
+            }
+        }
+        val richtig = staende.count { it == Stand.RICHTIG }
+        val angeschaut = staende.count { it == Stand.ANGESCHAUT }
+        val verdient = Muenzen.verdient(richtig, staende.size, angeschaut)
+        val basis = if (fehlerheft) this else nachRunde(arbeitSchluessel, uebung, richtig, staende.size)
+        return basis.copy(
+            fehler = offen,
+            muenzen = muenzen + verdient,
+            tage = if (heute in tage) tage else tage + heute,
+            letzterTag = heute,
+            rundenAmLetztenTag = rundenHeute(heute) + 1,
+        ) to verdient
+    }
+
+    fun rundenHeute(heute: Long): Int = if (letzterTag == heute) rundenAmLetztenTag else 0
+
+    fun serie(heute: Long): Pair<Int, Int> = Serie.mitSchutz(tage.toSet(), heute)
 
     fun sterneDerArbeit(arbeitSchluessel: String, uebungen: List<String>): Int =
         uebungen.sumOf { stand(arbeitSchluessel, it).sterne }

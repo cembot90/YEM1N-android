@@ -66,6 +66,8 @@ data class Aufgabe(
     val gross: String,
     val folge: List<String>,
     val optionen: List<String>,
+    /** Nur bei Kopien im Fehlerheft: Schlüssel der Originalaufgabe. */
+    val quellKey: String = "",
 ) {
     val istMauer get() = art == ART_MAUER
     val istWahl get() = art == ART_WAHL

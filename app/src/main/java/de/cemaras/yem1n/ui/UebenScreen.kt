@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.cemaras.yem1n.daten.Aufgabe
+import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.Mauer
 import de.cemaras.yem1n.logik.RundenStand
 import de.cemaras.yem1n.logik.Stand
@@ -56,9 +57,6 @@ import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
-
-private val LobRichtig = listOf("Richtig!", "Super!", "Stark!", "Genau!", "Prima gemacht!", "Klasse!", "Das sitzt!")
-private val LobDaneben = listOf("Fast!", "Nicht ganz.", "Schau genau hin.", "Das merken wir uns.", "Nächstes Mal klappt es.")
 
 @Composable
 fun UebenScreen(vm: AppViewModel) {
@@ -77,7 +75,10 @@ fun UebenScreen(vm: AppViewModel) {
             Text(uebung.titel, color = TextSanft, fontWeight = FontWeight.SemiBold)
         }
         if (s.fertig) {
-            Ergebnis(s, onNochmal = vm::nochmal, onFertig = vm::zurueck)
+            Ergebnis(
+                s, vm.fortschritt.name, vm.verdient, !vm.istFehlerheft,
+                onNochmal = vm::nochmal, onFertig = vm::zurueck,
+            )
         } else {
             val anteil = s.index.toFloat() / s.aufgaben.size
             LinearProgressIndicator(
@@ -161,7 +162,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         }
 
         if (s.bewertet) {
-            Rueckmeldung(s)
+            Rueckmeldung(s, vm.fortschritt.name)
         } else {
             Eingabe(a, e1, e2, fokus, { e1 = it }, { e2 = it }, vm)
         }
@@ -314,7 +315,7 @@ private fun Zahlenmauer(a: Aufgabe, s: RundenStand) {
 }
 
 @Composable
-private fun Rueckmeldung(s: RundenStand) {
+private fun Rueckmeldung(s: RundenStand, name: String) {
     val stand = s.staende[s.index]
     val farbe = when (stand) {
         Stand.RICHTIG -> Mint
@@ -323,8 +324,8 @@ private fun Rueckmeldung(s: RundenStand) {
     }
     val titel = remember(s.index, stand) {
         when (stand) {
-            Stand.RICHTIG -> LobRichtig.random()
-            Stand.FALSCH -> LobDaneben.random()
+            Stand.RICHTIG -> Lob.fuerRichtig(s.serie, false, name)
+            Stand.FALSCH -> Lob.titelDaneben()
             else -> "Hier ist die Lösung"
         }
     }
@@ -346,7 +347,11 @@ private fun Rueckmeldung(s: RundenStand) {
 }
 
 @Composable
-private fun Ergebnis(s: RundenStand, onNochmal: () -> Unit, onFertig: () -> Unit) {
+private fun Ergebnis(
+    s: RundenStand, name: String, muenzen: Int, nochmalMoeglich: Boolean,
+    onNochmal: () -> Unit, onFertig: () -> Unit,
+) {
+    val ende = remember(s.richtig, s.aufgaben.size) { Lob.fuerEnde(s.richtig, s.aufgaben.size, name) }
     Column(
         Modifier.fillMaxSize().padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -360,11 +365,22 @@ private fun Ergebnis(s: RundenStand, onNochmal: () -> Unit, onFertig: () -> Unit
         if (s.angeschaut > 0) {
             Text("${s.angeschaut} Lösungen angeschaut", fontSize = 16.sp, color = Himmel)
         }
-        Spacer(Modifier.height(28.dp))
-        Button(onClick = onNochmal, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text("Nochmal", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
+        Text(
+            ende,
+            fontSize = 20.sp, color = Color.White, textAlign = TextAlign.Center,
+        )
+        if (muenzen > 0) {
+            Spacer(Modifier.height(8.dp))
+            Text("🪙 +$muenzen Münzen", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Gelb)
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(28.dp))
+        if (nochmalMoeglich) {
+            Button(onClick = onNochmal, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                Text("Nochmal", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(10.dp))
+        }
         OutlinedButton(
             onClick = onFertig,
             modifier = Modifier.fillMaxWidth().height(56.dp),

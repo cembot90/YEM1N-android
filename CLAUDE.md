@@ -43,7 +43,15 @@ Minus ist ein normaler Bindestrich, Mal ist `·`, Geteilt ist `:`.
 Oberflächentexte und Kommentare auf Deutsch, kindgerecht und ohne Fachjargon.
 Farben: Lacivert und Sarı (Navy `#00205B`, Gelb `#FFED00`), wie bei iOS.
 
+## Cloud-Entscheidung
+
+Keine eigene Android-Cloud (kein Firebase). iOS nutzt nur die öffentliche CloudKit-Datenbank.
+Android soll später über die CloudKit-Web-Services-REST-API an dieselbe Datenbank, also eine Cloud für beide Systeme.
+
 ## Stand und nächste Schritte
 
 Meilenstein 1: Arbeiten laden, üben (alle Aufgabenarten), Fortschritt speichern, Arbeit einfügen.
-Offen: Cloud (Firebase), Joker, Eltern-Modus, Haustier, Vorlesen, Stifteingabe, Widget.
+Meilenstein 2a: Lob wie iOS, Münzen, Serie mit freiem Tag, Tagesziel, Fehlerheft mit Wiederholplan,
+Einstellungen (Name, Tagesziel, Arbeiten löschen), Fach-Filter.
+Offen in 2b: Probearbeit, Abzeichen, Rosa-Modus, Vorschule-Feinheiten, JSON-Datei öffnen, Training.
+Danach: Anleitung, Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.

@@ -10,7 +10,7 @@ class KlangTest {
     @Test fun jederKlangHatDieRichtigeLaenge() {
         for (k in Klang.entries) {
             val pcm = Klang.pcm(k)
-            assertEquals(k.dauerMs * Klang.RATE / 1000, pcm.size, k.name)
+            assertEquals(k.name, (k.dauerMs * Klang.RATE / 1000).toLong(), pcm.size.toLong())
         }
     }
 

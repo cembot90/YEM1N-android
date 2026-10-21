@@ -33,6 +33,7 @@ object InfoTexte {
         "Angaben nach § 5 DDG" to "$ANBIETER, Deutschland.",
         "Kontakt" to "Telefon: $TELEFON\nE-Mail: $MAIL",
         "Hinweis" to "YEM1N wird kostenlos und ohne Werbung angeboten.",
+        "Grafiken" to "Die Spielgrafiken stammen von Kenney (kenney.nl) und stehen unter der Lizenz CC0.",
         "Haftung für Links" to "Die App verlinkt auf die Anleitung und die Datenschutzerklärung auf GitHub Pages. Für fremde Inhalte, auf die verlinkt wird, sind die jeweiligen Anbieter verantwortlich.",
     )
 

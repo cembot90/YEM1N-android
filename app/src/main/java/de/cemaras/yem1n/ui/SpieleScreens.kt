@@ -1,5 +1,8 @@
 package de.cemaras.yem1n.ui
 
+import android.app.Activity
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +24,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -106,9 +111,11 @@ fun SpieleScreen(vm: AppViewModel) {
 @Composable
 fun SpielScreen(vm: AppViewModel, art: SpielArt) {
     val bestwert = vm.fortschritt.bestwerte[art.schluessel] ?: 0
+    QuerformatSperre()
     Box(Modifier.fillMaxSize()) {
         when (art) {
             SpielArt.EINHORN -> EinhornScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
+            SpielArt.LAUF -> LaufScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
             else -> Text("Kommt bald", color = Color.White, modifier = Modifier.align(Alignment.Center))
         }
         Column(
@@ -132,5 +139,17 @@ fun SpielScreen(vm: AppViewModel, art: SpielArt) {
                 )
             }
         }
+    }
+}
+
+/** Die Spiele sind fürs Querformat gemacht. Solange eins läuft, dreht sich der Bildschirm so, danach wieder frei. */
+@Composable
+private fun QuerformatSperre() {
+    val kontext = LocalContext.current
+    DisposableEffect(Unit) {
+        val aktivitaet = generateSequence(kontext) { (it as? ContextWrapper)?.baseContext }
+            .filterIsInstance<Activity>().firstOrNull()
+        aktivitaet?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        onDispose { aktivitaet?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
     }
 }

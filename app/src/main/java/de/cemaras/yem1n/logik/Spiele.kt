@@ -8,7 +8,7 @@ enum class SpielArt(
 ) {
     ELFMETER(
         "elfmeter", "Elfmeterschießen", "⚽",
-        "Wische vom Ball zum Tor. Der Torwart wird immer schneller. Der Winkel bringt 3 Punkte.", false,
+        "Wische vom Ball zum Tor. Der Torwart wird immer schneller. Der Winkel bringt 3 Punkte.", true,
     ),
     EINHORN(
         "einhorn", "Einhorn-Flug", "🦄",

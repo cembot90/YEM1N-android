@@ -116,6 +116,7 @@ fun SpielScreen(vm: AppViewModel, art: SpielArt) {
         when (art) {
             SpielArt.EINHORN -> EinhornScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
             SpielArt.LAUF -> LaufScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
+            SpielArt.ELFMETER -> ElfmeterScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
             SpielArt.JAGD -> JagdScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
             else -> Text("Kommt bald", color = Color.White, modifier = Modifier.align(Alignment.Center))
         }

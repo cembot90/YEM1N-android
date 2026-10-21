@@ -13,6 +13,7 @@ import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.logik.Runde
 import de.cemaras.yem1n.logik.RundenStand
+import de.cemaras.yem1n.logik.Stand
 import de.cemaras.yem1n.speicher.Speicher
 
 /** Wo die App gerade ist. */
@@ -136,11 +137,31 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     // Üben
 
     fun antworte(eingabe: String, eingabe2: String = "") {
-        runde = runde?.let { Runde.antworte(it, eingabe, eingabe2) }
+        val alt = runde ?: return
+        val neu = Runde.antworte(alt, eingabe, eingabe2)
+        runde = neu
+        vermerke(alt, neu)
     }
 
     fun zeigeLoesung() {
         runde = runde?.let { Runde.zeigeLoesung(it) }
+    }
+
+    /** Merkt sich Fehler sofort, damit sie auch bei einer abgebrochenen Runde ins Fehlerheft kommen. */
+    private fun vermerke(alt: RundenStand, neu: RundenStand) {
+        val i = alt.index
+        val vorher = alt.staende.getOrNull(i) ?: return
+        val nachher = neu.staende.getOrNull(i) ?: return
+        if (vorher != Stand.OFFEN || (nachher != Stand.RICHTIG && nachher != Stand.FALSCH)) return
+        val key = schluesselVon(neu, i) ?: return
+        behalte(fortschritt.nachAntwort(istFehlerheft, key, nachher, Tag.heute()))
+    }
+
+    private fun schluesselVon(s: RundenStand, i: Int): String? {
+        if (istFehlerheft) return s.aufgaben.getOrNull(i)?.quellKey
+        val arbeit = aktuelleArbeit ?: return null
+        val uebung = aktuelleUebung ?: return null
+        return Fehlerheft.schluessel(arbeit.schluessel, uebung.titel, i)
     }
 
     fun weiter() {
@@ -154,11 +175,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun rundeSpeichern(s: RundenStand) {
         val arbeit = aktuelleArbeit ?: return
         val uebung = aktuelleUebung ?: return
-        val sonder = istFehlerheft
-        val keys = if (sonder) s.aufgaben.map { it.quellKey }
-        else s.aufgaben.indices.map { Fehlerheft.schluessel(arbeit.schluessel, uebung.titel, it) }
         val (neu, muenzen) = fortschritt.nachRundeMit(
-            sonder, arbeit.schluessel, uebung.titel, keys, s.staende, Tag.heute(),
+            istFehlerheft, arbeit.schluessel, uebung.titel, s.staende, Tag.heute(),
         )
         verdient = muenzen
         behalte(neu)

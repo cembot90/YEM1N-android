@@ -86,39 +86,47 @@ class RundeAbschlussTest {
     private val a = arbeit()
     private val keys = List(3) { Fehlerheft.schluessel(a.schluessel, "Eins", it) }
 
-    @Test fun falscheAufgabeKommtInsFehlerheftUndRichtigeNimmtSieHeraus() {
-        val (f1, _) = Fortschritt().nachRundeMit(
-            false, a.schluessel, "Eins", keys, listOf(Stand.RICHTIG, Stand.FALSCH, Stand.ANGESCHAUT), heute = 5,
-        )
+    @Test fun falscheAntwortKommtSofortInsFehlerheftUndRichtigeNimmtSieHeraus() {
+        val f1 = Fortschritt().nachAntwort(false, keys[1], Stand.FALSCH, heute = 5)
         assertEquals(setOf(keys[1]), f1.fehler.keys)
-        val (f2, _) = f1.nachRundeMit(
-            false, a.schluessel, "Eins", keys, listOf(Stand.RICHTIG, Stand.RICHTIG, Stand.RICHTIG), heute = 6,
-        )
+        // Angeschaute und offene Antworten ändern nichts
+        assertEquals(f1, f1.nachAntwort(false, keys[0], Stand.ANGESCHAUT, 5))
+        assertEquals(f1, f1.nachAntwort(false, keys[0], Stand.OFFEN, 5))
+        val f2 = f1.nachAntwort(false, keys[1], Stand.RICHTIG, heute = 6)
         assertTrue(f2.fehler.isEmpty())
     }
 
     @Test fun fehlerheftMeistertErstNachZweiMalen() {
         val start = Fortschritt(fehler = mapOf(keys[0] to FehlerEintrag()))
-        val (f1, _) = start.nachRundeMit(true, "Fehlerheft", "Fehlerheft", listOf(keys[0]), listOf(Stand.RICHTIG), 10)
+        val f1 = start.nachAntwort(true, keys[0], Stand.RICHTIG, 10)
         assertEquals(FehlerEintrag(13, 1), f1.fehler[keys[0]])
-        val (f2, _) = f1.nachRundeMit(true, "Fehlerheft", "Fehlerheft", listOf(keys[0]), listOf(Stand.RICHTIG), 13)
+        val f2 = f1.nachAntwort(true, keys[0], Stand.RICHTIG, 13)
         assertTrue(f2.fehler.isEmpty())
-        assertTrue(f2.eintraege.isEmpty())
     }
 
     @Test fun fehlerheftFalschStelltAufAnfang() {
         val start = Fortschritt(fehler = mapOf(keys[0] to FehlerEintrag(13, 1)))
-        val (f, _) = start.nachRundeMit(true, "x", "x", listOf(keys[0]), listOf(Stand.FALSCH), 13)
+        val f = start.nachAntwort(true, keys[0], Stand.FALSCH, 13)
         assertEquals(FehlerEintrag(14, 0), f.fehler[keys[0]])
+    }
+
+    @Test fun zweiterFehlerInNormalerRundeLaesstDenPlanUnberuehrt() {
+        val start = Fortschritt(fehler = mapOf(keys[0] to FehlerEintrag(13, 1)))
+        assertEquals(start, start.nachAntwort(false, keys[0], Stand.FALSCH, 13))
+    }
+
+    @Test fun fehlerheftRundeVeraendertKeineSterne() {
+        val (f, _) = Fortschritt().nachRundeMit(true, "Fehlerheft", "Fehlerheft", listOf(Stand.RICHTIG), 10)
+        assertTrue(f.eintraege.isEmpty())
     }
 
     @Test fun muenzenTagesZielUndSerie() {
         val alle = List(3) { Stand.RICHTIG }
-        val (f1, m1) = Fortschritt().nachRundeMit(false, a.schluessel, "Eins", keys, alle, 7)
+        val (f1, m1) = Fortschritt().nachRundeMit(false, a.schluessel, "Eins", alle, 7)
         assertEquals(3 + 5, m1)
         assertEquals(8, f1.muenzen)
         assertEquals(1, f1.rundenHeute(7))
-        val (f2, _) = f1.nachRundeMit(false, a.schluessel, "Eins", keys, alle, 7)
+        val (f2, _) = f1.nachRundeMit(false, a.schluessel, "Eins", alle, 7)
         assertEquals(2, f2.rundenHeute(7))
         assertEquals(listOf(7L), f2.tage)
         assertEquals(0, f2.rundenHeute(8))

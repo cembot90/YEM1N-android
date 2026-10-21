@@ -129,6 +129,17 @@ fun EinstellungenScreen(vm: AppViewModel) {
         }
         Text("Dafür braucht das Gerät eine deutsche Sprachausgabe. Sie lässt sich in den Android-Einstellungen unter Sprache und Eingabe laden.", color = TextSanft, fontSize = 13.sp)
 
+        Abschnitt("Sprachen in der Vorschule")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Englisch anbieten", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.vorschulEnglisch, onCheckedChange = vm::setzeVorschulEnglisch)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Türkisch anbieten", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.vorschulTuerkisch, onCheckedChange = vm::setzeVorschulTuerkisch)
+        }
+        Text("Dann gibt es in der Vorschule einen Umschalter für die Fragen. Vorgelesen wird mit der natürlichen Stimme, wenn sie unten geladen ist, sonst mit der Stimme des Geräts (falls sie die Sprache kann).", color = TextSanft, fontSize = 13.sp)
+
         Abschnitt("Natürliche Stimmen")
         Text(
             "Klingt viel natürlicher als die Stimme des Geräts. Die Stimme wird einmal aus dem Internet geladen (am besten im WLAN) und liest danach ohne Internet vor.",

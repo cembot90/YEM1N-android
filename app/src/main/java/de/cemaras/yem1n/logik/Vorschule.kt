@@ -43,7 +43,41 @@ enum class VorschulArt(val titel: String, val emoji: String) {
 }
 
 /** Eine Frage auf Deutsch. Türkisch und Englisch sind für später vorbereitet. */
-data class VorschulText(val de: String, val tr: String? = null, val en: String? = null)
+data class VorschulText(val de: String, val tr: String? = null, val en: String? = null) {
+    /** Welche Sprache gilt wirklich: fehlt die Übersetzung, bleibt es Deutsch. */
+    fun sprache(wunsch: String): String = when (wunsch) {
+        "tr" -> if (tr == null) "de" else "tr"
+        "en" -> if (en == null) "de" else "en"
+        else -> "de"
+    }
+
+    fun text(wunsch: String): String = when (sprache(wunsch)) {
+        "tr" -> tr ?: de
+        "en" -> en ?: de
+        else -> de
+    }
+}
+
+/**
+ * Die Vorschule spricht Deutsch. Englisch und Türkisch sind ein Zusatz, den die Eltern in den
+ * Einstellungen einschalten. Erst dann gibt es den Umschalter in der Vorschule.
+ */
+object VorschulSprache {
+    /** Was der Umschalter anbietet. Nur Deutsch heißt: kein Umschalter. */
+    fun angebot(englisch: Boolean, tuerkisch: Boolean): List<String> =
+        listOf("de") + (if (englisch) listOf("en") else emptyList()) + (if (tuerkisch) listOf("tr") else emptyList())
+
+    /** Die Sprache, die gerade gilt. Ist die gewählte Sprache ausgeschaltet, gilt Deutsch. */
+    fun aktiv(gewaehlt: String, englisch: Boolean, tuerkisch: Boolean): String =
+        if (gewaehlt in angebot(englisch, tuerkisch)) gewaehlt else "de"
+
+    /** Name auf dem Umschalter, in der Sprache selbst. */
+    fun name(sprache: String): String = when (sprache) {
+        "tr" -> "Türkçe"
+        "en" -> "English"
+        else -> "Deutsch"
+    }
+}
 
 /**
  * Eine Frage der Vorschule. [zeige] und [zeigeZwei] sind Bilder zum Zählen, [gross] ein großes Zeichen,

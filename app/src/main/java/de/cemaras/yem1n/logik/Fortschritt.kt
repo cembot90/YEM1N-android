@@ -49,6 +49,10 @@ data class Fortschritt(
     val belohnungWoche: Long = -1,
     /** Zahlenraum in der Vorschule: 1 bis 5, 2 bis 10, 3 bis 20. */
     val vorschulStufe: Int = 2,
+    /** Sprache der Vorschule ("de", "en" oder "tr") und ob Englisch und Türkisch angeboten werden. */
+    val vorschulSprache: String = "de",
+    val vorschulEnglisch: Boolean = false,
+    val vorschulTuerkisch: Boolean = false,
     /** Liest die App Fragen und Lob vor? */
     val vorlesen: Boolean = true,
     /** Bester Punktestand je Spiel, Schlüssel siehe [SpielArt.schluessel]. */

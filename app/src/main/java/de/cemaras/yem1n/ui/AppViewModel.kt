@@ -25,6 +25,7 @@ import de.cemaras.yem1n.logik.SpielArt
 import de.cemaras.yem1n.logik.SpielRegeln
 import de.cemaras.yem1n.logik.VorschulArt
 import de.cemaras.yem1n.logik.VorschulGenerator
+import de.cemaras.yem1n.logik.VorschulSprache
 import de.cemaras.yem1n.logik.VorschulStand
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.logik.Runde
@@ -256,6 +257,22 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setzeVorschulStufe(stufe: Int) = behalte(fortschritt.copy(vorschulStufe = stufe.coerceIn(1, 3)))
 
+    /** Die Sprache der Vorschule, die gerade gilt. */
+    val vorschulSpracheAktiv: String
+        get() = VorschulSprache.aktiv(fortschritt.vorschulSprache, fortschritt.vorschulEnglisch, fortschritt.vorschulTuerkisch)
+
+    fun setzeVorschulSprache(sprache: String) = behalte(fortschritt.copy(vorschulSprache = sprache))
+
+    fun setzeVorschulEnglisch(an: Boolean) = behalte(fortschritt.copy(vorschulEnglisch = an))
+
+    fun setzeVorschulTuerkisch(an: Boolean) = behalte(fortschritt.copy(vorschulTuerkisch = an))
+
+    /** Liest eine Frage in der gewählten Sprache vor. */
+    private fun sageFrage(t: de.cemaras.yem1n.logik.VorschulText) {
+        val wunsch = vorschulSpracheAktiv
+        sprecher.sprich(t.text(wunsch), sprache = t.sprache(wunsch))
+    }
+
     fun setzeVorlesen(an: Boolean) {
         sprecher.an = an
         if (!an) sprecher.stopp()
@@ -273,7 +290,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             memory = null
             val s = VorschulStand(VorschulGenerator.fragen(art, fortschritt.vorschulStufe))
             vorschul = s
-            s.aktuelle?.let { sprecher.sprich(it.text.de) }
+            s.aktuelle?.let { sageFrage(it.text) }
         }
         ansicht = Ansicht.VorschulSpiel(art)
     }
@@ -282,7 +299,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Die aktuelle Frage noch einmal vorlesen (Lautsprecher-Knopf). */
     fun frageVorlesen() {
-        vorschul?.aktuelle?.let { sprecher.sprich(it.text.de) }
+        vorschul?.aktuelle?.let { sageFrage(it.text) }
     }
 
     fun vorschulWahl(i: Int) {
@@ -305,7 +322,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         vorschul = neu
         val frage = neu.aktuelle
         if (frage != null) {
-            sprecher.sprich(frage.text.de)
+            sageFrage(frage.text)
         } else {
             speichereVorschulRunde(neu.staende())
             sprecher.sprich(Lob.fuerEnde(neu.perfekt, neu.fragen.size, fortschritt.name), true)

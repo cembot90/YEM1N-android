@@ -53,6 +53,7 @@ import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
+import de.cemaras.yem1n.logik.VorschulSprache
 import kotlinx.coroutines.delay
 
 /** Die Übersicht der Vorschule: Zahlenraum, Schulstart-Pass und alle Spiele. */
@@ -92,6 +93,22 @@ fun VorschulScreen(vm: AppViewModel) {
                         labelColor = Color.White, selectedContainerColor = Gelb, selectedLabelColor = Navy,
                     ),
                 )
+            }
+        }
+        val angebot = VorschulSprache.angebot(vm.fortschritt.vorschulEnglisch, vm.fortschritt.vorschulTuerkisch)
+        if (angebot.size > 1) {
+            Text("Sprache", color = Color.White, fontWeight = FontWeight.Bold)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                angebot.forEach { sprache ->
+                    FilterChip(
+                        selected = vm.vorschulSpracheAktiv == sprache,
+                        onClick = { vm.setzeVorschulSprache(sprache) },
+                        label = { Text(VorschulSprache.name(sprache)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            labelColor = Color.White, selectedContainerColor = Gelb, selectedLabelColor = Navy,
+                        ),
+                    )
+                }
             }
         }
         SchulstartPass(vm.fortschritt.vorschulStempel())
@@ -242,7 +259,7 @@ private fun FragenSpiel(vm: AppViewModel, s: VorschulStand) {
         ) {
             Text("🔊", fontSize = 24.sp)
             Spacer(Modifier.padding(start = 10.dp))
-            Text(frage.text.de, fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
+            Text(frage.text.text(vm.vorschulSpracheAktiv), fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
         }
         FrageBild(frage)
         Optionen(frage, s) { vm.vorschulWahl(it) }

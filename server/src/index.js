@@ -1,6 +1,8 @@
 import { anfrage, schluesselLaden } from "./cloudkit.js";
 import { pruefeGeraet, pruefeSenden } from "./regeln.js";
 import { neueBremse } from "./limit.js";
+import { pushSenden } from "./fcm.js";
+import { TYPEN, abfrageKoerper, inhalt, neueEintraege, typenFuer } from "./mitteilungen.js";
 
 const proGeraet = neueBremse(30, 60000);
 const proCode = neueBremse(120, 60000);
@@ -76,6 +78,47 @@ export async function behandle(request, env, holen = fetch) {
   return antwort(404, { fehler: "Unbekannt" });
 }
 
+const MAX_FAMILIEN = 5;
+
+/**
+ * Läuft jede Minute: schaut pro Familie nach neuen Einträgen und schickt Mitteilungen.
+ * Beim ersten Mal wird nur der Stand gemerkt, damit alte Einträge keine Mitteilung auslösen.
+ * Zurück: Anzahl der verschickten Mitteilungen.
+ */
+export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
+  if (!env.FCM_DIENSTKONTO) return 0;
+  const konto = JSON.parse(env.FCM_DIENSTKONTO);
+  const liste = await env.GERAETE.list({ prefix: "geraete:", limit: MAX_FAMILIEN });
+  let verschickt = 0;
+  for (const k of liste.keys) {
+    const code = k.name.slice("geraete:".length);
+    let geraete = JSON.parse((await env.GERAETE.get(k.name)) || "[]");
+    const vorher = geraete.length;
+    for (const typ of typenFuer(geraete)) {
+      const standKey = `stand:${code}:${typ}`;
+      const stand = Number(await env.GERAETE.get(standKey));
+      const r = await anfrage(env, await schluessel(env), "records/query", abfrageKoerper(typ, code), holen);
+      if (r.status !== 200) continue;
+      if (!stand) { await env.GERAETE.put(standKey, String(jetzt)); continue; }
+      const neu = neueEintraege(r.text, stand);
+      if (!neu.length) continue;
+      await env.GERAETE.put(standKey, String(neu[neu.length - 1].created.timestamp));
+      for (const eintrag of neu.slice(-3)) {
+        const text = inhalt(typ, eintrag.fields);
+        if (!text) continue;
+        for (const g of geraete.filter((x) => x.rolle === TYPEN[typ])) {
+          const e = await pushSenden(konto, g.token, text.titel, text.text, typ, holen, jetzt);
+          if (e.ok) verschickt++;
+          if (e.ungueltig) geraete = geraete.filter((x) => x.token !== g.token);
+        }
+      }
+    }
+    if (geraete.length !== vorher) await env.GERAETE.put(k.name, JSON.stringify(geraete));
+  }
+  return verschickt;
+}
+
 export default {
   fetch: (request, env) => behandle(request, env),
+  scheduled: (event, env, ctx) => ctx.waitUntil(pruefeNeues(env).catch((e) => console.log("pruefeNeues", String(e)))),
 };

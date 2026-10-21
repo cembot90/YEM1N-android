@@ -4,6 +4,10 @@ compatibility_date = "2026-01-01"
 workers_dev = true
 preview_urls = false
 
+# Jede Minute nach neuen Einträgen schauen und Mitteilungen schicken.
+[triggers]
+crons = ["* * * * *"]
+
 [vars]
 CK_CONTAINER = "iCloud.de.cemaras.yem1n"
 CK_UMGEBUNG = "production"
@@ -17,4 +21,4 @@ id = "7698527a37de41c782ebfdb7aae4eac9"
 # Geheim (nicht in diese Datei schreiben), setzen mit "npx wrangler secret put NAME":
 #   CK_KEY_ID        Key-ID des Server-Schlüssels aus dem CloudKit-Dashboard
 #   CK_PRIVATE_KEY   privater Schlüssel im PKCS8-Format (PEM)
-#   FCM_DIENSTKONTO  JSON des Google-Dienstkontos (für Push, später)
+#   FCM_DIENSTKONTO  JSON des Google-Dienstkontos (für Mitteilungen über FCM)

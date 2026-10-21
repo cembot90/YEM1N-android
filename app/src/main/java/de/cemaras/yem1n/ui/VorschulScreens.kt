@@ -490,6 +490,16 @@ private fun MemorySpiel(vm: AppViewModel, m: MemoryStand) {
 private fun VorschulErgebnis(
     emoji: String, titel: String, zusatz: String?, sterne: Int, perfekt: Int, gesamt: Int, vm: AppViewModel,
 ) {
+    androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
+        VorschulErgebnisInhalt(emoji, titel, zusatz, sterne, perfekt, gesamt, vm)
+        if (sterne >= 1) Konfetti()
+    }
+}
+
+@Composable
+private fun VorschulErgebnisInhalt(
+    emoji: String, titel: String, zusatz: String?, sterne: Int, perfekt: Int, gesamt: Int, vm: AppViewModel,
+) {
     val name = vm.fortschritt.name
     val ende = remember(perfekt, gesamt) { Lob.fuerEnde(perfekt, gesamt, name) }
     Column(

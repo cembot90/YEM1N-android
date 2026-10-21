@@ -57,3 +57,9 @@ Meilenstein 2b-1: Aufgaben-Generator (Port von MatheGenerator), Probearbeit mit 
 Training (zwei schwächste Bereiche), Rosa-Modus, JSON-Datei öffnen.
 Offen in 2b-2: Abzeichen, Wochenziel, Vorschule-Feinheiten, JSON von anderen Apps teilen.
 Danach: Anleitung, Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
+
+## Geplant nach allen Meilensteinen: Designüberarbeitung
+
+Moderneres Aussehen wie die iOS-App: Glas-Karten (Unschärfe und feine Kante, ab Android 12 per Blur,
+darunter flache Karten), weichere Hintergründe mit Lichtflecken, federnde Knöpfe, Fortschrittsringe,
+Sparmodus für schwache Geräte. Erst nach den Funktionen, damit nicht doppelt gebaut wird.

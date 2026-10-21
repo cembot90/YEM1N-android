@@ -15,7 +15,7 @@ enum class SpielArt(
         "Tippe, dann fliegt das Einhorn hoch. Fang Sterne und Regenbögen, weich den Gewitterwolken aus.", true,
     ),
     LAUF("lauf", "Zahlenlauf", "🏃", "Spring über die Kakteen und sammle Münzen. Es wird immer schneller.", true),
-    JAGD("jagd", "Münzjagd", "🪙", "Sammle auf den Plattformen alle Münzen ein. Weich den Fliegern aus.", false),
+    JAGD("jagd", "Münzjagd", "🪙", "Sammle auf den Plattformen alle Münzen ein. Weich den Fliegern aus.", true),
     HOCKEY("hockey", "Münz-Hockey", "🏒", "Tischhockey gegen den Computer. Wer zuerst fünf Tore hat, gewinnt.", false),
 }
 

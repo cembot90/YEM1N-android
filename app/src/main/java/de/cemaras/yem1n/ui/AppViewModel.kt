@@ -187,6 +187,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val schwach = (app.getSystemService(android.content.Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true
         de.cemaras.yem1n.ui.theme.Sparmodus.an = fortschritt.sparmodus || schwach
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
+        offeneErgebnisseSenden()
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
@@ -400,6 +401,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun oeffneJoker() {
         ansicht = Ansicht.Joker
+        offeneErgebnisseSenden()
         if (jokerCode.isNotEmpty()) jokerLaden()
     }
 
@@ -883,21 +885,60 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (!imSonder) ergebnisMelden(arbeit.klasse, arbeit.fach, arbeit.titel, uebung.titel, s)
     }
 
+    /** Was beim Senden der Ergebnisse zuletzt passiert ist, für die Joker-Seite. */
+    var ergebnisStatus: String by mutableStateOf("")
+        private set
+    private var ergebnisSendet = false
+
     /**
-     * Schickt das Ergebnis der Runde an die Eltern (über den Server), wenn ein Familiencode gesetzt ist und
-     * dieses Gerät dem Kind gehört. Klappt es nicht, geht die Runde trotzdem in den Fortschritt, nur die Eltern sehen sie nicht.
+     * Merkt das Ergebnis der Runde vor und schickt es an die Eltern (über den Server), wenn ein Familiencode gesetzt ist
+     * und dieses Gerät dem Kind gehört. Was nicht ankommt, bleibt gemerkt und wird später noch einmal geschickt.
      */
     private fun ergebnisMelden(klasse: String, fach: String, arbeit: String, uebung: String, s: RundenStand) {
         val code = jokerCode
-        if (code.isEmpty() || fortschritt.jokerRolle != "kind") return
-        val jetzt = System.currentTimeMillis()
+        if (code.isEmpty()) return
+        if (fortschritt.jokerRolle != "kind") {
+            ergebnisStatus = "Dieses Gerät steht auf Eltern, darum wird die Runde nicht gesendet."
+            return
+        }
         val e = de.cemaras.yem1n.logik.RundenErgebnisEintrag(
             eintragId = java.util.UUID.randomUUID().toString(), klasse = klasse, fach = fach, arbeit = arbeit,
             uebung = uebung, richtig = s.richtig, gesamt = s.aufgaben.size, angesehen = s.angeschaut,
-            sterne = s.sterne, kind = fortschritt.name.trim(), zeitpunkt = jetzt,
+            sterne = s.sterne, kind = fortschritt.name.trim(), zeitpunkt = System.currentTimeMillis(),
         )
-        val koerper = ServerAnfrage.ergebnis(code, e)
-        viewModelScope.launch(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
+        val offen = (fortschritt.offeneErgebnisse + ServerAnfrage.ergebnis(code, e)).takeLast(50)
+        behalte(fortschritt.copy(offeneErgebnisse = offen))
+        offeneErgebnisseSenden()
+    }
+
+    /** Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später. */
+    fun offeneErgebnisseSenden() {
+        if (ergebnisSendet || fortschritt.offeneErgebnisse.isEmpty()) return
+        ergebnisSendet = true
+        viewModelScope.launch {
+            var gesendet = 0
+            var fehler: String? = null
+            for (koerper in fortschritt.offeneErgebnisse) {
+                val r = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
+                if (r.ok) {
+                    gesendet++
+                    behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
+                } else {
+                    fehler = r.meldung
+                    // Eine abgelehnte Anfrage (400) würde nie ankommen, sie fliegt raus, damit sie nicht alles blockiert.
+                    if (r.abgelehnt) behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
+                    else break
+                }
+            }
+            val warten = fortschritt.offeneErgebnisse.size
+            ergebnisStatus = when {
+                fehler != null && warten > 0 -> "$warten Runde(n) warten noch auf das Senden. $fehler"
+                fehler != null -> "Eine Runde konnte nicht gesendet werden. $fehler"
+                gesendet > 0 -> "Letzte Runde an die Eltern gesendet."
+                else -> ergebnisStatus
+            }
+            ergebnisSendet = false
+        }
     }
 
     /** Wochenbelohnung abholen. Gibt die Münzen zurück, 0 wenn es nichts abzuholen gab. */

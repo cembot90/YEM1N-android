@@ -100,6 +100,8 @@ fun JokerScreen(vm: AppViewModel) {
             }
         }
         if (vm.jokerMeldung.isNotEmpty()) Text(vm.jokerMeldung, color = TextSanft, fontSize = 14.sp)
+        if (!eltern && vm.ergebnisStatus.isNotEmpty()) Text(vm.ergebnisStatus, color = TextSanft, fontSize = 13.sp)
+        if (eltern) Text("Auf einem Eltern-Gerät werden Übungsrunden nicht an die Familie gesendet.", color = TextSanft, fontSize = 13.sp)
 
         vm.jokerFragen.forEach { frage -> FrageKarte(vm, frage, eltern) }
 

@@ -76,6 +76,8 @@ data class Fortschritt(
     val familiencode: String = "",
     /** "kind" oder "eltern": wer dieses Gerät benutzt (für die Joker-Seite). */
     val jokerRolle: String = "kind",
+    /** Fertige Anfragen an den Server (Rundenergebnisse), die noch nicht angekommen sind. Werden erneut geschickt. */
+    val offeneErgebnisse: List<String> = emptyList(),
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =

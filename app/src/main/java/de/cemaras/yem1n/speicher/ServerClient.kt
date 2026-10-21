@@ -8,7 +8,8 @@ object ServerKonfig {
     const val ADRESSE = "https://yem1n-server.cemaras-yem1n.workers.dev"
 }
 
-data class ServerErgebnis(val ok: Boolean, val meldung: String = "")
+/** [abgelehnt]: Der Server hat die Anfrage als ungültig abgewiesen (400), ein erneuter Versuch hilft nicht. */
+data class ServerErgebnis(val ok: Boolean, val meldung: String = "", val abgelehnt: Boolean = false)
 
 /** Schickt Joker, Antworten und Ergebnisse an den Server. Nie auf dem Haupt-Thread aufrufen. */
 object ServerClient {
@@ -24,7 +25,7 @@ object ServerClient {
             val ok = c.responseCode in 200..299
             val strom = if (ok) c.inputStream else (c.errorStream ?: c.inputStream)
             val text = strom.bufferedReader(Charsets.UTF_8).use { it.readText() }
-            if (ok) ServerErgebnis(true) else ServerErgebnis(false, fehlertext(c.responseCode, text))
+            if (ok) ServerErgebnis(true) else ServerErgebnis(false, fehlertext(c.responseCode, text), c.responseCode == 400)
         } catch (e: Exception) {
             ServerErgebnis(false, "Keine Verbindung. Ist das Internet an?")
         }

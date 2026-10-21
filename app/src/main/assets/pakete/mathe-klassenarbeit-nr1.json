@@ -1,0 +1,1069 @@
+{
+  "klasse": "Klasse 3",
+  "fach": "Mathe",
+  "arbeit": "Klassenarbeit Nr. 1",
+  "uebungen": [
+    {
+      "titel": "Minus mit Wörtern",
+      "gruppe": "Zum Aufwärmen",
+      "symbol": "-",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Subtrahiere von 31 die Zahl 19.",
+          "antwort": "12",
+          "erklaerung": "31 - 19 = 12"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Ziehe 8 von 80 ab.",
+          "antwort": "72",
+          "erklaerung": "80 - 8 = 72"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Subtrahiere von 35 die Zahl 8.",
+          "antwort": "27",
+          "erklaerung": "35 - 8 = 27"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Ziehe 11 von 98 ab.",
+          "antwort": "87",
+          "erklaerung": "98 - 11 = 87"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Ziehe 8 von 47 ab.",
+          "antwort": "39",
+          "erklaerung": "47 - 8 = 39"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Subtrahiere von 34 die Zahl 25.",
+          "antwort": "9",
+          "erklaerung": "34 - 25 = 9"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Ziehe 11 von 47 ab.",
+          "antwort": "36",
+          "erklaerung": "47 - 11 = 36"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt die Differenz der Zahlen 87 und 20?",
+          "antwort": "67",
+          "erklaerung": "87 - 20 = 67"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Subtrahiere von 56 die Zahl 22.",
+          "antwort": "34",
+          "erklaerung": "56 - 22 = 34"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt die Differenz der Zahlen 45 und 4?",
+          "antwort": "41",
+          "erklaerung": "45 - 4 = 41"
+        }
+      ]
+    },
+    {
+      "titel": "Mal mit Wörtern",
+      "gruppe": "Zum Aufwärmen",
+      "symbol": "·",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt das Produkt der Zahlen 6 und 8?",
+          "antwort": "48",
+          "erklaerung": "6 · 8 = 48"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Multipliziere die Zahlen 6 und 6.",
+          "antwort": "36",
+          "erklaerung": "6 · 6 = 36"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Multipliziere die Zahlen 3 und 3.",
+          "antwort": "9",
+          "erklaerung": "3 · 3 = 9"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt das Produkt der Zahlen 6 und 5?",
+          "antwort": "30",
+          "erklaerung": "6 · 5 = 30"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Multipliziere die Zahlen 2, 5 und 3.",
+          "antwort": "30",
+          "erklaerung": "2 · 5 · 3 = 30"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Multipliziere die Zahlen 10 und 6.",
+          "antwort": "60",
+          "erklaerung": "10 · 6 = 60"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt das Produkt der Zahlen 8 und 6?",
+          "antwort": "48",
+          "erklaerung": "8 · 6 = 48"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Multipliziere die Zahlen 6 und 10.",
+          "antwort": "60",
+          "erklaerung": "6 · 10 = 60"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt das Produkt der Zahlen 7 und 8?",
+          "antwort": "56",
+          "erklaerung": "7 · 8 = 56"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Wie heißt das Produkt der Zahlen 7 und 5?",
+          "antwort": "35",
+          "erklaerung": "7 · 5 = 35"
+        }
+      ]
+    },
+    {
+      "titel": "Kernaufgaben",
+      "gruppe": "Mal und Geteilt",
+      "symbol": "1· 2· 5·",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "4 · 1 =",
+          "antwort": "4",
+          "erklaerung": "4 · 1 = 4"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "5 · 3 =",
+          "antwort": "15",
+          "erklaerung": "5 · 3 = 15"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "5 · 6 =",
+          "antwort": "30",
+          "erklaerung": "5 · 6 = 30"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "3 · 2 =",
+          "antwort": "6",
+          "erklaerung": "3 · 2 = 6"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "9 · 5 =",
+          "antwort": "45",
+          "erklaerung": "9 · 5 = 45"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "1 · 10 =",
+          "antwort": "10",
+          "erklaerung": "1 · 10 = 10"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "5 · 1 =",
+          "antwort": "5",
+          "erklaerung": "5 · 1 = 5"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "4 · 2 =",
+          "antwort": "8",
+          "erklaerung": "4 · 2 = 8"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "10 · 10 =",
+          "antwort": "100",
+          "erklaerung": "10 · 10 = 100"
+        },
+        {
+          "art": "zahl",
+          "frage": "Das ist eine Kernaufgabe.",
+          "rechnung": "5 · 9 =",
+          "antwort": "45",
+          "erklaerung": "5 · 9 = 45"
+        }
+      ]
+    },
+    {
+      "titel": "Nachbaraufgaben",
+      "gruppe": "Mal und Geteilt",
+      "symbol": "+1",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "6 · 3 =",
+          "hinweis": "Du weißt: 5 · 3 = 15. Also + 3.",
+          "antwort": "18",
+          "erklaerung": "5 · 3 = 15, dann + 3 = 18"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "9 · 5 =",
+          "hinweis": "Du weißt: 10 · 5 = 50. Also - 5.",
+          "antwort": "45",
+          "erklaerung": "10 · 5 = 50, dann - 5 = 45"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "9 · 3 =",
+          "hinweis": "Du weißt: 10 · 3 = 30. Also - 3.",
+          "antwort": "27",
+          "erklaerung": "10 · 3 = 30, dann - 3 = 27"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "9 · 10 =",
+          "hinweis": "Du weißt: 10 · 10 = 100. Also - 10.",
+          "antwort": "90",
+          "erklaerung": "10 · 10 = 100, dann - 10 = 90"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "6 · 8 =",
+          "hinweis": "Du weißt: 5 · 8 = 40. Also + 8.",
+          "antwort": "48",
+          "erklaerung": "5 · 8 = 40, dann + 8 = 48"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "9 · 4 =",
+          "hinweis": "Du weißt: 10 · 4 = 40. Also - 4.",
+          "antwort": "36",
+          "erklaerung": "10 · 4 = 40, dann - 4 = 36"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "9 · 7 =",
+          "hinweis": "Du weißt: 10 · 7 = 70. Also - 7.",
+          "antwort": "63",
+          "erklaerung": "10 · 7 = 70, dann - 7 = 63"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "6 · 5 =",
+          "hinweis": "Du weißt: 5 · 5 = 25. Also + 5.",
+          "antwort": "30",
+          "erklaerung": "5 · 5 = 25, dann + 5 = 30"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "6 · 4 =",
+          "hinweis": "Du weißt: 5 · 4 = 20. Also + 4.",
+          "antwort": "24",
+          "erklaerung": "5 · 4 = 20, dann + 4 = 24"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "9 · 6 =",
+          "hinweis": "Du weißt: 10 · 6 = 60. Also - 6.",
+          "antwort": "54",
+          "erklaerung": "10 · 6 = 60, dann - 6 = 54"
+        }
+      ]
+    },
+    {
+      "titel": "Einmaleins",
+      "gruppe": "Mal und Geteilt",
+      "symbol": "7·8",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "4 · 10 =",
+          "antwort": "40",
+          "erklaerung": "4 · 10 = 40"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "9 · 10 =",
+          "antwort": "90",
+          "erklaerung": "9 · 10 = 90"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "10 · 8 =",
+          "antwort": "80",
+          "erklaerung": "10 · 8 = 80"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "5 · 9 =",
+          "antwort": "45",
+          "erklaerung": "5 · 9 = 45"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "6 · 9 =",
+          "antwort": "54",
+          "erklaerung": "6 · 9 = 54"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "7 · 4 =",
+          "antwort": "28",
+          "erklaerung": "7 · 4 = 28"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "7 · 3 =",
+          "antwort": "21",
+          "erklaerung": "7 · 3 = 21"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "10 · 7 =",
+          "antwort": "70",
+          "erklaerung": "10 · 7 = 70"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "5 · 6 =",
+          "antwort": "30",
+          "erklaerung": "5 · 6 = 30"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "8 · 4 =",
+          "antwort": "32",
+          "erklaerung": "8 · 4 = 32"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "2 · 3 =",
+          "antwort": "6",
+          "erklaerung": "2 · 3 = 6"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "8 · 5 =",
+          "antwort": "40",
+          "erklaerung": "8 · 5 = 40"
+        }
+      ]
+    },
+    {
+      "titel": "Geteilt",
+      "gruppe": "Mal und Geteilt",
+      "symbol": ":",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "20 : 4 =",
+          "hinweis": "Denn ___ · 4 = 20",
+          "antwort": "5",
+          "erklaerung": "20 : 4 = 5"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "48 : 8 =",
+          "hinweis": "Denn ___ · 8 = 48",
+          "antwort": "6",
+          "erklaerung": "48 : 8 = 6"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "40 : 5 =",
+          "hinweis": "Denn ___ · 5 = 40",
+          "antwort": "8",
+          "erklaerung": "40 : 5 = 8"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "60 : 6 =",
+          "hinweis": "Denn ___ · 6 = 60",
+          "antwort": "10",
+          "erklaerung": "60 : 6 = 10"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "30 : 5 =",
+          "hinweis": "Denn ___ · 5 = 30",
+          "antwort": "6",
+          "erklaerung": "30 : 5 = 6"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "4 : 2 =",
+          "hinweis": "Denn ___ · 2 = 4",
+          "antwort": "2",
+          "erklaerung": "4 : 2 = 2"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "54 : 9 =",
+          "hinweis": "Denn ___ · 9 = 54",
+          "antwort": "6",
+          "erklaerung": "54 : 9 = 6"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "35 : 7 =",
+          "hinweis": "Denn ___ · 7 = 35",
+          "antwort": "5",
+          "erklaerung": "35 : 7 = 5"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "16 : 8 =",
+          "hinweis": "Denn ___ · 8 = 16",
+          "antwort": "2",
+          "erklaerung": "16 : 8 = 2"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "72 : 9 =",
+          "hinweis": "Denn ___ · 9 = 72",
+          "antwort": "8",
+          "erklaerung": "72 : 9 = 8"
+        }
+      ]
+    },
+    {
+      "titel": "Teilen mit Rest",
+      "gruppe": "Mal und Geteilt",
+      "symbol": "R",
+      "tipp": "Bei geteilt nicht bei 10 stehen bleiben. 48 : 4 sind 12, nicht 10 Rest 8. Teile weiter, bis der Rest kleiner ist als die Zahl, durch die du teilst.",
+      "aufgaben": [
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "47 : 4 =",
+          "antwort": "11",
+          "antwort2": "3",
+          "erklaerung": "47 : 4 = 11 R 3"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "64 : 5 =",
+          "antwort": "12",
+          "antwort2": "4",
+          "erklaerung": "64 : 5 = 12 R 4"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "67 : 5 =",
+          "antwort": "13",
+          "antwort2": "2",
+          "erklaerung": "67 : 5 = 13 R 2"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "47 : 3 =",
+          "antwort": "15",
+          "antwort2": "2",
+          "erklaerung": "47 : 3 = 15 R 2"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "81 : 7 =",
+          "antwort": "11",
+          "antwort2": "4",
+          "erklaerung": "81 : 7 = 11 R 4"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "55 : 8 =",
+          "antwort": "6",
+          "antwort2": "7",
+          "erklaerung": "55 : 8 = 6 R 7"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "43 : 8 =",
+          "antwort": "5",
+          "antwort2": "3",
+          "erklaerung": "43 : 8 = 5 R 3"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "80 : 9 =",
+          "antwort": "8",
+          "antwort2": "8",
+          "erklaerung": "80 : 9 = 8 R 8"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "20 : 9 =",
+          "antwort": "2",
+          "antwort2": "2",
+          "erklaerung": "20 : 9 = 2 R 2"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "56 : 9 =",
+          "antwort": "6",
+          "antwort2": "2",
+          "erklaerung": "56 : 9 = 6 R 2"
+        }
+      ]
+    },
+    {
+      "titel": "Punkt vor Strich",
+      "gruppe": "Knobeln",
+      "symbol": "·+",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "30 : 5 + 14 =",
+          "antwort": "20",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "15 : 3 + 2 =",
+          "antwort": "7",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "54 : 9 + 17 =",
+          "antwort": "23",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "48 : 6 + 14 =",
+          "antwort": "22",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "10 · 5 - 26 =",
+          "antwort": "24",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "8 · 7 + 10 =",
+          "antwort": "66",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "10 · 2 + 12 =",
+          "antwort": "32",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "32 + 5 · 9 =",
+          "antwort": "77",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "24 + 4 · 2 =",
+          "antwort": "32",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "31 + 7 · 2 =",
+          "antwort": "45",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        }
+      ]
+    },
+    {
+      "titel": "Größer oder kleiner",
+      "gruppe": "Knobeln",
+      "symbol": "< >",
+      "aufgaben": [
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "5 · 10  ?  9 · 10",
+          "antwort": "<",
+          "erklaerung": "50 < 90"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "4 · 3  ?  2 · 9",
+          "antwort": "<",
+          "erklaerung": "12 < 18"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "49  ?  10 · 10",
+          "antwort": "<",
+          "erklaerung": "49 < 100"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "58  ?  10 · 3",
+          "antwort": ">",
+          "erklaerung": "58 > 30"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "60  ?  4 · 10",
+          "antwort": ">",
+          "erklaerung": "60 > 40"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "9 · 8  ?  8 · 9",
+          "antwort": "=",
+          "erklaerung": "72 = 72"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "9 · 6  ?  6 · 9",
+          "antwort": "=",
+          "erklaerung": "54 = 54"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "3 · 6  ?  18",
+          "antwort": "=",
+          "erklaerung": "18 = 18"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "3 · 8  ?  24",
+          "antwort": "=",
+          "erklaerung": "24 = 24"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "2 · 9  ?  2 · 8",
+          "antwort": ">",
+          "erklaerung": "18 > 16"
+        }
+      ]
+    },
+    {
+      "titel": "Zahlenmauern",
+      "gruppe": "Knobeln",
+      "symbol": "▲",
+      "aufgaben": [
+        {
+          "art": "mauer",
+          "frage": "Fülle die Mauer von unten nach oben.",
+          "reihen": [
+            [
+              10,
+              15,
+              9,
+              5
+            ],
+            [
+              25,
+              24,
+              14
+            ],
+            [
+              49,
+              38
+            ],
+            [
+              87
+            ]
+          ]
+        },
+        {
+          "art": "mauer",
+          "frage": "Fülle die Mauer von unten nach oben.",
+          "reihen": [
+            [
+              8,
+              9,
+              6,
+              11
+            ],
+            [
+              17,
+              15,
+              17
+            ],
+            [
+              32,
+              32
+            ],
+            [
+              64
+            ]
+          ]
+        },
+        {
+          "art": "mauer",
+          "frage": "Fülle die Mauer von unten nach oben.",
+          "reihen": [
+            [
+              7,
+              15,
+              4,
+              10
+            ],
+            [
+              22,
+              19,
+              14
+            ],
+            [
+              41,
+              33
+            ],
+            [
+              74
+            ]
+          ]
+        },
+        {
+          "art": "mauer",
+          "frage": "Fülle die Mauer von unten nach oben.",
+          "reihen": [
+            [
+              3,
+              5,
+              12,
+              7
+            ],
+            [
+              8,
+              17,
+              19
+            ],
+            [
+              25,
+              36
+            ],
+            [
+              61
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Zahlenrätsel",
+      "gruppe": "Knobeln",
+      "symbol": "?",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist ungerade.\nSie ist eine Neunerzahl.\nSie liegt zwischen 30 und 46.",
+          "antwort": "45",
+          "erklaerung": "45 ist ungerade, kommt im 9er-Einmaleins vor und liegt zwischen 30 und 46."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist ungerade.\nSie ist eine Neunerzahl.\nSie liegt zwischen 52 und 73.",
+          "antwort": "63",
+          "erklaerung": "63 ist ungerade, kommt im 9er-Einmaleins vor und liegt zwischen 52 und 73."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist gerade.\nSie ist eine Neunerzahl.\nSie liegt zwischen 30 und 41.",
+          "antwort": "36",
+          "erklaerung": "36 ist gerade, kommt im 9er-Einmaleins vor und liegt zwischen 30 und 41."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist ungerade.\nSie ist eine Siebenerzahl.\nSie liegt zwischen 42 und 55.",
+          "antwort": "49",
+          "erklaerung": "49 ist ungerade, kommt im 7er-Einmaleins vor und liegt zwischen 42 und 55."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist gerade.\nSie ist eine Neunerzahl.\nSie liegt zwischen 48 und 64.",
+          "antwort": "54",
+          "erklaerung": "54 ist gerade, kommt im 9er-Einmaleins vor und liegt zwischen 48 und 64."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist gerade.\nSie ist eine Achterzahl.\nSie liegt zwischen 49 und 62.",
+          "antwort": "56",
+          "erklaerung": "56 ist gerade, kommt im 8er-Einmaleins vor und liegt zwischen 49 und 62."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist ungerade.\nSie ist eine Fünferzahl.\nSie liegt zwischen 18 und 28.",
+          "antwort": "25",
+          "erklaerung": "25 ist ungerade, kommt im 5er-Einmaleins vor und liegt zwischen 18 und 28."
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist gerade.\nSie ist eine Fünferzahl.\nSie liegt zwischen 35 und 46.",
+          "antwort": "40",
+          "erklaerung": "40 ist gerade, kommt im 5er-Einmaleins vor und liegt zwischen 35 und 46."
+        }
+      ]
+    },
+    {
+      "titel": "Sachaufgaben",
+      "gruppe": "Knobeln",
+      "symbol": "✎",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Ali hat 30 Sticker. Emil hat 31 mehr als Ali. Wie viele Sticker hat Emil?",
+          "antwort": "61",
+          "erklaerung": "30 + 31 = 61"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Lena hat 81 Murmeln. Mia hat 13 weniger. Wie viele Murmeln hat Mia?",
+          "antwort": "68",
+          "erklaerung": "81 - 13 = 68"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Ben hat 7 Kisten mit je 5 Äpfeln. Wie viele Äpfel sind das?",
+          "antwort": "35",
+          "erklaerung": "7 · 5 = 35"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Sara teilt 72 Bonbons gerecht an 8 Kinder. Wie viele Bonbons bekommt jedes Kind?",
+          "antwort": "9",
+          "erklaerung": "72 : 8 = 9"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Ali spart für ein Spiel für 65 Euro und hat schon 19 Euro. Wie viele Euro fehlen noch?",
+          "antwort": "46",
+          "erklaerung": "65 - 19 = 46"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Jonas hat 9 Kisten mit je 6 Äpfeln. Wie viele Äpfel sind das?",
+          "antwort": "54",
+          "erklaerung": "9 · 6 = 54"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Nele teilt 54 Bonbons gerecht an 6 Kinder. Wie viele Bonbons bekommt jedes Kind?",
+          "antwort": "9",
+          "erklaerung": "54 : 6 = 9"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Ida hat 56 Murmeln. Mia hat 34 weniger. Wie viele Murmeln hat Mia?",
+          "antwort": "22",
+          "erklaerung": "56 - 34 = 22"
+        }
+      ]
+    },
+    {
+      "titel": "Alles gemischt",
+      "gruppe": "Wie in der Klassenarbeit",
+      "symbol": "★",
+      "aufgaben": [
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "42 : 7 =",
+          "hinweis": "Denn ___ · 7 = 42",
+          "antwort": "6",
+          "erklaerung": "42 : 7 = 6"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne und denk an die Umkehraufgabe.",
+          "rechnung": "63 : 9 =",
+          "hinweis": "Denn ___ · 9 = 63",
+          "antwort": "7",
+          "erklaerung": "63 : 9 = 7"
+        },
+        {
+          "art": "zahl",
+          "frage": "Punkt vor Strich.",
+          "rechnung": "2 · 9 + 19 =",
+          "antwort": "37",
+          "erklaerung": "Zuerst die Punktrechnung, dann plus oder minus."
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "3 · 6 =",
+          "antwort": "18",
+          "erklaerung": "3 · 6 = 18"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Multipliziere die Zahlen 6 und 3.",
+          "antwort": "18",
+          "erklaerung": "6 · 3 = 18"
+        },
+        {
+          "art": "zahl",
+          "frage": "Lies genau. Rechne und antworte.",
+          "rechnung": "Lena hat 44 Murmeln. Ida hat 14 weniger. Wie viele Murmeln hat Ida?",
+          "antwort": "30",
+          "erklaerung": "44 - 14 = 30"
+        },
+        {
+          "art": "vergleich",
+          "frage": "Was gehört in die Mitte?",
+          "rechnung": "10 · 9  ?  9 · 10",
+          "antwort": "=",
+          "erklaerung": "90 = 90"
+        },
+        {
+          "art": "zahl",
+          "frage": "Erst die Kernaufgabe, dann der Nachbar.",
+          "rechnung": "6 · 10 =",
+          "hinweis": "Du weißt: 5 · 10 = 50. Also + 10.",
+          "antwort": "60",
+          "erklaerung": "5 · 10 = 50, dann + 10 = 60"
+        },
+        {
+          "art": "zahl",
+          "frage": "Notiere die passende Rechnung.",
+          "rechnung": "Ziehe 24 von 31 ab.",
+          "antwort": "7",
+          "erklaerung": "31 - 24 = 7"
+        },
+        {
+          "art": "rest",
+          "frage": "Teile mit Rest. Rechne bis zum Ende.",
+          "rechnung": "63 : 6 =",
+          "antwort": "10",
+          "antwort2": "3",
+          "erklaerung": "63 : 6 = 10 R 3"
+        },
+        {
+          "art": "zahl",
+          "frage": "Rechne.",
+          "rechnung": "5 · 7 =",
+          "antwort": "35",
+          "erklaerung": "5 · 7 = 35"
+        },
+        {
+          "art": "zahl",
+          "frage": "Wie heißt die Zahl?",
+          "rechnung": "Meine Zahl ist gerade.\nSie ist eine Fünferzahl.\nSie liegt zwischen 27 und 39.",
+          "antwort": "30",
+          "erklaerung": "30 ist gerade, kommt im 5er-Einmaleins vor und liegt zwischen 27 und 39."
+        }
+      ]
+    }
+  ]
+}

@@ -60,8 +60,8 @@ JSON aus anderen Apps annehmen (Teilen und Öffnen).
 Meilenstein 2c: Vorschule (alle 23 Spiele plus Memory, Zahlenraum bis 5/10/20, Schulstart-Pass),
 Vorlesen mit der Sprachausgabe des Geräts (Schalter in den Einstellungen).
 Meilenstein 4a: Spiele-Bereich (15 Münzen pro Spiel, Tageslimit, Bestwerte, Eltern-Schalter) Einhorn-Flug und Zahlenlauf (Spiele laufen im Querformat).
-Münzjagd (Stick links, Sprungknopf rechts, drei Ebenenformen) und Elfmeterschießen (Wischen, Torwart wird mit dem Level besser) sind dazugekommen.
-Offen bei den Spielen: Münz-Hockey.
+Alle fünf Spiele sind da: Einhorn-Flug, Zahlenlauf, Münzjagd (Stick links, Sprungknopf rechts), Elfmeterschießen (Wischen, Torwart wird besser) und Münz-Hockey (Finger führt den Schläger, Computer wird pro Level besser).
+Offen bei den Spielen: Ton, Haptik und Partikel wie bei iOS.
 Offen in Vorschule: Englisch und Türkisch für Kleine, eigene Vorschul-Pakete, Konfetti, bessere Stimmen.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).

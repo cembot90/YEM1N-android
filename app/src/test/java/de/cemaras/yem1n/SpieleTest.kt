@@ -81,7 +81,7 @@ class SpieleTest {
     @Test
     fun spieleHabenEindeutigeSchluessel() {
         assertEquals(SpielArt.entries.size, SpielArt.entries.map { it.schluessel }.toSet().size)
-        assertTrue(SpielArt.EINHORN.verfuegbar)
+        assertTrue(SpielArt.entries.all { it.verfuegbar })
     }
 
     @Test

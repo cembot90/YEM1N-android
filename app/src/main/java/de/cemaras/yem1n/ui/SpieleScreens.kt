@@ -118,7 +118,7 @@ fun SpielScreen(vm: AppViewModel, art: SpielArt) {
             SpielArt.LAUF -> LaufScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
             SpielArt.ELFMETER -> ElfmeterScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
             SpielArt.JAGD -> JagdScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
-            else -> Text("Kommt bald", color = Color.White, modifier = Modifier.align(Alignment.Center))
+            SpielArt.HOCKEY -> HockeyScreen(onEnde = { punkte -> vm.spielEnde(art, punkte) })
         }
         Column(
             Modifier.align(Alignment.TopEnd).systemBarsPadding().padding(12.dp),

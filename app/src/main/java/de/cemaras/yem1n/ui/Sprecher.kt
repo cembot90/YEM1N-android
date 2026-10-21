@@ -9,6 +9,9 @@ import java.util.Locale
  * lässt sich die Sprachausgabe nicht starten, bleibt die App einfach still.
  */
 class Sprecher(kontext: Context) {
+    /** Die natürliche Stimme (Piper), wenn sie geladen ist. Sonst spricht die Stimme des Geräts. */
+    val natuerlich = NatuerlicheStimme(kontext)
+
     private var tts: TextToSpeech? = null
     private var bereit = false
     private var wartend: Pair<String, Boolean>? = null
@@ -25,7 +28,7 @@ class Sprecher(kontext: Context) {
                     bereit = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED
                     val w = wartend
                     wartend = null
-                    if (bereit && w != null) sprich(w.first, w.second)
+                    if (bereit && w != null) sprichMitGeraet(w.first, w.second)
                 }
             }
         } catch (e: Exception) {
@@ -34,8 +37,25 @@ class Sprecher(kontext: Context) {
     }
 
     /** [froh] klingt etwas höher und lebhafter, zum Beispiel beim Loben. */
-    fun sprich(text: String, froh: Boolean = false) {
+    fun sprich(text: String, froh: Boolean = false, sprache: String = "de") {
         if (!an || text.isBlank()) return
+        val gestartet = natuerlich.sprich(text, sprache, if (froh) 1.0f else 0.92f) { sprichMitGeraet(text, froh) }
+        if (!gestartet) sprichMitGeraet(text, froh)
+    }
+
+    /** Probehören aus den Einstellungen, auch wenn das Vorlesen sonst aus ist. */
+    fun probe(text: String, sprache: String) {
+        val gestartet = natuerlich.sprich(text, sprache, 0.92f) { }
+        if (!gestartet && sprache == "de") {
+            val vorher = an
+            an = true
+            sprichMitGeraet(text, false)
+            an = vorher
+        }
+    }
+
+    private fun sprichMitGeraet(text: String, froh: Boolean) {
+        if (!an) return
         val t = tts ?: return
         if (!bereit) {
             wartend = text to froh
@@ -52,6 +72,7 @@ class Sprecher(kontext: Context) {
 
     fun stopp() {
         wartend = null
+        natuerlich.stopp()
         try {
             tts?.stop()
         } catch (e: Exception) {
@@ -61,6 +82,7 @@ class Sprecher(kontext: Context) {
 
     fun schliessen() {
         stopp()
+        natuerlich.schliessen()
         try {
             tts?.shutdown()
         } catch (e: Exception) {

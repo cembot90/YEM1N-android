@@ -62,7 +62,8 @@ Vorlesen mit der Sprachausgabe des Geräts (Schalter in den Einstellungen).
 Meilenstein 4a: Spiele-Bereich (15 Münzen pro Spiel, Tageslimit, Bestwerte, Eltern-Schalter) Einhorn-Flug und Zahlenlauf (Spiele laufen im Querformat).
 Alle fünf Spiele sind da: Einhorn-Flug, Zahlenlauf, Münzjagd (Stick links, Sprungknopf rechts), Elfmeterschießen (Wischen, Torwart wird besser) und Münz-Hockey (Finger führt den Schläger, Computer wird pro Level besser).
 Offen bei den Spielen: Ton, Haptik und Partikel wie bei iOS.
-Offen in Vorschule: Englisch und Türkisch für Kleine, eigene Vorschul-Pakete, Konfetti, bessere Stimmen.
+Meilenstein 4b: Natürliche Stimmen (Piper über sherpa-onnx 1.13.8, Pakete aus dem iOS-Release `stimmen-1`, Laden und Probehören in den Einstellungen, danach offline). Das Projekt steht deshalb unter GPL-3.0 (`LICENSE`, `THIRD-PARTY.md`).
+Offen in Vorschule: Englisch und Türkisch für Kleine, eigene Vorschul-Pakete, Konfetti.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
 Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.

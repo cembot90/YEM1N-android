@@ -129,6 +129,36 @@ fun EinstellungenScreen(vm: AppViewModel) {
         }
         Text("Dafür braucht das Gerät eine deutsche Sprachausgabe. Sie lässt sich in den Android-Einstellungen unter Sprache und Eingabe laden.", color = TextSanft, fontSize = 13.sp)
 
+        Abschnitt("Natürliche Stimmen")
+        Text(
+            "Klingt viel natürlicher als die Stimme des Geräts. Die Stimme wird einmal aus dem Internet geladen (am besten im WLAN) und liest danach ohne Internet vor.",
+            color = TextSanft, fontSize = 13.sp,
+        )
+        for (p in de.cemaras.yem1n.logik.StimmPaket.stimmen) {
+            val flagge = when (p.sprache) { "tr" -> "🇹🇷 Türkisch"; "en" -> "🇬🇧 Englisch"; else -> "🇩🇪 Deutsch" }
+            val prozent = vm.stimmenLaden[p.id]
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f).padding(end = 8.dp)) {
+                    Text("$flagge: ${p.name}", color = Color.White, fontSize = 16.sp)
+                    Text(
+                        if (prozent != null) "Lädt ... $prozent %" else if (vm.stimmeDa(p.sprache)) "Geladen" else "${p.megabyte} MB",
+                        color = TextSanft, fontSize = 13.sp,
+                    )
+                }
+                if (prozent != null) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        progress = { prozent / 100f }, color = Gelb, modifier = Modifier.padding(4.dp).size(28.dp),
+                    )
+                } else if (vm.stimmeDa(p.sprache)) {
+                    TextButton(onClick = { vm.probeStimme(p.sprache) }) { Text("Hören", color = Gelb) }
+                    TextButton(onClick = { vm.entferneStimme(p.sprache) }) { Text("Löschen", color = TextSanft) }
+                } else {
+                    OutlinedButton(onClick = { vm.ladeStimme(p.sprache) }, border = BorderStroke(1.dp, Gelb)) { Text("Laden", color = Gelb) }
+                }
+            }
+        }
+        vm.stimmenFehler?.let { Text(it, color = Color(0xFFFF6B6B), fontSize = 14.sp) }
+
         Abschnitt("Hilfe")
         OutlinedButton(
             onClick = vm::oeffneInfo,

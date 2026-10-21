@@ -4,7 +4,14 @@ import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import de.cemaras.yem1n.logik.StimmPaket
+import de.cemaras.yem1n.speicher.StimmenLader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.PaketLeser
 import de.cemaras.yem1n.daten.Uebung
@@ -89,6 +96,67 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private var vorschulArt: VorschulArt = VorschulArt.MIX
     /** Vorlesen mit der Sprachausgabe des Geräts. */
     val sprecher = Sprecher(app)
+
+    /** Stand der Stimmenpakete: Prozent beim Laden (0 bis 100), -1 bei einem Fehler. Fehlt der Eintrag, ist nichts im Gange. */
+    val stimmenLaden = mutableStateMapOf<String, Int>()
+    var stimmenFehler: String? by mutableStateOf(null)
+        private set
+    private var stimmenZaehler by mutableStateOf(0)
+
+    fun stimmeDa(sprache: String): Boolean {
+        @Suppress("UNUSED_VARIABLE") val abonniert = stimmenZaehler
+        return sprecher.natuerlich.verfuegbar(sprache)
+    }
+
+    /** Lädt die Aussprachedaten (falls nötig) und die Stimme für die Sprache. */
+    fun ladeStimme(sprache: String) {
+        val paket = StimmPaket.fuer(sprache) ?: return
+        if (stimmenLaden.containsKey(paket.id)) return
+        stimmenFehler = null
+        stimmenLaden[paket.id] = 0
+        viewModelScope.launch {
+            val ort = sprecher.natuerlich.ort
+            val zwischen = java.io.File(getApplication<Application>().cacheDir, "stimmen")
+            val fehler = withContext(Dispatchers.IO) {
+                var f: String? = null
+                val noetig = listOf(StimmPaket.aussprache, paket).filter { !ort.installiert(it) }
+                val gesamt = noetig.sumOf { it.bytes }.coerceAtLeast(1)
+                var davor = 0L
+                for (p in noetig) {
+                    f = StimmenLader.lade(p, ort, zwischen) { anteil ->
+                        stimmenLaden[paket.id] = ((davor + p.bytes * anteil) * 100 / gesamt).toInt()
+                    }
+                    if (f != null) break
+                    davor += p.bytes
+                }
+                f
+            }
+            stimmenLaden.remove(paket.id)
+            stimmenFehler = fehler
+            stimmenZaehler += 1
+        }
+    }
+
+    fun entferneStimme(sprache: String) {
+        val paket = StimmPaket.fuer(sprache) ?: return
+        sprecher.natuerlich.stopp()
+        sprecher.natuerlich.vergiss(paket)
+        sprecher.natuerlich.ort.entfernen(paket)
+        // Sind keine Stimmen mehr da, braucht es auch die Aussprachedaten nicht
+        if (StimmPaket.stimmen.none { sprecher.natuerlich.ort.installiert(it) }) {
+            sprecher.natuerlich.ort.entfernen(StimmPaket.aussprache)
+        }
+        stimmenZaehler += 1
+    }
+
+    fun probeStimme(sprache: String) {
+        val text = when (sprache) {
+            "tr" -> "Merhaba! Sana böyle kitap okurum."
+            "en" -> "Hello! This is how I sound when I read to you."
+            else -> "Hallo! So klinge ich, wenn ich dir vorlese."
+        }
+        sprecher.probe(text, sprache)
+    }
 
     init {
         alleArbeiten = speicher.ladeArbeiten()

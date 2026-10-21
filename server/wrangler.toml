@@ -1,6 +1,8 @@
 name = "yem1n-server"
 main = "src/index.js"
 compatibility_date = "2026-01-01"
+workers_dev = true
+preview_urls = false
 
 [vars]
 CK_CONTAINER = "iCloud.de.cemaras.yem1n"

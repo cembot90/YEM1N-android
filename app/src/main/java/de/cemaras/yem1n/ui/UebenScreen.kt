@@ -82,6 +82,7 @@ fun UebenScreen(vm: AppViewModel) {
                 s, vm.fortschritt.name, vm.verdient, !(vm.istFehlerheft || vm.istProbe), vm.istProbe,
                 vm.neuePokale.map { "${it.emoji} ${it.titel}" }, vm.haustierText,
                 onNochmal = vm::nochmal, onFertig = vm::zurueck,
+                naechsteTitel = vm.naechsteUebung?.second?.titel, onNaechste = vm::startNaechsteUebung,
             )
         } else {
             if (vm.istProbe) ProbeUhr(vm.probeStart)
@@ -123,6 +124,9 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
     var e1 by remember(s.index, s.mauerSchritt) { mutableStateOf("") }
     var e2 by remember(s.index) { mutableStateOf("") }
     var tippSichtbar by remember(s.index) { mutableStateOf(false) }
+    var notizOffen by remember(s.index) { mutableStateOf(false) }
+    val notiz = remember(s.index) { androidx.compose.runtime.mutableStateListOf<List<androidx.compose.ui.geometry.Offset>>() }
+    if (notizOffen) Notizblock(notiz) { notizOffen = false }
     val fokus = remember { FocusRequester() }
     val brauchtTastatur = !s.bewertet && (a.art == Aufgabe.ART_ZAHL || a.art == Aufgabe.ART_REST ||
         a.art == Aufgabe.ART_TEXT || a.art == Aufgabe.ART_MAUER)
@@ -167,6 +171,12 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
             )
         }
         Spacer(Modifier.height(14.dp))
+
+        if (!s.bewertet) {
+            TextButton(onClick = { notizOffen = true }) {
+                Text(if (notiz.isEmpty()) "📝 Notizblock" else "📝 Notizblock (beschrieben)", color = Himmel)
+            }
+        }
 
         if (a.hinweis.isNotEmpty() && !s.bewertet && !vm.istProbe) {
             if (tippSichtbar) {
@@ -370,6 +380,7 @@ private fun Rueckmeldung(s: RundenStand, name: String) {
 private fun Ergebnis(
     s: RundenStand, name: String, muenzen: Int, nochmalMoeglich: Boolean, mitNote: Boolean,
     neueAbzeichen: List<String>, haustier: String?, onNochmal: () -> Unit, onFertig: () -> Unit,
+    naechsteTitel: String? = null, onNaechste: () -> Unit = {},
 ) {
     val ende = remember(s.richtig, s.aufgaben.size) { Lob.fuerEnde(s.richtig, s.aufgaben.size, name) }
     Column(
@@ -410,9 +421,23 @@ private fun Ergebnis(
             neueAbzeichen.forEach { Text(it, fontSize = 20.sp, color = Color.White, textAlign = TextAlign.Center) }
         }
         Spacer(Modifier.height(28.dp))
+        if (naechsteTitel != null) {
+            Button(onClick = onNaechste, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                Text("Nächste Übung: $naechsteTitel", fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            }
+            Spacer(Modifier.height(10.dp))
+        }
         if (nochmalMoeglich) {
-            Button(onClick = onNochmal, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                Text("Nochmal", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            if (naechsteTitel != null) {
+                OutlinedButton(
+                    onClick = onNochmal,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    border = BorderStroke(1.dp, Gelb),
+                ) { Text("Nochmal", fontSize = 18.sp, color = Gelb) }
+            } else {
+                Button(onClick = onNochmal, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                    Text("Nochmal", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                }
             }
             Spacer(Modifier.height(10.dp))
         }

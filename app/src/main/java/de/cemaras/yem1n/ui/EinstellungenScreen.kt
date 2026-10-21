@@ -133,6 +133,20 @@ fun EinstellungenScreen(vm: AppViewModel) {
             androidx.compose.material3.Switch(checked = vm.fortschritt.sparmodus, onCheckedChange = vm::setzeSparmodus)
         }
 
+        Abschnitt("Lernzeit")
+        val ctxZeit = androidx.compose.ui.platform.LocalContext.current
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Tägliche Erinnerung ans Üben", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.lernzeitAn, onCheckedChange = vm::setzeLernzeit)
+        }
+        if (vm.fortschritt.lernzeitAn) {
+            OutlinedButton(onClick = {
+                val m = vm.fortschritt.lernzeitMinuten
+                android.app.TimePickerDialog(ctxZeit, { _, h, min -> vm.setzeLernzeitUhrzeit(h * 60 + min) }, m / 60, m % 60, true).show()
+            }) { Text("Uhrzeit: ${de.cemaras.yem1n.logik.LernzeitErinnerung.uhrzeitText(vm.fortschritt.lernzeitMinuten)}") }
+            Text("Wer an dem Tag schon geübt hat, wird nicht erinnert.", color = TextSanft, fontSize = 13.sp)
+        }
+
         Abschnitt("Familie und Joker")
         val familie = vm.jokerCode
         Text(

@@ -78,6 +78,9 @@ data class Fortschritt(
     val jokerRolle: String = "kind",
     /** Fertige Anfragen an den Server (Rundenergebnisse), die noch nicht angekommen sind. Werden erneut geschickt. */
     val offeneErgebnisse: List<String> = emptyList(),
+    /** Tägliche Erinnerung ans Üben, mit Uhrzeit in Minuten seit Mitternacht (Standard 16:00). */
+    val lernzeitAn: Boolean = false,
+    val lernzeitMinuten: Int = 16 * 60,
 ) {
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =

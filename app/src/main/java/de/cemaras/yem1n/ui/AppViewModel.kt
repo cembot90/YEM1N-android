@@ -187,6 +187,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val schwach = (app.getSystemService(android.content.Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true
         de.cemaras.yem1n.ui.theme.Sparmodus.an = fortschritt.sparmodus || schwach
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
+        Erinnerung.planenLernzeit(app, fortschritt.lernzeitAn, fortschritt.lernzeitMinuten, fortschritt.rundenHeute(Tag.heute()) > 0)
         offeneErgebnisseSenden()
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
@@ -202,6 +203,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         fortschritt = neu
         speicher.speichereFortschritt(neu)
         Erinnerung.planen(getApplication(), neu.haustier, neu.haustierErinnerung)
+        Erinnerung.planenLernzeit(getApplication(), neu.lernzeitAn, neu.lernzeitMinuten, neu.rundenHeute(Tag.heute()) > 0)
         HaustierWidget.aktualisieren(getApplication(), neu)
     }
 
@@ -520,6 +522,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
 
+    fun setzeLernzeit(an: Boolean) = behalte(fortschritt.copy(lernzeitAn = an))
+
+    fun setzeLernzeitUhrzeit(minuten: Int) = behalte(fortschritt.copy(lernzeitMinuten = minuten.coerceIn(0, 24 * 60 - 1)))
+
     /** Nach der Frage nach der Erlaubnis noch einmal planen. */
     fun erinnerungNeuPlanen() {
         Erinnerung.planen(getApplication(), fortschritt.haustier, fortschritt.haustierErinnerung)
@@ -783,6 +789,30 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         haustierText = null
         neuePokale = emptyList()
         ansicht = Ansicht.Ueben(a.arbeit, uebung)
+    }
+
+    /**
+     * Die nächste Übung derselben Arbeit: bevorzugt eine, die noch nicht geübt wurde, sonst einfach die folgende.
+     * Null im Fehlerheft, in der Probearbeit und bei der letzten Übung.
+     */
+    val naechsteUebung: Pair<Int, Uebung>?
+        get() {
+            val a = ansicht as? Ansicht.Ueben ?: return null
+            if (imSonder) return null
+            val arbeit = aktuelleArbeit ?: return null
+            val danach = arbeit.uebungen.withIndex().filter { it.index > a.uebung }
+            val wahl = danach.firstOrNull { fortschritt.stand(arbeit.schluessel, it.value.titel).beste == 0 } ?: danach.firstOrNull()
+            return wahl?.let { it.index to it.value }
+        }
+
+    fun startNaechsteUebung() {
+        val a = ansicht as? Ansicht.Ueben ?: return
+        val (index, u) = naechsteUebung ?: return
+        runde = Runde.start(u.aufgaben)
+        verdient = 0
+        haustierText = null
+        neuePokale = emptyList()
+        ansicht = Ansicht.Ueben(a.arbeit, index)
     }
 
     /** Dieselbe Übung noch einmal von vorn. */

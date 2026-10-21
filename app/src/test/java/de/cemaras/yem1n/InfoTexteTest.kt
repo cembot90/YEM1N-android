@@ -13,7 +13,7 @@ class InfoTexteTest {
 
     @Test
     fun keineGedankenstriche() {
-        alle.forEach { assertFalse(it, it.contains('–') || it.contains('—')) }
+        alle.forEach { assertFalse(it, it.contains(0x2013.toChar()) || it.contains(0x2014.toChar())) }
     }
 
     @Test

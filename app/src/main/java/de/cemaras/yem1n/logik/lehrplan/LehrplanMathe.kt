@@ -502,7 +502,7 @@ object LehrplanMathe {
     fun uhrzeit(minuten: Int): String {
         val h = (minuten / 60) % 24
         val m = minuten % 60
-        return "%d:%02d".format(h, m)
+        return String.format(java.util.Locale.ROOT, "%d:%02d", h, m)
     }
 
     fun zeitspanne(): LernAufgabe {

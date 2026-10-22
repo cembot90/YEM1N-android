@@ -4,6 +4,7 @@ import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.Aufgabe
 import de.cemaras.yem1n.daten.Uebung
 import de.cemaras.yem1n.logik.lehrplan.LehrplanMathe
+import de.cemaras.yem1n.logik.lehrplan.LehrplanMatheMehr
 import kotlin.random.Random
 
 // Lernwelt: fertige Aufgaben nach dem Lehrplan. Port von Lehrplan.swift der iOS-App.
@@ -57,6 +58,9 @@ data class LernAufgabe(
         folge = emptyList(), optionen = optionen,
     )
 }
+
+/** Dieselbe Aufgabe mit einem Bild darüber, siehe AufgabenBild. */
+fun LernAufgabe.mitBild(bild: String): LernAufgabe = copy(bild = bild)
 
 class LernThema(
     val id: String,
@@ -249,7 +253,7 @@ object Lernwelt {
     const val ANZAHL = 10
 
     /** Einmal zusammengestellt und dann behalten. */
-    val themen: List<LernThema> by lazy { LehrplanMathe.themen }
+    val themen: List<LernThema> by lazy { LehrplanMathe.themen + LehrplanMatheMehr.themen }
 
     fun themenFuer(fach: LehrFach, klasse: Int, land: Bundesland): List<LernThema> =
         themen.filter { it.fach == fach && it.klasse(land) == klasse }

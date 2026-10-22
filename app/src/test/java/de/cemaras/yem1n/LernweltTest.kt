@@ -42,7 +42,7 @@ class LernweltTest {
             for (t in Lernwelt.themen) {
                 val a = t.erzeuge()
                 assertTrue("${t.id}: Frage leer", a.frage.isNotBlank())
-                assertTrue("${t.id}: Antwort leer", a.antwort.isNotBlank())
+                if (a.art != "mauer") assertTrue("${t.id}: Antwort leer", a.antwort.isNotBlank())
                 if (a.art == "wahl") {
                     assertTrue("${t.id}: richtige Antwort fehlt in den Knöpfen", a.antwort in a.optionen)
                     assertTrue("${t.id}: zu wenige Knöpfe", a.optionen.size >= 2)

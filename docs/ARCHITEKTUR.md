@@ -1,6 +1,6 @@
 # YEM1N Android: Architektur für IT-Leute
 
-Stand 22.10.2026. Zielgruppe: Entwickler und Administratoren, die das Projekt übernehmen, prüfen oder betreiben.
+Stand 22.10.2026 (abends). Zielgruppe: Entwickler und Administratoren, die das Projekt übernehmen, prüfen oder betreiben.
 
 ## 1. Überblick
 
@@ -44,6 +44,8 @@ iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
 - Lesen: `speicher/CloudClient.kt`, `logik/JokerCloud.kt`, `logik/CloudKit.kt`. Token ist ein reiner Lese-Token.
 - Schreiben: `speicher/ServerClient.kt` und `logik/ServerAnfrage.kt` an den Worker (`server/src/index.js`). Der Worker signiert gegen CloudKit (`cloudkit.js`), begrenzt Anfragen (`limit.js`), prüft Regeln (`regeln.js`) und verschickt Push (`fcm.js`, `mitteilungen.js`).
 - Records, die der Server schreibt, gehören dem Entwickler. iOS kann sie lesen und neue anlegen, aber nicht ändern. Darum sind alle geteilten Typen "nur neu anlegen": Joker, Antworten, Daumen, Ergebnisse, Duell, DuellAntwort, JokerNachschub, JokerFreigabe.
+- Klassencode (`logik/Klassensiegel.kt`, `logik/KlassenAdmin.kt`, `server/src/klasse.js`): Pakete einer Klasse liegen als `Lernpaket` mit Familiencode `K-XXXXX-XXXXX` in CloudKit. Jedes Paket trägt eine Ed25519-Unterschrift über `K-CODE|<json>`. Der öffentliche Schlüssel liegt als `KlassenSchluessel` (`klassenkey-K-CODE`). Empfänger merken sich den Schlüssel beim ersten Mal und lehnen einen anderen ab. Der Admin erzeugt den Schlüssel auf dem Gerät (privater Teil bleibt im `Fortschritt`, nie im Netz). Der Server (`POST /v1/klasse`, Arten `schluessel`, `paket`, `loeschen`) schreibt ein Paket nur, wenn die Unterschrift zum gespeicherten Schlüssel passt (WebCrypto Ed25519), und legt einen vorhandenen Schlüssel nie neu an. Paketnamen und Unterschriftsformat sind gleich wie bei iOS.
+- Seitenabfrage: `JokerCloud.alleSeiten` folgt dem `continuationMarker` von CloudKit (bis zu 10 Seiten à 200 Ergebnisse).
 - Familiencode `XXXXX-XXXXX` (`Familiencode`), QR `yem1n://familie/CODE`. Er ist der einzige Schlüssel zur Familie. Wer ihn kennt, sieht deren Daten (Grenze des Modells, siehe Risiken).
 - Schema: `cloud/schema.ckdb`. Details: `cloud/SERVER-KONZEPT.md`, `cloud/CLOUDKIT-ANDROID.md`.
 - Haustier und Pakete bleiben je System getrennt (kein Schreiben ohne Eigentümer).
@@ -55,9 +57,13 @@ iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
 - Kein Tracking, keine Werbung, kein Firebase außer als Postbote.
 - Natürliche Stimmen werden einmal geladen (GitHub-Release `stimmen-1`, SHA-256 fest im Code) und laufen danach offline.
 
+## 5a. KI auf dem Gerät
+
+`speicher/KiText.kt` nutzt Gemini Nano über ML Kit GenAI Prompt API (Beta, Android 8 oder neuer, nur auf unterstützten Geräten, `tools:overrideLibrary` im Manifest, weil die App ab Android 7 läuft). `logik/KiPrompt.kt` baut den Auftrag und prüft die Antwort: leer, zu lang oder mit neuen Zahlen wird verworfen, dann gilt der feste Satz aus `FehlerAnalyse`. Es geht nichts ins Internet. Fehlt das Modell, startet einmal ein Hintergrund-Download.
+
 ## 6. Hintergrundarbeit
 
-`speicher/Erinnerung.kt` plant Alarme mit `setAndAllowWhileIdle` (Request-Codes 17 Haustier, 18 Lernzeit, 19 Wochenbericht Sonntag). Ein `BroadcastReceiver` zeigt die Mitteilung. Mitteilungsrecht ab Android 13 wird erfragt. Das Widget (`HaustierWidget`) zeigt Haustier und Serie.
+`speicher/Erinnerung.kt` plant Alarme mit `setAndAllowWhileIdle` (Request-Codes 17 Haustier, 18 Lernzeit, 19 Wochenbericht Sonntag). Ein `BroadcastReceiver` zeigt die Mitteilung. Mitteilungsrecht ab Android 13 wird erfragt. Das Haustier schläft von 20 bis 7 Uhr (`HaustierZeit`). Das Widget (`HaustierWidget`) zeigt Haustier und Serie.
 
 ## 7. Bauen, Testen, Ausliefern
 
@@ -71,12 +77,13 @@ iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
 
 | Thema | Stand |
 | --- | --- |
-| Production-Schlüssel | Test läuft noch mit Development-Umgebung, Wechsel auf Production offen |
-| Mehr als 300 Ergebnisse | keine Seitenabfrage |
+| Production-Schlüssel | App und Server laufen auf Production (Schlüssel in Development gelöscht, 22.10.2026) |
 | Mitteilungen | Worker fragt jede Minute, ausgelegt für etwa 5 Familien (Free-Tarif Cloudflare) |
 | Familiencode | Geheimnis ohne Konto. Rate-Limit im Worker, aber kein Schutz gegen Weitergabe |
-| Klassencode mit Unterschrift | nicht umgesetzt, bräuchte Signatur im Worker |
-| KI-Erklärung | nicht umgesetzt, Android hat kein Gegenstück zur Geräte-KI |
+| Klassencode | Admin-Schlüssel liegt nur auf einem Gerät. Geht das Gerät verloren, braucht die Klasse einen neuen Klassencode (kein Schlüsselwechsel) |
+| KI-Erklärung | Beta-Schnittstelle von Google, nur auf unterstützten Geräten, sonst feste Sätze |
+| Löschen in der Cloud | Server-Datensätze gehören dem Entwickler, Löschung nur auf Anfrage über das CloudKit-Dashboard |
+| Release mit R8 | Keep-Regeln in `app/proguard-rules.pro`, vor dem Store-Upload auf einem echten Gerät prüfen |
 | Stift und Handschrift | nicht umgesetzt |
 | Lizenz | GPL-3.0 verlangt Quelltext bei Weitergabe der App |
 
@@ -86,3 +93,7 @@ iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
 2. Neue Aufgabenart: `daten/Paket.kt`, `logik/Pruefer.kt`, Eingabe in `ui/UebenScreen.kt`.
 3. Neues Lernthema: `logik/lehrplan/*` ergänzen, `Lernwelt.themen` erweitern, Test in `LernweltTest`.
 4. Neuer geteilter Record: `cloud/schema.ckdb`, Regel in `server/src/regeln.js`, Client in `logik/JokerCloud.kt`.
+
+## 10. Dokumentation pflegen
+
+Bei jeder Funktionsänderung mitziehen: `CLAUDE.md` (Stand), `docs/ARCHITEKTUR.md` (Technik), `docs/ELTERNANLEITUNG.md` (Bedienung für Eltern), `daten/InfoTexte.kt` (Kurzanleitung und Datenschutz in der App), `store/VEROEFFENTLICHUNG.md` (Data Safety), Testliste im Claude-Projekt. Neue Daten, die ins Netz gehen, brauchen immer eine Anpassung des Datenschutztexts und der Einwilligung.

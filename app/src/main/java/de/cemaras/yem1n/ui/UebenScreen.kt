@@ -394,15 +394,29 @@ private fun Rueckmeldung(s: RundenStand, name: String, vm: AppViewModel) {
         }
         if (stand == Stand.FALSCH && aufgabe != null && ErklaerFreund.lohntSich(aufgabe, gegeben)) {
             Spacer(Modifier.height(10.dp))
-            EuleErklaert(ErklaerFreund.satz(aufgabe, gegeben), s.index) { vm.sprecher.sprich(it) }
+            EuleErklaert(aufgabe, gegeben, s.index) { vm.sprecher.sprich(it) }
         }
     }
 }
 
-/** Der Knopf "Warum war das falsch?" und danach der Satz der Eule. */
+/** Der Knopf "Warum war das falsch?" und danach der Satz der Eule, wenn möglich von der KI auf dem Gerät umformuliert. */
 @Composable
-private fun EuleErklaert(satz: String, schluessel: Int, vorlesen: (String) -> Unit) {
+private fun EuleErklaert(aufgabe: de.cemaras.yem1n.daten.Aufgabe, gegeben: String, schluessel: Int, vorlesen: (String) -> Unit) {
     var offen by remember(schluessel) { mutableStateOf(false) }
+    var text by remember(schluessel) { mutableStateOf<String?>(null) }
+    var vonKi by remember(schluessel) { mutableStateOf(false) }
+    LaunchedEffect(offen, schluessel) {
+        if (!offen) return@LaunchedEffect
+        val ersatz = ErklaerFreund.satz(aufgabe, gegeben)
+        val grund = ErklaerFreund.befund(aufgabe, gegeben) != null
+        val fakten = de.cemaras.yem1n.logik.KiPrompt.fakten(aufgabe.rechnung, gegeben, ErklaerFreund.loesung(aufgabe), ersatz)
+        val roh = de.cemaras.yem1n.speicher.KiText.formuliere(
+            de.cemaras.yem1n.logik.KiPrompt.prompt(de.cemaras.yem1n.logik.KiPrompt.anweisung(grund), fakten),
+        )
+        val (t, ki) = de.cemaras.yem1n.logik.KiPrompt.pruefe(roh, listOf(aufgabe.rechnung, gegeben, ErklaerFreund.loesung(aufgabe), ersatz), ersatz)
+        text = t
+        vonKi = ki
+    }
     if (!offen) {
         Text(
             "🦉 Warum war das falsch?", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Gelb,
@@ -417,12 +431,20 @@ private fun EuleErklaert(satz: String, schluessel: Int, vorlesen: (String) -> Un
             Text("🦉", fontSize = 30.sp)
             Spacer(Modifier.width(10.dp))
             Column {
-                Text(satz, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "🔊 Vorlesen", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Gelb,
-                    modifier = Modifier.clickable { vorlesen(satz) },
-                )
+                val t = text
+                if (t == null) {
+                    Text("Die Eule denkt nach ...", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                } else {
+                    Text(t, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Spacer(Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Text(
+                            "🔊 Vorlesen", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Gelb,
+                            modifier = Modifier.clickable { vorlesen(t) },
+                        )
+                        if (vonKi) Text("✨ von der KI auf diesem Gerät", fontSize = 12.sp, color = TextSanft)
+                    }
+                }
             }
         }
     }

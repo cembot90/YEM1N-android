@@ -88,13 +88,16 @@ Sprachen sind ein eigener Bereich (`ui/SprachenScreen.kt`, `logik/Sprachen.kt`):
 Klassencode ist da (Einstellungen > Familie und Cloud): Pakete der Klasse holen, Ed25519-Unterschrift prüfen (`logik/Klassensiegel.kt`, Schlüssel wird beim ersten Mal gemerkt). Nur Empfangen, Senden als Admin gibt es auf Android nicht.
 KI-Satz beim Erklär-Freund mit Gemini Nano über ML Kit GenAI (`speicher/KiText.kt`, `logik/KiPrompt.kt`, Beta, nur auf unterstützten Geräten, sonst feste Sätze, Zahlen werden geprüft).
 Hauptmenü wie iOS (Kopf mit Knöpfen, Lernwelt, Extra, Mehr, Arbeiten nach Klasse und Fach), Einstellungen in sechs Gruppen. Sprachen mit Karteikasten (`logik/Karteikasten.kt`), Wiederholen und Elternbericht.
-Noch nicht von iOS übernommen: Stift und Handschrift (bewusst nicht), Klassencode als Admin (Pakete unterschreiben und senden), Sprachen: Tippen der Antworten und Auswahl der Lernsprachen.
-Noch offen in der Cloud: Wechsel der Production-Schlüssel nach dem Test, Seiten für mehr als 300 Ergebnisse.
+Noch nicht von iOS übernommen: Stift und Handschrift (bewusst nicht).
+Klassencode als Admin ist da (`logik/KlassenAdmin.kt`, Server `server/src/klasse.js`, Route `/v1/klasse`: Schlüssel anlegen, Pakete unterschreiben, senden, löschen; der Server prüft die Unterschrift). Nach Änderungen im `server/` muss Cem mit `npx wrangler deploy` neu veröffentlichen.
+Sprachen: Tippen der Antworten (mit Sonderzeichen) und Auswahl der Lernsprachen sind da. Ergebnisse werden seitenweise geholt (`JokerCloud.alleSeiten`). Production-Schlüssel sind umgestellt (Development gelöscht).
+Datenschutztext (`daten/InfoTexte.kt`) und `store/VEROEFFENTLICHUNG.md` beschreiben die Cloud mit Einwilligung. R8 ist im Release an (`app/proguard-rules.pro`), Cem testet vor dem Store-Upload ein signiertes Release.
+Dokumentation pflegen: bei jeder Funktionsänderung `CLAUDE.md`, `docs/ARCHITEKTUR.md`, `docs/ELTERNANLEITUNG.md`, `InfoTexte.kt`, `store/VEROEFFENTLICHUNG.md` und die Testliste im Claude-Projekt mitziehen.
 
 ## Designüberarbeitung (begonnen)
 
 Schon da: Glas-Karten als Verlauf mit feiner Kante (`ui/theme/Glas.kt`, ohne echte Unschärfe, weil das auf Kinder-Tablets zu viel Leistung braucht), Lichtflecken im Hintergrund, federnde Karten auf dem Startbildschirm, Fortschrittsring für das Tagesziel, Sparmodus (Schalter in den Einstellungen, an bei schwachen Geräten).
-Noch offen: Federn und Ringe auch in den übrigen Bildschirmen.
+Federn und Ringe sind in Start, Sprachen und Lernwelt da. Noch offen: übrige Bildschirme (Haustier, Erfolge, Einstellungen).
 
 Ursprünglicher Plan:
 

@@ -84,7 +84,8 @@ Die CloudKit-Typen `JokerNachschub` und `JokerFreigabe` legt iOS selbst an (`anz
 Einwilligung der Eltern vor dem Familiencode (`logik/Einwilligung.kt`), ohne sie geht nichts in die Cloud. QR-Code für den Familiencode (zeigen und scannen, Format `yem1n://familie/CODE`).
 Meilenstein 7 (Lernwelt): Aufgaben nach dem Lehrplan für Hessen, Bayern und NRW, Klassen 1 bis 4, Fächer Mathe, Deutsch, Englisch, Musik, Kunst, dazu Türkisch und Italienisch als Extras aus dem Sprachkatalog (`app/src/main/resources/sprachkatalog.json`, Wörter anhören und erkennen). Themen stehen in `logik/lehrplan/`, Bilder in `ui/AufgabenBild.kt`, Sterne je Thema bleiben erhalten. Bundesland und Klasse stellt man in der Lernwelt ein.
 Meilenstein 8 (Erklären): Erklär-Freund (nach einer falschen Antwort "Warum war das falsch?", feste Sätze aus `logik/FehlerAnalyse.kt`, keine KI), Olli die Eule beim Haustier (`logik/Eule.kt`, Einführung und Tipps), Rechenweg als Bild (`logik/ErklaerBild.kt`, `ui/ErklaerBildView.kt`). Unter Einstellungen > Bereiche lassen sich Vorschule und Sprachen ausblenden.
-Noch nicht von iOS übernommen: Stift und Handschrift, Klassencode mit Unterschrift, Sprachen als eigener Bereich mit Karten, Paaren und Bericht (nur die Lernwelt-Version ist da), KI-Formulierung beim Erklär-Freund, Schlaf des Haustiers von 20 bis 7 Uhr, Sonntagserinnerung zum Wochenbericht.
+Sprachen sind ein eigener Bereich (`ui/SprachenScreen.kt`, `logik/Sprachen.kt`): Karten, Paare, Fragen aus der Lernwelt. Haustier schläft von 20 bis 7 Uhr, Sonntagserinnerung zum Wochenbericht ist da.
+Noch nicht von iOS übernommen: Stift und Handschrift, Klassencode mit Unterschrift (braucht Signatur über den Server), KI-Formulierung beim Erklär-Freund (auf Android gibt es keine Apple-Intelligence, es bleiben feste Sätze).
 Noch offen in der Cloud: Wechsel der Production-Schlüssel nach dem Test, Seiten für mehr als 300 Ergebnisse.
 
 ## Designüberarbeitung (begonnen)

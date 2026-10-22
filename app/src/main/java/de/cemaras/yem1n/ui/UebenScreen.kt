@@ -50,6 +50,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.cemaras.yem1n.daten.Aufgabe
+import de.cemaras.yem1n.logik.ErklaerFreund
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.Mauer
 import de.cemaras.yem1n.logik.RundenStand
@@ -192,7 +195,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         }
 
         if (s.bewertet) {
-            Rueckmeldung(s, vm.fortschritt.name)
+            Rueckmeldung(s, vm.fortschritt.name, vm)
         } else {
             Eingabe(a, e1, e2, fokus, { e1 = it }, { e2 = it }, vm)
         }
@@ -349,7 +352,7 @@ private fun Zahlenmauer(a: Aufgabe, s: RundenStand) {
 }
 
 @Composable
-private fun Rueckmeldung(s: RundenStand, name: String) {
+private fun Rueckmeldung(s: RundenStand, name: String, vm: AppViewModel) {
     val stand = s.staende[s.index]
     val farbe = when (stand) {
         Stand.RICHTIG -> Mint
@@ -376,6 +379,41 @@ private fun Rueckmeldung(s: RundenStand, name: String) {
         if (s.erklaerung.isNotEmpty()) {
             Spacer(Modifier.height(6.dp))
             Text(s.erklaerung, fontSize = 18.sp, color = Color.White, textAlign = TextAlign.Center)
+        }
+        val aufgabe = s.aktuell
+        val gegeben = s.gegeben.getOrNull(s.index).orEmpty()
+        if (stand == Stand.FALSCH && aufgabe != null && ErklaerFreund.lohntSich(aufgabe, gegeben)) {
+            Spacer(Modifier.height(10.dp))
+            EuleErklaert(ErklaerFreund.satz(aufgabe, gegeben), s.index) { vm.sprecher.sprich(it) }
+        }
+    }
+}
+
+/** Der Knopf "Warum war das falsch?" und danach der Satz der Eule. */
+@Composable
+private fun EuleErklaert(satz: String, schluessel: Int, vorlesen: (String) -> Unit) {
+    var offen by remember(schluessel) { mutableStateOf(false) }
+    if (!offen) {
+        Text(
+            "🦉 Warum war das falsch?", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Gelb,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(Gelb.copy(alpha = 0.15f))
+                .clickable { offen = true }
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+        )
+    } else {
+        Row(verticalAlignment = Alignment.Top) {
+            Text("🦉", fontSize = 30.sp)
+            Spacer(Modifier.width(10.dp))
+            Column {
+                Text(satz, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "🔊 Vorlesen", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Gelb,
+                    modifier = Modifier.clickable { vorlesen(satz) },
+                )
+            }
         }
     }
 }

@@ -40,6 +40,8 @@ import de.cemaras.yem1n.logik.ProblemAufgabe
 import de.cemaras.yem1n.logik.RundenErgebnisEintrag
 import de.cemaras.yem1n.logik.Schwaeche
 import de.cemaras.yem1n.logik.Tag
+import de.cemaras.yem1n.logik.KindBericht
+import de.cemaras.yem1n.logik.Wochenbericht
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Mint
@@ -94,6 +96,7 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
             Kennzahl2("${u.sterne} ⭐", "Sterne")
         }
 
+        BerichtKarte(Wochenbericht.berichte(alle))
         val imZeitraum = AntwortProtokoll.imZeitraum(liste, tage, Tag.heute())
         RadarKarte(imZeitraum, tage) { tage = it }
         ProblemKarte(AntwortProtokoll.problemAufgaben(imZeitraum))
@@ -261,5 +264,27 @@ private fun ZuletztKarte(kinder: List<Pair<String, Long>>, format: SimpleDateFor
                 Text("zuletzt geübt " + format.format(Date(zeit)), color = TextSanft, fontSize = 13.sp)
             }
         }
+    }
+}
+
+@Composable
+private fun BerichtKarte(berichte: List<KindBericht>) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text("Wochenbericht", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Gelb)
+        berichte.forEach { b ->
+            if (b.name.isNotEmpty()) Text("⭐ ${b.name}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text(Wochenbericht.text(b), color = Color.White, fontSize = 14.sp)
+        }
+        OutlinedButton(onClick = {
+            val senden = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(android.content.Intent.EXTRA_TEXT, Wochenbericht.gesamtText(berichte))
+            }
+            ctx.startActivity(android.content.Intent.createChooser(senden, "Wochenbericht teilen"))
+        }) { Text("Teilen", color = Color.White) }
     }
 }

@@ -205,6 +205,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         de.cemaras.yem1n.ui.theme.Sparmodus.an = fortschritt.sparmodus || schwach
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
         Erinnerung.planenLernzeit(app, fortschritt.lernzeitAn, fortschritt.lernzeitMinuten, fortschritt.rundenHeute(Tag.heute()) > 0)
+        Erinnerung.planenBericht(app, fortschritt.wochenberichtAn && fortschritt.jokerRolle == "eltern")
         offeneErgebnisseSenden()
         Mitteilungen.kanalAnlegen(app)
         if (fortschritt.duellGeraet.isEmpty()) behalte(fortschritt.copy(duellGeraet = java.util.UUID.randomUUID().toString()))
@@ -224,6 +225,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         speicher.speichereFortschritt(neu)
         Erinnerung.planen(getApplication(), neu.haustier, neu.haustierErinnerung)
         Erinnerung.planenLernzeit(getApplication(), neu.lernzeitAn, neu.lernzeitMinuten, neu.rundenHeute(Tag.heute()) > 0)
+        Erinnerung.planenBericht(getApplication(), neu.wochenberichtAn && neu.jokerRolle == "eltern")
         HaustierWidget.aktualisieren(getApplication(), neu)
     }
 
@@ -719,6 +721,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun euleEinfuehrungGesehen() = behalte(fortschritt.copy(euleEinfuehrung = true))
 
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
+
+    fun setzeWochenbericht(an: Boolean) = behalte(fortschritt.copy(wochenberichtAn = an))
 
     fun setzeLernzeit(an: Boolean) = behalte(fortschritt.copy(lernzeitAn = an))
 

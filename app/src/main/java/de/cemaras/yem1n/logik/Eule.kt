@@ -27,10 +27,10 @@ object Eule {
     }
 
     /** Alle Tipps, die gerade passen: zuerst die zur Lage, dann allgemeine. */
-    fun tipps(h: Haustier, muenzen: Int, familie: Boolean, heute: Long): List<String> =
-        (lageTipps(h, muenzen, heute) + allgemeineTipps(h, familie)).distinct()
+    fun tipps(h: Haustier, muenzen: Int, familie: Boolean, heute: Long, schlaeft: Boolean = false): List<String> =
+        (lageTipps(h, muenzen, heute, schlaeft) + allgemeineTipps(h, familie)).distinct()
 
-    fun lageTipps(h: Haustier, muenzen: Int, heute: Long): List<String> {
+    fun lageTipps(h: Haustier, muenzen: Int, heute: Long, schlaeft: Boolean = false): List<String> {
         val n = h.name
         val t = mutableListOf<String>()
         val geschenk = "Hol dir dein Tagesgeschenk ab: ${Haustier.GESCHENK_MUENZEN} Münzen warten auf dich."
@@ -38,6 +38,9 @@ object Eule {
             t += "Übe eine Runde, dann schlüpft $n. Ich bin schon ganz gespannt!"
             if (h.geschenkOffen(heute)) t += geschenk
             return t
+        }
+        if (schlaeft) {
+            t += "Pssst, $n schläft. Ab ${HaustierZeit.WACH_AB} Uhr ist es wieder wach. Üben kannst du trotzdem, dann ist es morgen satt."
         }
         when (h.stimmung) {
             HaustierStimmung.HUNGRIG -> t += "$n hat Hunger. Eine Runde üben macht es satt, ganz ohne Münzen."
@@ -80,8 +83,10 @@ object Eule {
         HaustierHut.alle.filter { it.id !in h.huete && it.preis <= muenzen }.minByOrNull { it.preis }
 
     /** Was das Tier beim Antippen sagt. [nummer] zählt mit, damit nicht immer dasselbe kommt. */
-    fun antippen(h: Haustier, nummer: Int): String {
-        val liste = if (h.stufe == HaustierStufe.EI) listOf(
+    fun antippen(h: Haustier, nummer: Int, schlaeft: Boolean = false): String {
+        val liste = if (h.stufe != HaustierStufe.EI && schlaeft) listOf(
+            "Zzz ... nur noch fünf Minuten ...", "Schnarch ... Zzz ...", "Mmh ... ich träume von dir ... Zzz ...",
+        ) else if (h.stufe == HaustierStufe.EI) listOf(
             "Klopf, klopf! Bald bin ich da.", "Hier drin ist es warm und kuschelig.",
             "Ich höre dich! Üb eine Runde, dann komme ich raus.",
         ) else when (h.stimmung) {

@@ -73,6 +73,8 @@ data class Fortschritt(
     /** Version der Einwilligung für die Cloud und der Zeitpunkt (Millisekunden), 0 heißt: nicht erteilt. */
     val einwilligung: Int = 0,
     val einwilligungDatum: Long = 0,
+    /** Eltern: Sonntag um 18 Uhr an den Wochenbericht erinnern. */
+    val wochenberichtAn: Boolean = false,
     /** Bereiche, die Eltern ausblenden können. */
     val vorschulAn: Boolean = true,
     val sprachenAn: Boolean = true,

@@ -206,3 +206,17 @@ data class Haustier(
         }
     }
 }
+
+/** Ab 20 Uhr schläft das Tier, ab 7 Uhr ist es wieder wach. */
+object HaustierZeit {
+    const val SCHLAFEN_AB = 20
+    const val WACH_AB = 7
+
+    fun schlaeft(stunde: Int): Boolean = stunde >= SCHLAFEN_AB || stunde < WACH_AB
+
+    fun schlaeftJetzt(jetzt: Long = System.currentTimeMillis(), zone: java.util.TimeZone = java.util.TimeZone.getDefault()): Boolean {
+        val k = java.util.Calendar.getInstance(zone)
+        k.timeInMillis = jetzt
+        return schlaeft(k.get(java.util.Calendar.HOUR_OF_DAY))
+    }
+}

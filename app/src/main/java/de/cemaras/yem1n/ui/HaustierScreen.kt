@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +52,7 @@ import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.logik.HaustierArt
 import de.cemaras.yem1n.logik.HaustierHut
 import de.cemaras.yem1n.logik.HaustierStufe
+import de.cemaras.yem1n.logik.HaustierZeit
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
@@ -150,8 +152,9 @@ private fun HaustierStall(vm: AppViewModel, tier: Haustier) {
     ) {
         Text(tier.name, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
         Text("${tier.stufe.titel} ${tier.stimmung.emoji}", color = Gelb, fontWeight = FontWeight.Bold)
-        OlliBlase(vm, tier, muenzen, heute)
-        Tierbild(tier)
+        val schlaeft = tier.stufe != HaustierStufe.EI && HaustierZeit.schlaeftJetzt()
+        OlliBlase(vm, tier, muenzen, heute, schlaeft)
+        Tierbild(tier, schlaeft)
         val weiter = tier.stufe.naechste
         if (weiter != null) {
             Column(Modifier.fillMaxWidth()) {
@@ -214,16 +217,17 @@ private fun HaustierStall(vm: AppViewModel, tier: Haustier) {
 }
 
 @Composable
-private fun Tierbild(tier: Haustier) {
+private fun Tierbild(tier: Haustier, schlaeft: Boolean = false) {
     val wippen = rememberInfiniteTransition(label = "wippen")
     val hoch by wippen.animateFloat(
-        initialValue = 0f, targetValue = -10f,
+        initialValue = 0f, targetValue = if (schlaeft) 0f else -10f,
         animationSpec = infiniteRepeatable(tween(if (tier.stimmung.name == "FROH") 500 else 1400, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "hoch",
     )
     val groesse = tier.stufe.groesse
     Box(Modifier.height((groesse + 40).dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Text(tier.emoji, fontSize = groesse.sp, modifier = Modifier.offset(y = hoch.dp))
+        Text(tier.emoji, fontSize = groesse.sp, modifier = Modifier.offset(y = hoch.dp).alpha(if (schlaeft) 0.6f else 1f))
+        if (schlaeft) Text("💤", fontSize = (groesse * 0.4f).sp, modifier = Modifier.offset(x = (groesse * 0.5f).dp, y = (-groesse * 0.4f).dp))
         val hut = HaustierHut.finde(tier.hut)
         if (hut != null && tier.stufe != HaustierStufe.EI) {
             Text(hut.emoji, fontSize = (groesse * 0.45f).sp, modifier = Modifier.offset(y = (hoch - groesse * 0.45f).dp))
@@ -306,12 +310,12 @@ private fun Hutladen(vm: AppViewModel, tier: Haustier) {
 
 /** Olli erklärt beim ersten Besuch das Haustier, danach gibt sie Tipps. Antippen zeigt den nächsten. */
 @Composable
-private fun OlliBlase(vm: AppViewModel, tier: Haustier, muenzen: Int, heute: Long) {
+private fun OlliBlase(vm: AppViewModel, tier: Haustier, muenzen: Int, heute: Long, schlaeft: Boolean) {
     val einfuehrung = remember(tier.name, tier.stufe == HaustierStufe.EI) { Eule.einfuehrung(tier) }
     var schritt by remember { mutableStateOf(if (vm.fortschritt.euleEinfuehrung) -1 else 0) }
     var nummer by remember { mutableStateOf(0) }
-    val tipps = remember(tier, muenzen, heute, vm.fortschritt.familiencode) {
-        Eule.tipps(tier, muenzen, vm.fortschritt.familiencode.isNotEmpty(), heute)
+    val tipps = remember(tier, muenzen, heute, vm.fortschritt.familiencode, schlaeft) {
+        Eule.tipps(tier, muenzen, vm.fortschritt.familiencode.isNotEmpty(), heute, schlaeft)
     }
     val text = if (schritt >= 0) einfuehrung[schritt] else tipps[Math.floorMod(nummer, tipps.size)]
     Column(horizontalAlignment = Alignment.CenterHorizontally) {

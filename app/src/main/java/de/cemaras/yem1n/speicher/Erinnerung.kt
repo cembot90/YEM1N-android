@@ -15,6 +15,7 @@ import de.cemaras.yem1n.MainActivity
 import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.logik.HaustierErinnerung
 import de.cemaras.yem1n.logik.LernzeitErinnerung
+import de.cemaras.yem1n.logik.WochenberichtErinnerung
 
 /** Plant die Haustier-Erinnerung und zeigt sie an. Nichts davon verlässt das Gerät. */
 object Erinnerung {
@@ -22,6 +23,7 @@ object Erinnerung {
     private const val ANFRAGE = 17
     private const val KANAL_LERNZEIT = "lernzeit"
     private const val ANFRAGE_LERNZEIT = 18
+    private const val ANFRAGE_BERICHT = 19
 
     private fun alarm(ctx: Context) = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -70,14 +72,33 @@ object Erinnerung {
         }
     }
 
+    private fun berichtAbsicht(ctx: Context): PendingIntent {
+        val i = Intent(ctx, ErinnerungEmpfaenger::class.java)
+            .putExtra("titel", WochenberichtErinnerung.TITEL).putExtra("text", WochenberichtErinnerung.TEXT).putExtra("art", "bericht")
+        return PendingIntent.getBroadcast(ctx, ANFRAGE_BERICHT, i, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    /** Plant die Erinnerung für den nächsten Sonntag um 18 Uhr, oder nimmt sie weg. */
+    fun planenBericht(ctx: Context, an: Boolean, jetzt: Long = System.currentTimeMillis()) {
+        try {
+            val a = alarm(ctx)
+            a.cancel(berichtAbsicht(ctx))
+            if (!an || !erlaubt(ctx)) return
+            a.setAndAllowWhileIdle(AlarmManager.RTC, WochenberichtErinnerung.zeitpunkt(jetzt), berichtAbsicht(ctx))
+        } catch (e: Exception) {
+            // Ohne Erinnerung läuft die App ganz normal weiter.
+        }
+    }
+
     internal fun zeigen(ctx: Context, titel: String, text: String, art: String = "haustier") {
         if (!erlaubt(ctx) || titel.isEmpty()) return
         val lernzeit = art == "lernzeit"
-        val kanal = if (lernzeit) KANAL_LERNZEIT else KANAL
+        val bericht = art == "bericht"
+        val kanal = if (lernzeit) KANAL_LERNZEIT else if (bericht) "bericht" else KANAL
         val zentrale = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= 26) {
             zentrale.createNotificationChannel(
-                NotificationChannel(kanal, if (lernzeit) "Lernzeit" else "Haustier", NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(kanal, if (lernzeit) "Lernzeit" else if (bericht) "Wochenbericht" else "Haustier", NotificationManager.IMPORTANCE_DEFAULT),
             )
         }
         val oeffnen = PendingIntent.getActivity(
@@ -90,12 +111,14 @@ object Erinnerung {
             .setAutoCancel(true)
             .setContentIntent(oeffnen)
             .build()
-        zentrale.notify(if (lernzeit) ANFRAGE_LERNZEIT else ANFRAGE, n)
+        zentrale.notify(if (lernzeit) ANFRAGE_LERNZEIT else if (bericht) ANFRAGE_BERICHT else ANFRAGE, n)
     }
 }
 
 class ErinnerungEmpfaenger : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        // Der Sonntagsalarm plant sich selbst für die nächste Woche neu.
+        if (intent.getStringExtra("art") == "bericht") Erinnerung.planenBericht(context, true)
         Erinnerung.zeigen(
             context, intent.getStringExtra("titel").orEmpty(), intent.getStringExtra("text").orEmpty(),
             intent.getStringExtra("art") ?: "haustier",

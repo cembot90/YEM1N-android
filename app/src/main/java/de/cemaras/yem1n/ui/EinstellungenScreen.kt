@@ -157,6 +157,13 @@ fun EinstellungenScreen(vm: AppViewModel) {
             Text("Wer an dem Tag schon geübt hat, wird nicht erinnert.", color = TextSanft, fontSize = 13.sp)
         }
 
+        if (vm.fortschritt.jokerRolle == "eltern") {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Sonntags um 18 Uhr an den Wochenbericht erinnern", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+                androidx.compose.material3.Switch(checked = vm.fortschritt.wochenberichtAn, onCheckedChange = vm::setzeWochenbericht)
+            }
+        }
+
         Abschnitt("Familie und Joker")
         Text("Einwilligung: ${de.cemaras.yem1n.logik.Einwilligung.datumText(vm.fortschritt.einwilligungDatum)}", color = TextSanft, fontSize = 13.sp)
         if (!vm.einwilligungOffen) {

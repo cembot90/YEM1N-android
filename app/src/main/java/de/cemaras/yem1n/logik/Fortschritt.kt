@@ -80,6 +80,10 @@ data class Fortschritt(
     val sprachenAn: Boolean = true,
     /** Olli hat dem Kind das Haustier schon erklärt. */
     val euleEinfuehrung: Boolean = false,
+    /** Karteikasten der Sprachen: Schlüssel "sprache|thema|deutsches Wort". */
+    val wortStand: Map<String, WortEintrag> = emptyMap(),
+    /** Letzte Runden der Sprachen für den Bericht. */
+    val sprachVerlauf: List<SprachRunde> = emptyList(),
     /** Klassencode (XXXXX-XXXXX), von dem Aufgabenpakete der Klasse kommen. Leer ohne. */
     val klassencode: String = "",
     /** Gemerkter öffentlicher Schlüssel je Klassencode (Base64), damit ein Wechsel auffällt. */

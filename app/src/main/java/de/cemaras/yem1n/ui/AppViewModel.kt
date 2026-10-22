@@ -29,6 +29,8 @@ import de.cemaras.yem1n.logik.Einwilligung
 import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
 import de.cemaras.yem1n.logik.Klassensiegel
+import de.cemaras.yem1n.logik.Karteikasten
+import de.cemaras.yem1n.logik.SprachRunde
 import de.cemaras.yem1n.logik.JokerFrage
 import de.cemaras.yem1n.logik.DuellAntwort
 import de.cemaras.yem1n.logik.DuellHerausforderung
@@ -449,6 +451,17 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         offeneErgebnisseSenden()
         if (jokerCode.isNotEmpty()) jokerLaden()
     }
+
+    // Sprachen: Karteikasten und Bericht
+
+    fun bewerteWort(sprache: String, thema: String, de: String, richtig: Boolean) =
+        behalte(fortschritt.copy(wortStand = Karteikasten.bewerte(fortschritt.wortStand, Karteikasten.schluessel(sprache, thema, de), richtig, System.currentTimeMillis())))
+
+    fun kannWort(sprache: String, thema: String, de: String) =
+        behalte(fortschritt.copy(wortStand = Karteikasten.kannIch(fortschritt.wortStand, Karteikasten.schluessel(sprache, thema, de), System.currentTimeMillis())))
+
+    fun sprachRunde(sprache: String, thema: String, art: String, richtig: Int, gesamt: Int) =
+        behalte(fortschritt.copy(sprachVerlauf = Karteikasten.neuerVerlauf(fortschritt.sprachVerlauf, SprachRunde(System.currentTimeMillis(), sprache, thema, art, richtig, gesamt))))
 
     // Klassencode: Aufgabenpakete der Klasse, vom Admin unterschrieben
 

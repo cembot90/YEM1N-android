@@ -120,7 +120,7 @@ object LehrplanMatheMehr {
     /** Mehrzahl der Dinge, die gesammelt werden */
     val dinge = listOf("Murmeln", "Sticker", "Bonbons", "Buntstifte", "Karten", "Muscheln", "Kekse", "Perlen")
 
-    class KindName(val name: String, val pron: String, val Pron: String)
+    class KindName(val name: String, val er: String, val ErGross: String)
 
     fun kind(): KindName {
         val k = Lern.eins(kinder)
@@ -200,7 +200,7 @@ object LehrplanMatheMehr {
                 val a = z(2..12)
                 val b = z(2..(20 - a))
                 Lern.zahl(
-                    LIES, "${k.name} hat $a $ding. ${k.Pron} bekommt $b dazu. Wie viele $ding hat ${k.pron} jetzt?",
+                    LIES, "${k.name} hat $a $ding. ${k.ErGross} bekommt $b dazu. Wie viele $ding hat ${k.er} jetzt?",
                     a + b, erklaerung = "$a + $b = ${a + b}",
                 )
             }
@@ -208,7 +208,7 @@ object LehrplanMatheMehr {
                 val a = z(5..20)
                 val b = z(2..(a - 2))
                 Lern.zahl(
-                    LIES, "${k.name} hat $a $ding. ${k.Pron} verschenkt $b. Wie viele $ding hat ${k.pron} noch?",
+                    LIES, "${k.name} hat $a $ding. ${k.ErGross} verschenkt $b. Wie viele $ding hat ${k.er} noch?",
                     a - b, erklaerung = "$a - $b = ${a - b}",
                 )
             }
@@ -309,7 +309,7 @@ object LehrplanMatheMehr {
                 val a = z(20..70)
                 val b = z(5..(99 - a))
                 Lern.zahl(
-                    LIES, "${k.name} hat $a $ding. ${k.Pron} bekommt $b dazu. Wie viele $ding hat ${k.pron} jetzt?",
+                    LIES, "${k.name} hat $a $ding. ${k.ErGross} bekommt $b dazu. Wie viele $ding hat ${k.er} jetzt?",
                     a + b, erklaerung = "$a + $b = ${a + b}",
                 )
             }
@@ -333,7 +333,7 @@ object LehrplanMatheMehr {
                 val ziel = z(5..10) * 10
                 val schon = z(5..(ziel - 3))
                 Lern.zahl(
-                    LIES, "${k.name} möchte $ziel $ding sammeln. ${k.Pron} hat schon $schon. Wie viele fehlen noch?",
+                    LIES, "${k.name} möchte $ziel $ding sammeln. ${k.ErGross} hat schon $schon. Wie viele fehlen noch?",
                     ziel - schon, erklaerung = "$ziel - $schon = ${ziel - schon}",
                 )
             }
@@ -579,7 +579,7 @@ object LehrplanMatheMehr {
                 val preis = z(2..4)
                 val stift = z(3..9)
                 Lern.zahl(
-                    LIES, "${k.name} kauft $hefte Hefte für je $preis € und einen Füller für $stift €. Wie viel Euro bezahlt ${k.pron}?",
+                    LIES, "${k.name} kauft $hefte Hefte für je $preis € und einen Füller für $stift €. Wie viel Euro bezahlt ${k.er}?",
                     hefte * preis + stift,
                     erklaerung = "$hefte · $preis = ${hefte * preis}, dann ${hefte * preis} + $stift = ${hefte * preis + stift}",
                 )

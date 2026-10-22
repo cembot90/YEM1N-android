@@ -20,7 +20,14 @@ jobs:
       - name: Unit-Tests und Debug-Build
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+          set -o pipefail
+          ./gradlew testDebugUnitTest assembleDebug --no-daemon --console=plain 2>&1 | tee build.log
+      - name: Fehler als Hinweise ausgeben
+        if: failure()
+        run: |
+          grep -E "^e: |FAILED|AssertionError|Expected|What went wrong" -A2 build.log | head -40 | while IFS= read -r zeile; do
+            echo "::error::${zeile}"
+          done
       - name: Testbericht sichern
         if: always()
         uses: actions/upload-artifact@v4

@@ -45,7 +45,9 @@ private enum class SprachModus { KARTEN, PAARE }
 
 @Composable
 fun SprachenScreen(vm: AppViewModel) {
-    var sprache by rememberSaveable { mutableStateOf("en") }
+    val aktiv = Sprachen.alle.filter { it.code in vm.fortschritt.lernSprachen }
+    var sprache by rememberSaveable { mutableStateOf(aktiv.firstOrNull()?.code ?: "en") }
+    if (aktiv.isNotEmpty() && sprache !in aktiv.map { it.code }) sprache = aktiv.first().code
     var thema by rememberSaveable { mutableStateOf<String?>(null) }
     var modus by rememberSaveable { mutableStateOf<String?>(null) }
     val info = Sprachen.info(sprache)
@@ -65,12 +67,16 @@ fun SprachenScreen(vm: AppViewModel) {
         Text("🗣️ Sprachen", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
 
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (s in Sprachen.alle) {
+            for (s in aktiv) {
                 KnopfChip("${s.flagge} ${s.name}", s.code == sprache) { sprache = s.code; thema = null; modus = null }
             }
         }
 
         val jetzt = System.currentTimeMillis()
+        if (aktiv.isEmpty()) {
+            Text("Du hast keine Sprache gewählt. Wähle in den Einstellungen unter Bereiche, was du lernen möchtest.", color = TextSanft)
+            return@Column
+        }
         if (modus == "bericht") {
             BerichtAnsicht(vm, sprache)
             Spacer(Modifier.height(24.dp))
@@ -116,9 +122,11 @@ fun SprachenScreen(vm: AppViewModel) {
         when (modus) {
             "karten" -> KartenAnsicht(vm, woerter, sprache, themaVon = { t.id })
             "paare" -> PaareAnsicht(vm, woerter, sprache, t.id)
+            "tippen" -> TippenAnsicht(vm, woerter, sprache, t.id)
             else -> {
                 BreitKnopf("🃏 Karten", "Wort anschauen, umdrehen, anhören") { modus = "karten" }
                 BreitKnopf("🧩 Paare", "Zu jedem Wort das passende finden") { modus = "paare" }
+                BreitKnopf("⌨️ Tippen", "Das Wort selbst schreiben") { modus = "tippen" }
                 val lern = Sprachen.lernThema(t.id, sprache)
                 if (lern != null) BreitKnopf("❓ Fragen", "Zehn Aufgaben mit Sternen") { vm.startLernThema(lern) }
             }
@@ -298,5 +306,69 @@ private fun BerichtAnsicht(vm: AppViewModel, sprache: String) {
             Text("$titel (${r.art})", color = Color.White, modifier = Modifier.weight(1f))
             Text("${r.richtig} von ${r.gesamt}", color = TextSanft)
         }
+    }
+}
+
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun TippenAnsicht(vm: AppViewModel, woerter: List<Vokabel>, sprache: String, themaId: String) {
+    var runde by rememberSaveable { mutableStateOf(0) }
+    val fragen = remember(woerter, sprache, runde) { woerter.shuffled().take(10) }
+    var i by remember(fragen) { mutableStateOf(0) }
+    var eingabe by remember(fragen) { mutableStateOf("") }
+    var ergebnis by remember(fragen) { mutableStateOf<de.cemaras.yem1n.logik.Tipp?>(null) }
+    var richtig by remember(fragen) { mutableStateOf(0) }
+    var nochmal by remember(fragen) { mutableStateOf(listOf<Vokabel>()) }
+    if (fragen.isEmpty()) { Text("Hier ist nichts zu üben.", color = TextSanft); return }
+
+    if (i >= fragen.size) {
+        androidx.compose.runtime.LaunchedEffect(fragen) { vm.sprachRunde(sprache, themaId, "tippen", richtig, fragen.size) }
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("$richtig von ${fragen.size}", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Gelb)
+            if (nochmal.isNotEmpty()) {
+                Text("Das üben wir noch:", color = TextSanft)
+                for (w in nochmal) Text("${w.emoji} ${w.de} = ${w.text(sprache)}", color = Color.White, fontSize = 18.sp)
+            }
+            TextButton(onClick = { runde++ }) { Text("Nochmal", color = Gelb, fontSize = 18.sp) }
+        }
+        return
+    }
+    val w = fragen[i]
+    Text("Wort ${i + 1} von ${fragen.size}", color = TextSanft)
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Karte).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (w.emoji.isNotEmpty() && !de.cemaras.yem1n.logik.lehrplan.LehrplanEnglisch.nurZiffern(w.emoji)) Text(w.emoji, fontSize = 64.sp)
+        Text(w.de, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White, textAlign = TextAlign.Center)
+        Text("Wie heißt das auf ${Sprachen.info(sprache).name}?", color = TextSanft, fontSize = 14.sp)
+    }
+    androidx.compose.material3.OutlinedTextField(
+        value = eingabe, onValueChange = { if (ergebnis == null) eingabe = it }, singleLine = true,
+        modifier = Modifier.fillMaxWidth(), label = { Text("Deine Antwort") }, enabled = ergebnis == null,
+    )
+    if (ergebnis == null) {
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (z in de.cemaras.yem1n.logik.SprachTipp.sonderzeichen(sprache)) {
+                Text(z, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Karte).clickable { eingabe += z }.padding(horizontal = 14.dp, vertical = 8.dp))
+            }
+        }
+        BreitKnopfKlein("Prüfen", Modifier.fillMaxWidth()) {
+            val t = de.cemaras.yem1n.logik.SprachTipp.pruefe(w.text(sprache), eingabe, sprache)
+            ergebnis = t
+            val ok = t != de.cemaras.yem1n.logik.Tipp.FALSCH
+            if (ok) richtig++ else nochmal = nochmal + w
+            vm.bewerteWort(sprache, themaId, w.de, ok)
+            vm.sprecher.sprich(w.text(sprache), sprache = sprache)
+        }
+    } else {
+        val t = ergebnis!!
+        Text(
+            when (t) {
+                de.cemaras.yem1n.logik.Tipp.RICHTIG -> "Richtig! 🎉"
+                de.cemaras.yem1n.logik.Tipp.FAST -> "Fast richtig! Achte auf die Zeichen: ${w.text(sprache)}"
+                else -> "Richtig ist: ${w.text(sprache)}"
+            },
+            color = if (t == de.cemaras.yem1n.logik.Tipp.FALSCH) Color(0xFFFF6B6B) else Mint, fontWeight = FontWeight.Black, fontSize = 20.sp,
+        )
+        BreitKnopfKlein("Weiter", Modifier.fillMaxWidth()) { i++; eingabe = ""; ergebnis = null }
     }
 }

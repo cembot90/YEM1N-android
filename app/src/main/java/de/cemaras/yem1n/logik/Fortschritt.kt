@@ -80,6 +80,8 @@ data class Fortschritt(
     val sprachenAn: Boolean = true,
     /** Olli hat dem Kind das Haustier schon erklärt. */
     val euleEinfuehrung: Boolean = false,
+    /** Welche Sprachen das Kind lernt (en, tr, it). */
+    val lernSprachen: List<String> = listOf("en", "tr", "it"),
     /** Karteikasten der Sprachen: Schlüssel "sprache|thema|deutsches Wort". */
     val wortStand: Map<String, WortEintrag> = emptyMap(),
     /** Letzte Runden der Sprachen für den Bericht. */

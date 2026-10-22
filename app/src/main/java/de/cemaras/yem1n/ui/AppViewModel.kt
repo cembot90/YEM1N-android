@@ -30,6 +30,7 @@ import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
 import de.cemaras.yem1n.logik.Klassensiegel
 import de.cemaras.yem1n.logik.Karteikasten
+import de.cemaras.yem1n.logik.Sprachen
 import de.cemaras.yem1n.logik.SprachRunde
 import de.cemaras.yem1n.logik.JokerFrage
 import de.cemaras.yem1n.logik.DuellAntwort
@@ -453,6 +454,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     // Sprachen: Karteikasten und Bericht
+
+    fun setzeLernSprache(code: String, an: Boolean) {
+        val neu = Sprachen.alle.map { it.code }.filter { if (it == code) an else it in fortschritt.lernSprachen }
+        behalte(fortschritt.copy(lernSprachen = neu))
+    }
 
     fun bewerteWort(sprache: String, thema: String, de: String, richtig: Boolean) =
         behalte(fortschritt.copy(wortStand = Karteikasten.bewerte(fortschritt.wortStand, Karteikasten.schluessel(sprache, thema, de), richtig, System.currentTimeMillis())))

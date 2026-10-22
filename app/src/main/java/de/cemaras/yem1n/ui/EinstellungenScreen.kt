@@ -131,6 +131,13 @@ fun EinstellungenScreen(vm: AppViewModel) {
                 Text("Sprachen in der Lernwelt (Englisch, Türkisch, Italienisch)", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
                 androidx.compose.material3.Switch(checked = vm.fortschritt.sprachenAn, onCheckedChange = vm::setzeSprachenAn)
             }
+            Text("Diese Sprachen lernt das Kind im Bereich Sprachen:", color = TextSanft, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
+            for (sp in de.cemaras.yem1n.logik.Sprachen.alle) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("${sp.flagge} ${sp.name}", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+                    androidx.compose.material3.Switch(checked = sp.code in vm.fortschritt.lernSprachen, onCheckedChange = { vm.setzeLernSprache(sp.code, it) })
+                }
+            }
 
         }
         if (seite == "spiele") {

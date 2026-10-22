@@ -31,6 +31,7 @@ import de.cemaras.yem1n.logik.JokerFrage
 import de.cemaras.yem1n.logik.ServerAnfrage
 import de.cemaras.yem1n.logik.CloudAdresse
 import de.cemaras.yem1n.speicher.Erinnerung
+import de.cemaras.yem1n.speicher.Mitteilungen
 import de.cemaras.yem1n.speicher.HaustierWidget
 import de.cemaras.yem1n.logik.HaustierHut
 import de.cemaras.yem1n.logik.Lob
@@ -189,6 +190,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
         Erinnerung.planenLernzeit(app, fortschritt.lernzeitAn, fortschritt.lernzeitMinuten, fortschritt.rundenHeute(Tag.heute()) > 0)
         offeneErgebnisseSenden()
+        Mitteilungen.kanalAnlegen(app)
+        geraetMelden()
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
@@ -413,6 +416,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         behalte(fortschritt.copy(familiencode = code))
         jokerFragen = emptyList()
         jokerLaden()
+        geraetMelden()
         return true
     }
 
@@ -429,7 +433,37 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun setzeJokerRolle(rolle: String) {
-        if (rolle == "kind" || rolle == "eltern") behalte(fortschritt.copy(jokerRolle = rolle))
+        if (rolle == "kind" || rolle == "eltern") {
+            behalte(fortschritt.copy(jokerRolle = rolle))
+            geraetMelden()
+        }
+    }
+
+    /**
+     * Meldet dieses Gerät (Familiencode, Rolle, Push-Kennung von Google) beim Server an,
+     * damit es Mitteilungen bekommt. Nur wenn sich etwas geändert hat.
+     */
+    fun geraetMelden() {
+        val code = jokerCode
+        if (code.isEmpty()) return
+        val app = getApplication<android.app.Application>()
+        try {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                if (token.isNullOrEmpty()) return@addOnSuccessListener
+                Mitteilungen.speichereToken(app, token)
+                val rolle = fortschritt.jokerRolle
+                val schluessel = "$code|$rolle|$token"
+                if (Mitteilungen.gemeldet(app) == schluessel) return@addOnSuccessListener
+                viewModelScope.launch {
+                    val e = withContext(Dispatchers.IO) {
+                        ServerClient.senden(ServerAnfrage.PFAD_GERAET, ServerAnfrage.geraet(code, rolle, token))
+                    }
+                    if (e.ok) Mitteilungen.merkeGemeldet(app, schluessel)
+                }
+            }
+        } catch (e: Exception) {
+            // Ohne Google-Dienste gibt es keine Mitteilungen, die App läuft trotzdem.
+        }
     }
 
     fun jokerLaden() {

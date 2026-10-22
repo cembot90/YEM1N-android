@@ -57,6 +57,17 @@ fun JokerScreen(vm: AppViewModel) {
     val code = vm.jokerCode
     val eltern = f.jokerRolle == "eltern"
 
+    // Ab Android 13 einmal um die Erlaubnis für Mitteilungen bitten, sobald es einen Familiencode gibt.
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val erlaubnis = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { }
+    androidx.compose.runtime.LaunchedEffect(code) {
+        if (code.isNotEmpty() && !de.cemaras.yem1n.speicher.Erinnerung.erlaubt(ctx)) {
+            erlaubnis.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     Column(
         Modifier
             .fillMaxSize()

@@ -92,7 +92,8 @@ function kv(start = {}) {
     m,
     get: async (k) => (m.has(k) ? m.get(k) : null),
     put: async (k, v) => { m.set(k, v); },
-    list: async ({ prefix }) => ({ keys: [...m.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })) }),
+    listAufrufe: 0,
+    list: async function ({ prefix }) { this.listAufrufe++; return { keys: [...m.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })) }; },
   };
 }
 
@@ -134,4 +135,20 @@ test("Duell-Mitteilung geht nicht an das Gerät, das sie geschickt hat", () => {
   assert.equal(absenderGeraet("Duell", f), "G-1");
   assert.match(inhalt("Duell", f).text, /Yemin fordert dich heraus/);
   assert.equal(absenderGeraet("JokerAntwort", f), "");
+});
+
+test("Cron: list wird nur einmal gebraucht, danach liest der Lauf die Familienliste", async () => {
+  leereCache();
+  const { konto: k } = konto();
+  const speicher = kv({ ["geraete:" + CODE]: JSON.stringify([{ rolle: "eltern", token: "E1" }]) });
+  const env = {
+    GERAETE: speicher, FCM_DIENSTKONTO: JSON.stringify(k), CK_KEY_ID: "k", CK_PRIVATE_KEY: ecKonto(),
+    CK_CONTAINER: "iCloud.test", CK_UMGEBUNG: "production",
+  };
+  const holen = async (url) => url.includes("oauth2")
+    ? new Response(JSON.stringify({ access_token: "T", expires_in: 3600 }))
+    : new Response(JSON.stringify({ records: [] }));
+  for (let i = 0; i < 5; i++) await pruefeNeues(env, holen, 1000 + i);
+  assert.equal(speicher.listAufrufe, 1);
+  assert.deepEqual(JSON.parse(speicher.m.get("familien")), [CODE]);
 });

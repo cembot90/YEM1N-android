@@ -98,6 +98,7 @@ export async function behandle(request, env, holen = fetch) {
     const neu = alt.filter((x) => x.token !== g.token);
     neu.push({ rolle: g.rolle, token: g.token, geraet: g.geraet || "", seit: Date.now() });
     await env.GERAETE.put(key, JSON.stringify(neu.slice(-10)));
+    await familieMerken(env, g.code);
     return antwort(200, { ok: true });
   }
 
@@ -105,6 +106,25 @@ export async function behandle(request, env, holen = fetch) {
 }
 
 const MAX_FAMILIEN = 5;
+const FAMILIEN_KEY = "familien";
+
+/** Merkt sich den Familiencode in einer eigenen Liste, damit der Minutenlauf nie "list" braucht (Gratis-Grenze 1000 pro Tag). */
+export async function familieMerken(env, code) {
+  const alt = JSON.parse((await env.GERAETE.get(FAMILIEN_KEY)) || "[]");
+  if (alt.includes(code)) return;
+  alt.push(code);
+  await env.GERAETE.put(FAMILIEN_KEY, JSON.stringify(alt.slice(-MAX_FAMILIEN)));
+}
+
+/** Codes der Familien. Gibt es die Liste noch nicht, wird einmal aus den Geräteeinträgen aufgebaut. */
+export async function familienCodes(env) {
+  const roh = await env.GERAETE.get(FAMILIEN_KEY);
+  if (roh) return JSON.parse(roh).slice(-MAX_FAMILIEN);
+  const liste = await env.GERAETE.list({ prefix: "geraete:", limit: MAX_FAMILIEN });
+  const codes = liste.keys.map((k) => k.name.slice("geraete:".length));
+  await env.GERAETE.put(FAMILIEN_KEY, JSON.stringify(codes));
+  return codes;
+}
 
 /**
  * Läuft jede Minute: schaut pro Familie nach neuen Einträgen und schickt Mitteilungen.
@@ -115,11 +135,10 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
   if (!env.FCM_DIENSTKONTO) { console.log("pruefeNeues: FCM_DIENSTKONTO fehlt"); return 0; }
   const konto = JSON.parse(env.FCM_DIENSTKONTO);
   console.log("pruefeNeues: Lauf");
-  const liste = await env.GERAETE.list({ prefix: "geraete:", limit: MAX_FAMILIEN });
   let verschickt = 0;
-  for (const k of liste.keys) {
-    const code = k.name.slice("geraete:".length);
-    let geraete = JSON.parse((await env.GERAETE.get(k.name)) || "[]");
+  for (const code of await familienCodes(env)) {
+    const geraeteKey = "geraete:" + code;
+    let geraete = JSON.parse((await env.GERAETE.get(geraeteKey)) || "[]");
     const vorher = geraete.length;
     for (const typ of typenFuer(geraete)) {
       const standKey = `stand:${code}:${typ}`;
@@ -142,7 +161,7 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
         }
       }
     }
-    if (geraete.length !== vorher) await env.GERAETE.put(k.name, JSON.stringify(geraete));
+    if (geraete.length !== vorher) await env.GERAETE.put(geraeteKey, JSON.stringify(geraete));
   }
   return verschickt;
 }

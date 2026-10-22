@@ -86,8 +86,9 @@ const MAX_FAMILIEN = 5;
  * Zurück: Anzahl der verschickten Mitteilungen.
  */
 export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
-  if (!env.FCM_DIENSTKONTO) return 0;
+  if (!env.FCM_DIENSTKONTO) { console.log("pruefeNeues: FCM_DIENSTKONTO fehlt"); return 0; }
   const konto = JSON.parse(env.FCM_DIENSTKONTO);
+  console.log("pruefeNeues: Lauf");
   const liste = await env.GERAETE.list({ prefix: "geraete:", limit: MAX_FAMILIEN });
   let verschickt = 0;
   for (const k of liste.keys) {
@@ -98,7 +99,7 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
       const standKey = `stand:${code}:${typ}`;
       const stand = Number(await env.GERAETE.get(standKey));
       const r = await anfrage(env, await schluessel(env), "records/query", abfrageKoerper(typ, code), holen);
-      if (r.status !== 200) continue;
+      if (r.status !== 200) { console.log("pruefeNeues: Abfrage", typ, "Status", r.status, r.text.slice(0, 200)); continue; }
       if (!stand) { await env.GERAETE.put(standKey, String(jetzt)); continue; }
       const neu = neueEintraege(r.text, stand);
       if (!neu.length) continue;
@@ -108,6 +109,7 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
         if (!text) continue;
         for (const g of geraete.filter((x) => x.rolle === TYPEN[typ])) {
           const e = await pushSenden(konto, g.token, text.titel, text.text, typ, holen, jetzt);
+          console.log("pruefeNeues: Push", typ, g.rolle, e.ok ? "ok" : "Fehler " + e.status);
           if (e.ok) verschickt++;
           if (e.ungueltig) geraete = geraete.filter((x) => x.token !== g.token);
         }

@@ -60,6 +60,16 @@ object LehrplanEnglisch {
         )
     }
 
+    /** Katalog-Thema zu Thema der Englisch-Lernwelt, für den Weg von den Sprachen in die Fragen. */
+    val katalogZuThemaId = mapOf(
+        "farben" to "e1-farben", "zahl0" to "e1-zahlen", "haustiere" to "e2-tiere", "obst" to "e2-obst",
+        "familie" to "e3-familie", "kleidung" to "e3-kleidung", "schule" to "e3-schule", "zahl20" to "e3-zahlen",
+        "wochentage" to "e3-tage", "wetter" to "e4-wetter", "monate" to "e4-monate", "zeit" to "e4-zeit",
+        "wildtiere" to "e4-wildtiere", "freizeit" to "e4-freizeit", "koerper" to "e3-koerper", "essen" to "e3-essen",
+        "hallo" to "e3-hallo", "zuhause" to "e4-zuhause", "fahrzeuge" to "e4-fahrzeuge", "stadt" to "e4-stadt",
+        "taetigkeiten" to "e4-tun", "gegenteile" to "e4-gegenteile",
+    )
+
     /** Wörter je Katalog-Thema, aus der mitgelieferten Datei sprachkatalog.json */
     val woerter: Map<String, List<Vokabel>> by lazy {
         try {
@@ -545,9 +555,9 @@ object LehrplanKunst {
  * darum sind es Extras. Die Stufe des Katalogs bestimmt die Klasse (1 bis 3).
  */
 object LehrplanSprachen {
-    private class Thema(val id: String, val titel: String, val emoji: String, val klasse: Int)
+    class Thema(val id: String, val titel: String, val emoji: String, val klasse: Int)
 
-    private val themenListe = listOf(
+    val themenListe = listOf(
         Thema("hallo", "Hallo und Danke", "👋", 1), Thema("zahl0", "Zahlen 0 bis 10", "🔢", 1),
         Thema("farben", "Farben", "🎨", 1), Thema("haustiere", "Haustiere und Bauernhof", "🐶", 1),
         Thema("familie", "Familie", "👨‍👩‍👧", 1), Thema("koerper", "Körper", "🧍", 1),

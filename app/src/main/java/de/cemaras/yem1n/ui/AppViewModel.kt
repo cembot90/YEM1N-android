@@ -76,6 +76,7 @@ sealed interface Ansicht {
     data object ErgebnisseEltern : Ansicht
     data object Duell : Ansicht
     data object Lernwelt : Ansicht
+    data object Sprachen : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -258,7 +259,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 else -> arbeiten.getOrNull(a.arbeit)
             }
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -958,6 +959,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     val bundesland: de.cemaras.yem1n.logik.Bundesland
         get() = de.cemaras.yem1n.logik.Bundesland.aus(fortschritt.bundesland)
 
+    fun oeffneSprachen() {
+        ansicht = Ansicht.Sprachen
+    }
+
     fun oeffneLernwelt() {
         ansicht = Ansicht.Lernwelt
     }
@@ -1083,7 +1088,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {

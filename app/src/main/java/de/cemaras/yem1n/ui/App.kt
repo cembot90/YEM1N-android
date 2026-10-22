@@ -95,6 +95,7 @@ fun App(vm: AppViewModel) {
             Ansicht.Joker -> JokerScreen(vm)
             Ansicht.Duell -> DuellScreen(vm)
             Ansicht.Lernwelt -> LernweltScreen(vm)
+            Ansicht.Sprachen -> SprachenScreen(vm)
             Ansicht.ErgebnisseEltern -> ErgebnisseElternScreen(vm)
             is Ansicht.Spiel -> SpielScreen(vm, (vm.ansicht as Ansicht.Spiel).art)
             is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)
@@ -202,6 +203,12 @@ fun StartScreen(vm: AppViewModel) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SonderKnopf("⚔️", "Duell", "Gegen die Familie", Modifier.weight(1f)) { vm.oeffneDuell() }
             SonderKnopf("🌍", "Lernwelt", "nach dem Lehrplan", Modifier.weight(1f)) { vm.oeffneLernwelt() }
+        }
+        if (vm.fortschritt.sprachenAn) {
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SonderKnopf("🗣️", "Sprachen", "Englisch, Türkisch, Italienisch", Modifier.weight(1f)) { vm.oeffneSprachen() }
+            }
         }
         val faecher = vm.faecher
         if (faecher.size > 1) {

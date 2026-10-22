@@ -4,6 +4,7 @@ import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.Aufgabe
 import de.cemaras.yem1n.daten.Uebung
 import de.cemaras.yem1n.logik.lehrplan.LehrplanMathe
+import de.cemaras.yem1n.logik.lehrplan.LehrplanDeutsch
 import de.cemaras.yem1n.logik.lehrplan.LehrplanMatheMehr
 import kotlin.random.Random
 
@@ -253,7 +254,7 @@ object Lernwelt {
     const val ANZAHL = 10
 
     /** Einmal zusammengestellt und dann behalten. */
-    val themen: List<LernThema> by lazy { LehrplanMathe.themen + LehrplanMatheMehr.themen }
+    val themen: List<LernThema> by lazy { LehrplanMathe.themen + LehrplanMatheMehr.themen + LehrplanDeutsch.themen }
 
     fun themenFuer(fach: LehrFach, klasse: Int, land: Bundesland): List<LernThema> =
         themen.filter { it.fach == fach && it.klasse(land) == klasse }

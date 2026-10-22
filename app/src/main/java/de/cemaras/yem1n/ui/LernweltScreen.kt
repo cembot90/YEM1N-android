@@ -90,7 +90,7 @@ fun LernweltScreen(vm: AppViewModel) {
 
         // Fächer
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (f in LehrFach.entries) Chip("${f.emoji} ${f.anzeige}", f == fach) { fachName = f.name }
+            for (f in LehrFach.entries.filter { vm.fortschritt.sprachenAn || !it.istSprache }) Chip("${f.emoji} ${f.anzeige}", f == fach) { fachName = f.name }
         }
 
         val reihen = Lernwelt.klassenReihenfolge(eigene)

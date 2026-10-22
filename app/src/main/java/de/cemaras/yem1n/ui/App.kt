@@ -179,7 +179,9 @@ fun StartScreen(vm: AppViewModel) {
         FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() }
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SonderKnopf("🧸", "Vorschule", "für die Kleinen", Modifier.weight(1f)) { vm.oeffneVorschule() }
+            if (vm.fortschritt.vorschulAn) {
+                SonderKnopf("🧸", "Vorschule", "für die Kleinen", Modifier.weight(1f)) { vm.oeffneVorschule() }
+            }
             SonderKnopf("🎮", "Spiele", "mit Münzen", Modifier.weight(1f)) { vm.oeffneSpiele() }
         }
         Spacer(Modifier.height(8.dp))

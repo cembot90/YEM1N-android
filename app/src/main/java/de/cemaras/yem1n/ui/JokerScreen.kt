@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -80,6 +81,10 @@ fun JokerScreen(vm: AppViewModel) {
         TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
         Text("🆘 Joker", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
 
+        if (vm.einwilligungOffen) {
+            EinwilligungKarte(vm)
+            return@Column
+        }
         if (code.isEmpty()) {
             CodeEingabe(vm)
             return@Column
@@ -261,4 +266,40 @@ private fun FrageKarte(vm: AppViewModel, frage: JokerFrage, eltern: Boolean) {
             ) { Text("Antwort senden", fontWeight = FontWeight.Bold) }
         }
     }
+}
+
+@Composable
+private fun EinwilligungKarte(vm: AppViewModel) {
+    var haken by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    Text("Bevor es losgeht", fontSize = 26.sp, fontWeight = FontWeight.Black, color = Gelb)
+    Text(
+        "Bitte lass diesen Schritt von einem Elternteil oder einer erziehungsberechtigten Person lesen und bestätigen.",
+        color = Color.White, fontSize = 16.sp,
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        for (p in de.cemaras.yem1n.logik.Einwilligung.punkte) {
+            Row {
+                Text("•  ", color = Gelb, fontSize = 15.sp)
+                Text(p, color = Color.White, fontSize = 15.sp)
+            }
+        }
+    }
+    TextButton(onClick = { vm.oeffneInfoSeite(InfoSeite.DATENSCHUTZ) }) {
+        Text("Datenschutzerklärung lesen", color = Gelb, fontWeight = FontWeight.Bold)
+    }
+    Row(verticalAlignment = Alignment.Top) {
+        androidx.compose.material3.Checkbox(checked = haken, onCheckedChange = { haken = it })
+        Text(
+            "Ich bin Elternteil oder erziehungsberechtigte Person. Ich habe die Datenschutzerklärung gelesen und willige in die beschriebene Verarbeitung für mein Kind ein.",
+            color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(top = 12.dp),
+        )
+    }
+    androidx.compose.material3.Button(onClick = vm::einwilligen, enabled = haken, modifier = Modifier.fillMaxWidth()) {
+        Text("Einverstanden, weiter")
+    }
+    TextButton(onClick = vm::zurueck, modifier = Modifier.fillMaxWidth()) {
+        Text("Nicht einverstanden", color = TextSanft)
+    }
+    Text("Ohne Einwilligung bleibt die App auf diesem Gerät. Üben geht trotzdem.", color = TextSanft, fontSize = 13.sp)
 }

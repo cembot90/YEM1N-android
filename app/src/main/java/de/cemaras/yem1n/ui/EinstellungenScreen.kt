@@ -95,6 +95,16 @@ fun EinstellungenScreen(vm: AppViewModel) {
             ) { Text("+", color = Gelb, fontSize = 20.sp) }
         }
 
+        Abschnitt("Bereiche")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Vorschule anzeigen", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.vorschulAn, onCheckedChange = vm::setzeVorschulAn)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Sprachen in der Lernwelt (Englisch, Türkisch, Italienisch)", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+            androidx.compose.material3.Switch(checked = vm.fortschritt.sprachenAn, onCheckedChange = vm::setzeSprachenAn)
+        }
+
         Abschnitt("Spiele")
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Spiele erlauben", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f))
@@ -148,6 +158,10 @@ fun EinstellungenScreen(vm: AppViewModel) {
         }
 
         Abschnitt("Familie und Joker")
+        Text("Einwilligung: ${de.cemaras.yem1n.logik.Einwilligung.datumText(vm.fortschritt.einwilligungDatum)}", color = TextSanft, fontSize = 13.sp)
+        if (!vm.einwilligungOffen) {
+            OutlinedButton(onClick = vm::einwilligungWiderrufen) { Text("Einwilligung widerrufen") }
+        }
         val familie = vm.jokerCode
         Text(
             if (familie.isEmpty()) "Noch kein Familiencode. Ohne ihn läuft die App nur auf diesem Gerät."

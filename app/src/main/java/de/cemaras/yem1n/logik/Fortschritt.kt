@@ -70,6 +70,12 @@ data class Fortschritt(
     val spielHaptik: Boolean = true,
     /** Das Haustier, null solange noch keins gewählt wurde. */
     val haustier: Haustier? = null,
+    /** Version der Einwilligung für die Cloud und der Zeitpunkt (Millisekunden), 0 heißt: nicht erteilt. */
+    val einwilligung: Int = 0,
+    val einwilligungDatum: Long = 0,
+    /** Bereiche, die Eltern ausblenden können. */
+    val vorschulAn: Boolean = true,
+    val sprachenAn: Boolean = true,
     /** Olli hat dem Kind das Haustier schon erklärt. */
     val euleEinfuehrung: Boolean = false,
     /** Erinnerung am Nachmittag, wenn das Haustier hungrig würde. */

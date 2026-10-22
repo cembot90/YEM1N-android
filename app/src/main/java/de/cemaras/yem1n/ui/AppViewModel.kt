@@ -25,6 +25,7 @@ import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.speicher.CloudClient
 import de.cemaras.yem1n.speicher.ServerClient
+import de.cemaras.yem1n.logik.Einwilligung
 import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
 import de.cemaras.yem1n.logik.JokerFrage
@@ -415,7 +416,20 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     // Joker: Fragen der Kinder und Antworten der Eltern über den eigenen Server
 
     /** Der Familiencode in der Form XXXXX-XXXXX, leer ohne gültigen Code (auch ältere Codes ohne Strich gehen). */
-    val jokerCode: String get() = Familiencode.pruefe(fortschritt.familiencode) ?: ""
+    val jokerCode: String
+        get() = if (einwilligungOffen) "" else Familiencode.pruefe(fortschritt.familiencode) ?: ""
+
+    /** Solange die Eltern nicht eingewilligt haben, geht nichts in die Cloud. */
+    val einwilligungOffen: Boolean get() = Einwilligung.erforderlich(fortschritt.einwilligung)
+
+    fun einwilligen() = behalte(fortschritt.copy(einwilligung = Einwilligung.AKTUELLE_VERSION, einwilligungDatum = System.currentTimeMillis()))
+
+    /** Widerruf: Der Familiencode wird vergessen, die App sendet nichts mehr. */
+    fun einwilligungWiderrufen() {
+        behalte(fortschritt.copy(einwilligung = 0, einwilligungDatum = 0, familiencode = ""))
+        jokerFragen = emptyList()
+        jokerMeldung = ""
+    }
 
     var jokerFragen: List<JokerFrage> by mutableStateOf(emptyList())
         private set
@@ -714,6 +728,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun erinnerungNeuPlanen() {
         Erinnerung.planen(getApplication(), fortschritt.haustier, fortschritt.haustierErinnerung)
     }
+
+    fun setzeVorschulAn(an: Boolean) = behalte(fortschritt.copy(vorschulAn = an))
+
+    fun setzeSprachenAn(an: Boolean) = behalte(fortschritt.copy(sprachenAn = an))
 
     fun setzeSparmodus(an: Boolean) {
         de.cemaras.yem1n.ui.theme.Sparmodus.an = an

@@ -36,7 +36,10 @@ enum class LehrFach(val anzeige: String, val emoji: String) {
     MUSIK("Musik", "🎵"),
     KUNST("Kunst", "🎨"),
     TUERKISCH("Türkisch", "🇹🇷"),
-    ITALIENISCH("Italienisch", "🇮🇹"),
+    ITALIENISCH("Italienisch", "🇮🇹");
+
+    /** Fremdsprachen lassen sich unter Bereiche ausblenden. */
+    val istSprache: Boolean get() = this == ENGLISCH || this == TUERKISCH || this == ITALIENISCH
 }
 
 /** Eine Aufgabe, bevor sie in die Übung kommt. */

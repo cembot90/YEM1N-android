@@ -1015,6 +1015,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             eintragId = java.util.UUID.randomUUID().toString(), klasse = klasse, fach = fach, arbeit = arbeit,
             uebung = uebung, richtig = s.richtig, gesamt = s.aufgaben.size, angesehen = s.angeschaut,
             sterne = s.sterne, kind = fortschritt.name.trim(), zeitpunkt = System.currentTimeMillis(),
+            details = de.cemaras.yem1n.logik.AntwortProtokoll.json(de.cemaras.yem1n.logik.AntwortProtokoll.eintraege(s)),
         )
         val offen = (fortschritt.offeneErgebnisse + ServerAnfrage.ergebnis(code, e)).takeLast(50)
         behalte(fortschritt.copy(offeneErgebnisse = offen))

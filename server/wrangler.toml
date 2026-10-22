@@ -8,6 +8,10 @@ preview_urls = false
 [triggers]
 crons = ["* * * * *"]
 
+# Protokolle im Cloudflare-Dashboard (Reiter Observability) und für "wrangler tail".
+[observability]
+enabled = true
+
 [vars]
 CK_CONTAINER = "iCloud.de.cemaras.yem1n"
 CK_UMGEBUNG = "production"

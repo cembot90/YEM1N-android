@@ -31,6 +31,8 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.3" }
+code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version = "16.1.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -97,6 +97,12 @@ fun JokerScreen(vm: AppViewModel) {
             Text("Familiencode", color = TextSanft, fontSize = 13.sp)
             Text(Familiencode.zeige(code), fontSize = 24.sp, fontWeight = FontWeight.Black, color = Color.White)
             Text("Mit diesem Code finden sich Kind und Eltern.", color = TextSanft, fontSize = 13.sp)
+            var qrOffen by remember { mutableStateOf(false) }
+            TextButton(onClick = { qrOffen = true }) { Text("📷 QR-Code zeigen", color = Gelb, fontWeight = FontWeight.Bold) }
+            if (qrOffen) {
+                QrDialog("QR-Code der Familie", de.cemaras.yem1n.logik.QrPaket.inhalt("familie", code),
+                    "Auf dem anderen Gerät bei Joker auf QR-Code scannen tippen.") { qrOffen = false }
+            }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(selected = !eltern, onClick = { vm.setzeJokerRolle("kind") }, label = { Text("Ich bin das Kind") }, colors = chipFarbenJoker())
                 FilterChip(selected = eltern, onClick = { vm.setzeJokerRolle("eltern") }, label = { Text("Ich bin Mama oder Papa") }, colors = chipFarbenJoker())
@@ -138,6 +144,16 @@ private fun CodeEingabe(vm: AppViewModel) {
     Button(onClick = vm::neuerFamiliencode, modifier = Modifier.fillMaxWidth().height(52.dp)) {
         Text("Neuen Familiencode erstellen", fontWeight = FontWeight.Bold)
     }
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    OutlinedButton(
+        onClick = {
+            qrScannen(ctx, { roh ->
+                val gelesen = de.cemaras.yem1n.logik.QrPaket.lese(roh)
+                fehler = gelesen == null || gelesen.first != "familie" || !vm.setzeFamiliencode(gelesen.second)
+            }, { fehler = true })
+        },
+        modifier = Modifier.fillMaxWidth().height(52.dp),
+    ) { Text("📷 QR-Code scannen", color = Color.White, fontWeight = FontWeight.Bold) }
     Text("Oder gib den Code ein, den du schon hast:", color = TextSanft, fontSize = 14.sp)
     OutlinedTextField(
         value = eingabe,

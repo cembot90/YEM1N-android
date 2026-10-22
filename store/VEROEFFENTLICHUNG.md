@@ -25,30 +25,45 @@ Stand: Entwicklung, noch nichts auf einem Gerät getestet.
 
 ## 3. Datenschutz und Data Safety
 
-Die App erhebt und überträgt keine personenbezogenen Daten. Alles bleibt auf dem Gerät.
+Stand 22.10.2026. Üben, Fortschritt und Haustier bleiben auf dem Gerät. Mit Einwilligung der Eltern und einem
+Familiencode nutzt die App eine Cloud (Apple CloudKit über einen Vermittler bei Cloudflare, Mitteilungen über Google FCM).
+Die Texte in der App stehen in `daten/InfoTexte.kt` (Datenschutz). Sie müssen zu den Angaben hier und auf
+`https://cembot90.github.io/YEM1N/` passen. Bitte vor der Veröffentlichung selbst prüfen (kein Rechtsrat).
+
+Data-Safety-Antworten für Google Play:
 
 | Frage | Antwort |
 | --- | --- |
-| Erhebt oder teilt die App Nutzerdaten? | Nein |
-| Daten werden verschlüsselt übertragen? | Ja (nur HTTPS, siehe unten) |
-| Können Nutzer die Löschung verlangen? | Nicht nötig, die Daten liegen nur auf dem Gerät. Deinstallieren löscht alles |
+| Erhebt oder teilt die App Nutzerdaten? | Ja, nur wenn Eltern einen Familiencode eintragen und einwilligen |
+| Welche Daten? | Nutzer-IDs (Familiencode und Push-Kennung), App-Aktivität (Rundenergebnisse), Nachrichten in der App (Joker-Fragen und Antworten), Name des Kindes (freiwillig) |
+| Zweck | App-Funktionen (Joker, Ergebnisse für Eltern, Duell, Mitteilungen) |
+| Teilen mit Dritten? | Verarbeiter: Apple (CloudKit), Cloudflare (Vermittler), Google (FCM). Keine Weitergabe zu Werbung oder Analyse |
+| Daten verschlüsselt übertragen? | Ja (nur HTTPS) |
+| Können Nutzer die Löschung verlangen? | Ja, per E-Mail an cembot@icloud.com mit dem Familiencode. Daten auf dem Gerät löscht die Deinstallation |
+| Ist die Datenerhebung freiwillig? | Ja, ohne Familiencode wird nichts gesendet |
 | Konto nötig? | Nein |
 | Werbung? | Nein |
-| In-App-Käufe? | Nein (Münzen sind nur Spielgeld, es gibt kein echtes Geld) |
+| In-App-Käufe? | Nein (Münzen sind nur Spielgeld) |
 
-Wofür die App ins Internet geht (ohne Nutzerdaten zu senden):
+Wichtig für die Löschung: Datensätze, die der Server schreibt, gehören dem Entwickler. Nutzer können sie nicht selbst
+löschen, deshalb gilt das Versprechen "Löschung auf Anfrage" aus dem Datenschutztext. Cem löscht dann im
+CloudKit-Dashboard (Production > Records) alle Einträge mit diesem Familiencode.
+
+Wofür die App noch ins Internet geht:
 
 - Bedienungsanleitung von GitHub Pages (`cembot90.github.io`), mit Offline-Kurzfassung.
-- Download der natürlichen Stimmen aus dem GitHub-Release `stimmen-1`, nur wenn Eltern es in den
-  Einstellungen auslösen. Größe und Prüfsumme werden geprüft.
+- Download der natürlichen Stimmen aus dem GitHub-Release `stimmen-1`, nur wenn Eltern es auslösen. Größe und Prüfsumme werden geprüft.
+- Klassencode: Pakete der Klasse aus CloudKit lesen. Nur der Klassencode geht über das Netz.
+- Gemini Nano (KI auf dem Gerät) lädt sein Modell einmal von Google. Danach läuft die KI ohne Internet.
 
 Berechtigungen:
 
-- `INTERNET`: für die beiden Punkte oben.
-- `POST_NOTIFICATIONS`: nur für die Erinnerung des Haustiers, wird erst nach Eltern-Schalter und Frage gefordert.
+- `INTERNET`: für die Punkte oben.
+- `POST_NOTIFICATIONS`: für Erinnerungen (Haustier, Lernzeit, Wochenbericht) und Mitteilungen, wird erst nach Eltern-Schalter und Frage gefordert.
+- Kamera: nur zum Scannen des QR-Codes für den Familiencode, wenn Eltern es auslösen.
 
 Datenschutzerklärung (URL für den Store-Eintrag): `https://cembot90.github.io/YEM1N/` (gleiche Seite wie iOS,
-muss den Satz zu Android enthalten, siehe Punkt 6).
+muss die Cloud-Nutzung auf Android beschreiben, siehe Punkt 6).
 
 ## 4. Store-Eintrag (Entwurf)
 
@@ -90,8 +105,12 @@ Stichworte: Lernen, Grundschule, Mathe, Deutsch, Vorschule, Einmaleins, Hausaufg
 
 - `docs/index.html` im iOS-Repo (`cembot90/YEM1N`): Datenschutz um Android ergänzen
   (kein Konto, nur Gerätespeicher, Stimmen-Download von GitHub, Mitteilung nur lokal). Das macht Claude im iOS-Repo.
-- Release-Bau mit Verkleinerung (R8) ist noch aus. Vor dem Store-Bau einschalten und mit Keep-Regeln für
-  `com.k2fsa.sherpa.onnx` prüfen, weil die Sprach-Bibliothek ihre Klassen aus nativem Code ruft.
+- Release-Bau: `app/proguard-rules.pro` hat Keep-Regeln für Sprachausgabe (sherpa-onnx), Unterschriften (eddsa) und
+  kotlinx.serialization und ist im Release-Typ eingetragen. **Vor dem Hochladen einmal testen** (nur Cem kann das):
+  Android Studio > Build > Generate Signed App Bundle, dann die App aus dem Bundle auf einem echten Gerät starten
+  und prüfen: üben, Vorlesen (natürliche Stimme), Joker, QR-Code scannen, Klassencode. Stürzt etwas ab, die
+  Fehlermeldung (Logcat) an Claude schicken, dann kommt die fehlende Keep-Regel dazu.
+- Gemini Nano (ML Kit GenAI) braucht eigentlich Android 8. Die App läuft weiter ab Android 7, die KI ist dort aus.
 - Versionsnummer: `versionCode` bei jedem Upload um 1 erhöhen.
 - Lizenzen: Das Projekt steht unter GPL-3.0 (`LICENSE`, `THIRD-PARTY.md`). Der Quellcode ist im öffentlichen
   Repo, im Store-Eintrag den Link nennen.

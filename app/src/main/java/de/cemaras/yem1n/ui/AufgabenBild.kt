@@ -81,6 +81,13 @@ fun AufgabenBild(code: String, vm: AppViewModel) {
         }
         "emoji" -> Text(wert, fontSize = 76.sp, textAlign = TextAlign.Center)
         "englisch" -> GelbKnopf("🔊 Auf Englisch anhören") { vm.sprecher.sprich(wert, sprache = "en") }
+        "sprich" -> {
+            val sprache = wert.substringBefore('|')
+            val wort = wert.substringAfter('|')
+            GelbKnopf("🔊 Auf ${if (sprache == "tr") "Türkisch" else "Italienisch"} anhören") {
+                vm.sprecher.sprich(wort, sprache = sprache)
+            }
+        }
         "note" -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             NotenZeile(wert, Modifier.size(width = 220.dp, height = 120.dp))
             GelbKnopf("🎵 Ton anhören") { TonGeber.spiele(wert) }

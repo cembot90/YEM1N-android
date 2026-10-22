@@ -15,7 +15,11 @@ import kotlinx.serialization.json.jsonObject
 private fun LernAufgabe.mit(code: String) = copy(bild = code)
 
 /** Ein Wort aus dem Sprachkatalog: Bild, Deutsch, Englisch */
-class Vokabel(val emoji: String, val de: String, val en: String)
+class Vokabel(
+    val emoji: String, val de: String, val en: String, val tr: String = "", val it: String = "",
+) {
+    fun text(sprache: String): String = when (sprache) { "en" -> en; "tr" -> tr; "it" -> it; else -> de }
+}
 
 /** Englisch ab Klasse 3. Klasse 1 und 2 sind Extras zum Reinschnuppern. */
 object LehrplanEnglisch {
@@ -77,14 +81,16 @@ object LehrplanEnglisch {
                 val wo: JsonObject = w.jsonObject
                 val de = (wo["de"] as? JsonPrimitive)?.content.orEmpty()
                 val en = (wo["en"] as? JsonPrimitive)?.content.orEmpty()
+                val tr = (wo["tr"] as? JsonPrimitive)?.content.orEmpty()
+                val it = (wo["it"] as? JsonPrimitive)?.content.orEmpty()
                 if (de.isEmpty() || en.isEmpty()) null
-                else Vokabel((wo["emoji"] as? JsonPrimitive)?.content.orEmpty(), de, en)
+                else Vokabel((wo["emoji"] as? JsonPrimitive)?.content.orEmpty(), de, en, tr, it)
             }
         }
         return erg
     }
 
-    private fun nurZiffern(e: String) = e.isNotEmpty() && e.all { it.isDigit() || it == '️' || it == '⃣' }
+    fun nurZiffern(e: String) = e.isNotEmpty() && e.all { it.isDigit() || it == '️' || it == '⃣' }
 
     fun vokabel(katalog: String): LernAufgabe {
         val liste = woerter[katalog].orEmpty()
@@ -531,5 +537,71 @@ object LehrplanKunst {
     fun kuenstler(): LernAufgabe {
         val (frage, wer) = Lern.eins(kunstwerke)
         return Lern.wahl("Wer war das?", frage, wer, kunstwerke.map { it.second }, erklaerung = "Das war $wer.")
+    }
+}
+
+/**
+ * Türkisch und Italienisch aus dem Sprachkatalog. Sie stehen nicht im Lehrplan,
+ * darum sind es Extras. Die Stufe des Katalogs bestimmt die Klasse (1 bis 3).
+ */
+object LehrplanSprachen {
+    private class Thema(val id: String, val titel: String, val emoji: String, val klasse: Int)
+
+    private val themenListe = listOf(
+        Thema("hallo", "Hallo und Danke", "👋", 1), Thema("zahl0", "Zahlen 0 bis 10", "🔢", 1),
+        Thema("farben", "Farben", "🎨", 1), Thema("haustiere", "Haustiere und Bauernhof", "🐶", 1),
+        Thema("familie", "Familie", "👨‍👩‍👧", 1), Thema("koerper", "Körper", "🧍", 1),
+        Thema("obst", "Obst und Gemüse", "🍎", 1), Thema("essen", "Essen und Trinken", "🍞", 1),
+        Thema("wildtiere", "Wilde Tiere", "🦁", 2), Thema("zuhause", "Zuhause", "🏠", 2),
+        Thema("schule", "Schule", "🏫", 2), Thema("kleidung", "Kleidung", "👕", 2),
+        Thema("wetter", "Wetter und Natur", "☀️", 2), Thema("fahrzeuge", "Fahrzeuge", "🚗", 2),
+        Thema("stadt", "Stadt und Orte", "🏙️", 2), Thema("freizeit", "Spielen und Freizeit", "⚽", 2),
+        Thema("wochentage", "Wochentage", "📅", 2), Thema("zahl20", "Zahlen 11 bis 20", "🔢", 2),
+        Thema("monate", "Monate", "🗓️", 3), Thema("zeit", "Jahreszeiten und Zeit", "🌷", 3),
+        Thema("taetigkeiten", "Tätigkeiten", "🏃", 3), Thema("gegenteile", "Gegenteile", "↔️", 3),
+        Thema("zehner", "Zehnerzahlen bis 100", "💯", 3), Thema("saetze", "Kleine Sätze", "💬", 3),
+    )
+
+    private fun themen(fach: LehrFach, kuerzel: String, adjektiv: String): List<LernThema> =
+        themenListe.map { t ->
+            LernThema(
+                id = "$kuerzel-${t.id}", fach = fach, titel = t.titel, emoji = t.emoji,
+                beschreibung = "Wörter anhören und erkennen", klasse = t.klasse, lehrplan = false,
+                tipp = "Tippe auf den Lautsprecher und sprich das Wort laut nach.",
+                erzeuge = { vokabel(t.id, kuerzel, adjektiv) },
+            )
+        }
+
+    val tuerkisch: List<LernThema> by lazy { themen(LehrFach.TUERKISCH, "tr", "türkische") }
+    val italienisch: List<LernThema> by lazy { themen(LehrFach.ITALIENISCH, "it", "italienische") }
+
+    private fun sprachName(sprache: String) = if (sprache == "tr") "Türkisch" else "Italienisch"
+
+    fun vokabel(katalog: String, sprache: String, adjektiv: String): LernAufgabe {
+        val liste = LehrplanEnglisch.woerter[katalog].orEmpty().filter { it.text(sprache).isNotEmpty() }
+        if (liste.size < 3) {
+            return if (sprache == "tr") Lern.wahl("Wie heißt das auf Türkisch?", "Hallo", "merhaba", listOf("hoşça kal", "teşekkürler"))
+            else Lern.wahl("Wie heißt das auf Italienisch?", "Hallo", "ciao", listOf("arrivederci", "grazie"))
+        }
+        val w = Lern.eins(liste)
+        val fremd = w.text(sprache)
+        val mitBild = liste.filter { it.emoji.isNotEmpty() && !LehrplanEnglisch.nurZiffern(it.emoji) }
+        if (mitBild.size >= 3 && w.emoji.isNotEmpty() && mitBild.any { it.text(sprache) == fremd } && Lern.wahr(0.33)) {
+            return Lern.wahl(
+                "Hör gut zu! Welches Bild passt?", richtig = w.emoji, falsch = mitBild.map { it.emoji },
+                bild = "sprich:$sprache|$fremd", erklaerung = "$fremd heißt ${w.de} ${w.emoji}.",
+            )
+        }
+        if (Lern.wahr(0.5)) {
+            val vorne = if (w.emoji.isEmpty()) "" else w.emoji + " "
+            return Lern.wahl(
+                "Wie heißt das auf ${sprachName(sprache)}?", vorne + w.de, fremd, liste.map { it.text(sprache) },
+                erklaerung = "${w.de} heißt auf ${sprachName(sprache)} $fremd.",
+            )
+        }
+        return Lern.wahl(
+            "Was bedeutet das $adjektiv Wort?", fremd, w.de, liste.map { it.de },
+            bild = "sprich:$sprache|$fremd", erklaerung = "$fremd heißt ${w.de}.",
+        )
     }
 }

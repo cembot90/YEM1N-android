@@ -169,3 +169,27 @@ class LernweltWeitereTest {
         }
     }
 }
+
+class LernweltSprachenTest {
+    @org.junit.Test
+    fun tuerkischUndItalienischHabenThemen() {
+        for (f in listOf(de.cemaras.yem1n.logik.LehrFach.TUERKISCH, de.cemaras.yem1n.logik.LehrFach.ITALIENISCH)) {
+            val liste = de.cemaras.yem1n.logik.Lernwelt.themen.filter { it.fach == f }
+            org.junit.Assert.assertEquals(24, liste.size)
+            for (t in liste) {
+                val a = t.erzeuge()
+                org.junit.Assert.assertTrue(t.id, a.optionen.contains(a.antwort))
+                org.junit.Assert.assertFalse(a.antwort.isEmpty())
+            }
+        }
+    }
+
+    @org.junit.Test
+    fun sprichBildNenntSpracheUndWort() {
+        val liste = de.cemaras.yem1n.logik.Lernwelt.themen.filter { it.id == "tr-farben" }
+        repeat(30) {
+            val a = liste.first().erzeuge()
+            if (a.bild.startsWith("sprich:")) org.junit.Assert.assertTrue(a.bild.startsWith("sprich:tr|"))
+        }
+    }
+}

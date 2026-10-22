@@ -39,8 +39,8 @@ class Sprecher(kontext: Context) {
     /** [froh] klingt etwas höher und lebhafter, zum Beispiel beim Loben. */
     fun sprich(text: String, froh: Boolean = false, sprache: String = "de") {
         if (!an || text.isBlank()) return
-        val gestartet = natuerlich.sprich(text, sprache, if (froh) 1.0f else 0.92f) { sprichMitGeraet(text, froh) }
-        if (!gestartet) sprichMitGeraet(text, froh)
+        val gestartet = natuerlich.sprich(text, sprache, if (froh) 1.0f else 0.92f) { sprichMitGeraet(text, froh, sprache) }
+        if (!gestartet) sprichMitGeraet(text, froh, sprache)
     }
 
     /** Probehören aus den Einstellungen, auch wenn das Vorlesen sonst aus ist. */
@@ -54,7 +54,7 @@ class Sprecher(kontext: Context) {
         }
     }
 
-    private fun sprichMitGeraet(text: String, froh: Boolean) {
+    private fun sprichMitGeraet(text: String, froh: Boolean, sprache: String = "de") {
         if (!an) return
         val t = tts ?: return
         if (!bereit) {
@@ -62,6 +62,8 @@ class Sprecher(kontext: Context) {
             return
         }
         try {
+            // Fremdsprachen mit der passenden Gerätestimme, Deutsch bleibt Standard
+            t.language = java.util.Locale.forLanguageTag(when (sprache) { "en" -> "en-GB"; "tr" -> "tr-TR"; "it" -> "it-IT"; else -> "de-DE" })
             t.setSpeechRate(if (froh) 1.0f else 0.9f)
             t.setPitch(if (froh) 1.15f else 1.05f)
             t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "yem1n")

@@ -10,6 +10,7 @@ import de.cemaras.yem1n.logik.lehrplan.LehrplanLesen
 import de.cemaras.yem1n.logik.lehrplan.LehrplanEnglisch
 import de.cemaras.yem1n.logik.lehrplan.LehrplanMusik
 import de.cemaras.yem1n.logik.lehrplan.LehrplanKunst
+import de.cemaras.yem1n.logik.lehrplan.LehrplanSprachen
 import de.cemaras.yem1n.logik.lehrplan.LehrplanMatheMehr
 import kotlin.random.Random
 
@@ -34,6 +35,8 @@ enum class LehrFach(val anzeige: String, val emoji: String) {
     ENGLISCH("Englisch", "🇬🇧"),
     MUSIK("Musik", "🎵"),
     KUNST("Kunst", "🎨"),
+    TUERKISCH("Türkisch", "🇹🇷"),
+    ITALIENISCH("Italienisch", "🇮🇹"),
 }
 
 /** Eine Aufgabe, bevor sie in die Übung kommt. */
@@ -261,7 +264,8 @@ object Lernwelt {
     /** Einmal zusammengestellt und dann behalten. */
     val themen: List<LernThema> by lazy { LehrplanMathe.themen + LehrplanMatheMehr.themen +
             LehrplanDeutsch.themen + LehrplanDeutschMehr.themen + LehrplanLesen.themen +
-            LehrplanEnglisch.themen + LehrplanMusik.themen + LehrplanKunst.themen
+            LehrplanEnglisch.themen + LehrplanMusik.themen + LehrplanKunst.themen +
+            LehrplanSprachen.tuerkisch + LehrplanSprachen.italienisch
     }
 
     fun themenFuer(fach: LehrFach, klasse: Int, land: Bundesland): List<LernThema> =

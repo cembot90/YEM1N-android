@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync, createVerify } from "node:crypto";
 import { anmeldeblatt, leereCache, nachrichtKoerper, pushSenden } from "../src/fcm.js";
-import { abfrageKoerper, inhalt, neueEintraege, typenFuer } from "../src/mitteilungen.js";
+import { abfrageKoerper, absenderGeraet, inhalt, neueEintraege, typenFuer } from "../src/mitteilungen.js";
 import { pruefeNeues } from "../src/index.js";
 
 const CODE = "ABCDE-23456";
@@ -69,8 +69,9 @@ test("Inhalte der Mitteilungen", () => {
 });
 
 test("Typen richten sich nach den Rollen der Geräte", () => {
-  assert.deepEqual(typenFuer([{ rolle: "kind" }]).sort(), ["JokerAntwort", "JokerFreigabe"]);
-  assert.equal(typenFuer([{ rolle: "kind" }, { rolle: "eltern" }]).length, 6);
+  assert.deepEqual(typenFuer([{ rolle: "kind" }]).sort(), ["Duell", "DuellAntwort", "JokerAntwort", "JokerFreigabe"]);
+  assert.equal(typenFuer([{ rolle: "kind" }, { rolle: "eltern" }]).length, 8);
+  assert.ok(typenFuer([{ rolle: "kind" }]).includes("Duell"));
 });
 
 test("Nur neuere Einträge zählen, älteste zuerst", () => {
@@ -126,4 +127,11 @@ test("Cron: erster Lauf merkt nur den Stand, zweiter schickt Mitteilung an die r
 
 test("Ohne Dienstkonto passiert nichts", async () => {
   assert.equal(await pruefeNeues({}, fetch), 0);
+});
+
+test("Duell-Mitteilung geht nicht an das Gerät, das sie geschickt hat", () => {
+  const f = { json: { value: JSON.stringify({ von: "Yemin", vonGeraet: "G-1" }) } };
+  assert.equal(absenderGeraet("Duell", f), "G-1");
+  assert.match(inhalt("Duell", f).text, /Yemin fordert dich heraus/);
+  assert.equal(absenderGeraet("JokerAntwort", f), "");
 });

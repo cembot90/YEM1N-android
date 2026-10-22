@@ -17,6 +17,14 @@ function text(wert, max, pflicht = true) {
   return wert;
 }
 
+/** Das Duell wird als JSON-Text abgelegt, wie bei iOS. Muss gültiges JSON sein. */
+function jsonText(wert) {
+  const t = text(wert, 20000);
+  if (t === null) return null;
+  try { JSON.parse(t); } catch { return null; }
+  return t;
+}
+
 function zahl(wert, min, max) {
   return Number.isInteger(wert) && wert >= min && wert <= max ? wert : null;
 }
@@ -76,6 +84,22 @@ export function pruefeSenden(body) {
       felder = { familienCode: s(code), anzahl: s(anzahl) };
       break;
     }
+    case "duell": {
+      const id = text(d.id, 80), json = jsonText(d.json);
+      if (feldFehler(id, json)) return { fehler: "Duell ungültig" };
+      typ = "Duell";
+      name = "duell-" + id;
+      felder = { familienCode: s(code), json: s(json) };
+      break;
+    }
+    case "duellantwort": {
+      const id = text(d.duellId, 80), geraet = text(d.geraet, 80), json = jsonText(d.json);
+      if (feldFehler(id, geraet, json)) return { fehler: "Duell-Antwort ungültig" };
+      typ = "DuellAntwort";
+      name = "duellantwort-" + id + "-" + geraet;
+      felder = { familienCode: s(code), json: s(json) };
+      break;
+    }
     case "ergebnis": {
       const id = text(d.eintragId, 80), klasse = text(d.klasse, 40, false), fach = text(d.fach, 40, false);
       const arbeit = text(d.arbeit, 120, false), uebung = text(d.uebung, 120, false), kind = text(d.kind, 40, false);
@@ -111,5 +135,8 @@ export function pruefeGeraet(body) {
   if (!ROLLEN.includes(body.rolle)) return { fehler: "Rolle ungültig" };
   const token = text(body.token, 400);
   if (!token) return { fehler: "Push-Kennung ungültig" };
-  return { code, rolle: body.rolle, token };
+  // Die Gerätekennung aus dem Duell, damit man sich nicht selbst benachrichtigt (optional)
+  const geraet = text(body.geraet, 80, false);
+  if (geraet === null) return { fehler: "Gerätekennung ungültig" };
+  return { code, rolle: body.rolle, token, geraet };
 }

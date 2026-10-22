@@ -62,10 +62,21 @@ object ServerAnfrage {
     fun freigabe(code: String, anzahl: Int = 3): String =
         kopf(code, "freigabe", buildJsonObject { put("anzahl", anzahl.coerceIn(1, 10)) })
 
-    /** Meldet dieses Gerät für Mitteilungen an. [rolle] ist "kind" oder "eltern". */
-    fun geraet(code: String, rolle: String, token: String): String = buildJsonObject {
+    /** Eine Duell-Herausforderung, [json] ist der Text aus [DuellPost.text]. */
+    fun duell(code: String, id: String, json: String): String =
+        kopf(code, "duell", buildJsonObject { put("id", id); put("json", json) })
+
+    fun duellAntwort(code: String, duellId: String, geraet: String, json: String): String =
+        kopf(code, "duellantwort", buildJsonObject { put("duellId", duellId); put("geraet", geraet); put("json", json) })
+
+    /**
+     * Meldet dieses Gerät für Mitteilungen an. [rolle] ist "kind" oder "eltern".
+     * [duellGeraet] ist die Gerätekennung aus dem Duell, damit man keine Mitteilung zur eigenen Herausforderung bekommt.
+     */
+    fun geraet(code: String, rolle: String, token: String, duellGeraet: String = ""): String = buildJsonObject {
         put("code", code)
         put("rolle", rolle)
         put("token", token)
+        if (duellGeraet.isNotEmpty()) put("geraet", duellGeraet)
     }.toString()
 }

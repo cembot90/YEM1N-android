@@ -2,7 +2,7 @@ import { anfrage, schluesselLaden } from "./cloudkit.js";
 import { pruefeGeraet, pruefeSenden } from "./regeln.js";
 import { neueBremse } from "./limit.js";
 import { pushSenden } from "./fcm.js";
-import { TYPEN, abfrageKoerper, inhalt, neueEintraege, typenFuer } from "./mitteilungen.js";
+import { TYPEN, absenderGeraet, abfrageKoerper, inhalt, neueEintraege, typenFuer } from "./mitteilungen.js";
 
 const proGeraet = neueBremse(30, 60000);
 const proCode = neueBremse(120, 60000);
@@ -70,7 +70,7 @@ export async function behandle(request, env, holen = fetch) {
     const key = "geraete:" + g.code;
     const alt = JSON.parse((await env.GERAETE.get(key)) || "[]");
     const neu = alt.filter((x) => x.token !== g.token);
-    neu.push({ rolle: g.rolle, token: g.token, seit: Date.now() });
+    neu.push({ rolle: g.rolle, token: g.token, geraet: g.geraet || "", seit: Date.now() });
     await env.GERAETE.put(key, JSON.stringify(neu.slice(-10)));
     return antwort(200, { ok: true });
   }
@@ -107,7 +107,8 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
       for (const eintrag of neu.slice(-3)) {
         const text = inhalt(typ, eintrag.fields);
         if (!text) continue;
-        for (const g of geraete.filter((x) => x.rolle === TYPEN[typ])) {
+        for (const g of geraete.filter((x) => TYPEN[typ] === "alle" || x.rolle === TYPEN[typ])) {
+          if (g.geraet && absenderGeraet(typ, eintrag.fields) === g.geraet) continue;
           const e = await pushSenden(konto, g.token, text.titel, text.text, typ, holen, jetzt);
           console.log("pruefeNeues: Push", typ, g.rolle, e.ok ? "ok" : "Fehler " + e.status);
           if (e.ok) verschickt++;

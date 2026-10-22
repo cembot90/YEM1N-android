@@ -42,7 +42,7 @@ test("Ungültiges wird abgelehnt", () => {
 });
 
 test("Gerät melden", () => {
-  assert.deepEqual(pruefeGeraet({ code: CODE, rolle: "eltern", token: "abc" }), { code: CODE, rolle: "eltern", token: "abc" });
+  assert.deepEqual(pruefeGeraet({ code: CODE, rolle: "eltern", token: "abc" }), { code: CODE, rolle: "eltern", token: "abc", geraet: "" });
   assert.ok(pruefeGeraet({ code: CODE, rolle: "admin", token: "abc" }).fehler);
   assert.ok(pruefeGeraet({ code: CODE, rolle: "kind" }).fehler);
 });
@@ -181,4 +181,23 @@ test("Nachschub und Freigabe werden zu CloudKit-Befehlen", () => {
   assert.equal(f.operation.operations[0].record.fields.anzahl.value, 3);
   assert.ok(pruefeSenden({ code: CODE, art: "freigabe", daten: { anzahl: 99 } }).fehler);
   assert.ok(pruefeSenden({ code: CODE, art: "nachschub", daten: {} }).fehler);
+});
+
+test("Duell und Antwort bekommen feste Namen wie bei iOS", () => {
+  const d = pruefeSenden({ code: CODE, art: "duell", daten: { id: "ABC-1", json: '{"von":"Yemin"}' } });
+  const r = d.operation.operations[0].record;
+  assert.equal(r.recordType, "Duell");
+  assert.equal(r.recordName, "duell-ABC-1");
+  assert.equal(r.fields.json.value, '{"von":"Yemin"}');
+  const a = pruefeSenden({ code: CODE, art: "duellantwort", daten: { duellId: "ABC-1", geraet: "G-9", json: "{}" } });
+  assert.equal(a.operation.operations[0].record.recordName, "duellantwort-ABC-1-G-9");
+  assert.equal(a.operation.operations[0].record.recordType, "DuellAntwort");
+  assert.ok(pruefeSenden({ code: CODE, art: "duell", daten: { id: "x", json: "kein json" } }).fehler);
+  assert.ok(pruefeSenden({ code: CODE, art: "duell", daten: { json: "{}" } }).fehler);
+});
+
+test("Gerätemeldung nimmt eine optionale Gerätekennung", () => {
+  const g = pruefeGeraet({ code: CODE, rolle: "kind", token: "t", geraet: "G-1" });
+  assert.equal(g.geraet, "G-1");
+  assert.equal(pruefeGeraet({ code: CODE, rolle: "kind", token: "t" }).geraet, "");
 });

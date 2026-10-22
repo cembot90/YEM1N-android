@@ -88,6 +88,8 @@ data class Fortschritt(
     /** Freigaben der Eltern, die dieses Gerät schon angewendet hat, und der Zeitpunkt des ersten Abgleichs. */
     val jokerFreigaben: List<String> = emptyList(),
     val jokerFreigabeAb: Long = 0,
+    /** Feste, zufällige Kennung dieses Geräts für das Duell. Sie sagt nichts über die Person. */
+    val duellGeraet: String = "",
 ) {
 
     fun jokerUebrig(heute: Long): Int = JokerNachschub.uebrig(jokerLimit, jokerTag, jokerGenutzt, heute)

@@ -75,6 +75,8 @@ object JokerCloud {
     const val TYP_ANTWORT = "JokerAntwort"
     const val TYP_DAUMEN = "JokerDaumen"
     const val TYP_ERGEBNIS = "RundenErgebnis"
+    const val TYP_DUELL = "Duell"
+    const val TYP_DUELLANTWORT = "DuellAntwort"
     const val TYP_NACHSCHUB = "JokerNachschub"
     const val TYP_FREIGABE = "JokerFreigabe"
 

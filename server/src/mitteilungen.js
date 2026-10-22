@@ -9,7 +9,21 @@ export const TYPEN = {
   JokerNachschub: "eltern",
   JokerAntwort: "kind",
   JokerFreigabe: "kind",
+  // Das Duell geht an alle Geräte der Familie
+  Duell: "alle",
+  DuellAntwort: "alle",
 };
+
+function duellJson(felder) {
+  try { return JSON.parse(felder && felder.json ? felder.json.value : "{}"); } catch { return {}; }
+}
+
+/** Die Gerätekennung, die ein Duell-Eintrag geschickt hat (damit sie nicht an sich selbst geht), sonst "". */
+export function absenderGeraet(typ, felder) {
+  if (typ === "Duell") return duellJson(felder).vonGeraet || "";
+  if (typ === "DuellAntwort") return duellJson(felder).geraet || "";
+  return "";
+}
 
 function kurz(t, n = 100) {
   const s = String(t || "").replace(/\s+/g, " ").trim();
@@ -35,6 +49,10 @@ export function inhalt(typ, felder) {
       return { titel: `💬 Antwort von ${kurz(f("absender"), 30) || "deinen Eltern"}`, text: kurz(f("text")) };
     case "JokerFreigabe":
       return { titel: "🎁 Neue Joker!", text: "Deine Eltern haben dir Joker geschenkt." };
+    case "Duell":
+      return { titel: "⚔️ Neue Duell-Herausforderung", text: `${kurz(duellJson(felder).von, 30) || "Jemand aus deiner Familie"} fordert dich heraus. Nimmst du an?` };
+    case "DuellAntwort":
+      return { titel: "⚔️ Ein Duell ist entschieden", text: "Schau nach, wer gewonnen hat!" };
     default:
       return null;
   }
@@ -43,7 +61,7 @@ export function inhalt(typ, felder) {
 /** Welche Rollen unter den Geräten einer Familie vorkommen, daraus die Typen, die abgefragt werden müssen. */
 export function typenFuer(geraete) {
   const rollen = new Set(geraete.map((g) => g.rolle));
-  return Object.keys(TYPEN).filter((t) => rollen.has(TYPEN[t]));
+  return Object.keys(TYPEN).filter((t) => TYPEN[t] === "alle" ? geraete.length > 0 : rollen.has(TYPEN[t]));
 }
 
 /** Aus einer CloudKit-Antwort die Einträge, die neuer sind als der Stand. */

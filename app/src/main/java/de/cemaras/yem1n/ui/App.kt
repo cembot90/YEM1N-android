@@ -93,6 +93,7 @@ fun App(vm: AppViewModel) {
             is Ansicht.VorschulPakete -> VorschulPaketScreen(vm, (vm.ansicht as Ansicht.VorschulPakete).arbeit)
             Ansicht.HaustierSeite -> HaustierScreen(vm)
             Ansicht.Joker -> JokerScreen(vm)
+            Ansicht.Duell -> DuellScreen(vm)
             Ansicht.ErgebnisseEltern -> ErgebnisseElternScreen(vm)
             is Ansicht.Spiel -> SpielScreen(vm, (vm.ansicht as Ansicht.Spiel).art)
             is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)
@@ -193,6 +194,11 @@ fun StartScreen(vm: AppViewModel) {
                 if (tier == null) "such dir eins aus" else tier.stufe.titel, Modifier.weight(1f),
             ) { vm.oeffneHaustier() }
             SonderKnopf("🆘", "Joker", "Frag deine Eltern", Modifier.weight(1f)) { vm.oeffneJoker() }
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SonderKnopf("⚔️", "Duell", "Gegen die Familie", Modifier.weight(1f)) { vm.oeffneDuell() }
+            Spacer(Modifier.weight(1f))
         }
         val faecher = vm.faecher
         if (faecher.size > 1) {

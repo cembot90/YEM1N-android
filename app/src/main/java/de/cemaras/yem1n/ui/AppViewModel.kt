@@ -28,6 +28,13 @@ import de.cemaras.yem1n.speicher.ServerClient
 import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
 import de.cemaras.yem1n.logik.JokerFrage
+import de.cemaras.yem1n.logik.DuellAntwort
+import de.cemaras.yem1n.logik.DuellHerausforderung
+import de.cemaras.yem1n.logik.DuellPost
+import de.cemaras.yem1n.logik.DuellRegeln
+import de.cemaras.yem1n.logik.DuellSpiel
+import de.cemaras.yem1n.logik.DuellStand
+import de.cemaras.yem1n.logik.DuellStufe
 import de.cemaras.yem1n.logik.JokerNachschub
 import de.cemaras.yem1n.logik.ServerAnfrage
 import de.cemaras.yem1n.logik.CloudAdresse
@@ -66,6 +73,7 @@ sealed interface Ansicht {
     data object HaustierSeite : Ansicht
     data object Joker : Ansicht
     data object ErgebnisseEltern : Ansicht
+    data object Duell : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -192,6 +200,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         Erinnerung.planenLernzeit(app, fortschritt.lernzeitAn, fortschritt.lernzeitMinuten, fortschritt.rundenHeute(Tag.heute()) > 0)
         offeneErgebnisseSenden()
         Mitteilungen.kanalAnlegen(app)
+        if (fortschritt.duellGeraet.isEmpty()) behalte(fortschritt.copy(duellGeraet = java.util.UUID.randomUUID().toString()))
         geraetMelden()
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
@@ -236,7 +245,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -455,11 +464,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 if (token.isNullOrEmpty()) return@addOnSuccessListener
                 Mitteilungen.speichereToken(app, token)
                 val rolle = fortschritt.jokerRolle
-                val schluessel = "$code|$rolle|$token"
+                val schluessel = "$code|$rolle|$token|${fortschritt.duellGeraet}"
                 if (Mitteilungen.gemeldet(app) == schluessel) return@addOnSuccessListener
                 viewModelScope.launch {
                     val e = withContext(Dispatchers.IO) {
-                        ServerClient.senden(ServerAnfrage.PFAD_GERAET, ServerAnfrage.geraet(code, rolle, token))
+                        ServerClient.senden(ServerAnfrage.PFAD_GERAET, ServerAnfrage.geraet(code, rolle, token, fortschritt.duellGeraet))
                     }
                     if (e.ok) Mitteilungen.merkeGemeldet(app, schluessel)
                 }
@@ -518,6 +527,89 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 fortschritt.mitJokerAufgefuellt(Tag.heute()).copy(jokerFreigaben = (fortschritt.jokerFreigaben + neu).takeLast(100)),
             )
             jokerMeldung = "🎁 Deine Eltern haben dir neue Joker geschenkt!"
+        }
+    }
+
+    // ---- Duell ----
+
+    var duelle: List<DuellHerausforderung> by mutableStateOf(emptyList())
+    var duellAntworten: List<DuellAntwort> by mutableStateOf(emptyList())
+    var duellMeldung: String by mutableStateOf("")
+    var duellBeschaeftigt: Boolean by mutableStateOf(false)
+    var duellSpiel: DuellSpiel? by mutableStateOf(null)
+
+    /** Wer das Duell spielt: der Name aus den Einstellungen, sonst die Rolle. */
+    val duellName: String
+        get() = fortschritt.name.trim().take(14).ifEmpty { if (fortschritt.jokerRolle == "eltern") "Eltern" else "Kind" }
+
+    /** Die Stufe zur Klasse des Kindes. Eltern rechnen standardmäßig auf Profi. */
+    val duellMeineStufe: DuellStufe
+        get() = if (fortschritt.jokerRolle == "eltern") DuellStufe.PROFI else DuellStufe.KLASSE3
+
+    fun oeffneDuell() {
+        ansicht = Ansicht.Duell
+        duellLaden()
+    }
+
+    fun duellLaden() {
+        val code = jokerCode
+        if (code.isEmpty() || duellBeschaeftigt) return
+        duellBeschaeftigt = true
+        viewModelScope.launch {
+            val (d, a) = withContext(Dispatchers.IO) {
+                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_DUELL, code, 200)) to
+                    cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_DUELLANTWORT, code, 400))
+            }
+            if (d == null || a == null) {
+                duellMeldung = "Die Duelle konnten nicht geladen werden. Ist das Internet an?"
+            } else {
+                val neu = JokerCloud.datensaetze(d).mapNotNull { DuellPost.herausforderung(it.text("json")) }
+                val antw = JokerCloud.datensaetze(a).mapNotNull { DuellPost.antwort(it.text("json")) }
+                // Was gerade erst geschickt wurde, steht vielleicht noch nicht in der Cloud.
+                val ids = neu.map { it.id }.toSet()
+                val antwIds = antw.map { it.id }.toSet()
+                duelle = neu + duelle.filter { it.id !in ids && it.vonGeraet == fortschritt.duellGeraet }
+                duellAntworten = antw + duellAntworten.filter { it.id !in antwIds && it.geraet == fortschritt.duellGeraet }
+                duellMeldung = ""
+            }
+            duellBeschaeftigt = false
+        }
+    }
+
+    fun duellNeu(meine: DuellStufe, andere: DuellStufe) {
+        duellSpiel = DuellSpiel(meine, DuellRegeln.aufgaben(meine), null, andere, DuellRegeln.aufgaben(andere))
+    }
+
+    fun duellAnnehmen(d: DuellHerausforderung) {
+        duellSpiel = DuellSpiel(d.anStufe, d.aufgaben.ifEmpty { DuellRegeln.aufgaben(d.anStufe) }, d)
+    }
+
+    fun duellSpielBeenden() {
+        duellSpiel = null
+    }
+
+    /** Alle Aufgaben sind gerechnet: Ergebnis in die Familien-Cloud schicken. */
+    fun duellFertig(stand: DuellStand) {
+        val spiel = duellSpiel ?: return
+        val code = jokerCode
+        val jetzt = DuellRegeln.zeitpunktJetzt()
+        val koerper: String
+        val herausforderung = spiel.herausforderung
+        if (herausforderung == null) {
+            val d = DuellHerausforderung(
+                id = java.util.UUID.randomUUID().toString(), von = duellName, vonGeraet = fortschritt.duellGeraet,
+                vonStufe = spiel.stufe, vonStand = stand, anStufe = spiel.anStufe, aufgaben = spiel.fuerAndere, zeitpunkt = jetzt,
+            )
+            duelle = duelle + d
+            koerper = ServerAnfrage.duell(code, d.id, DuellPost.text(d))
+        } else {
+            val a = DuellAntwort(herausforderung.id, duellName, fortschritt.duellGeraet, stand, jetzt)
+            duellAntworten = duellAntworten + a
+            koerper = ServerAnfrage.duellAntwort(code, a.duellID, a.geraet, DuellPost.text(a))
+        }
+        viewModelScope.launch {
+            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
+            duellMeldung = if (e.ok) "" else "Das Ergebnis ging nicht raus. ${e.meldung}"
         }
     }
 
@@ -915,7 +1007,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {

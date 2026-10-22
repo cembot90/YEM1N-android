@@ -88,7 +88,7 @@ private fun DuellStart(vm: AppViewModel) {
         Text("⚔️ Duell", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
         Text("Kopfrechnen gegen deine Familie. Du rechnest vor, die anderen rechnen nach, jeder auf seiner Stufe.", color = TextSanft, fontSize = 15.sp)
 
-        if (!Familiencode.istGueltig(code)) {
+        if (Familiencode.pruefe(code) == null) {
             Text("Für das Duell braucht ihr einen gemeinsamen Familiencode.", color = Color.White, fontSize = 16.sp)
             Button(onClick = vm::oeffneJoker, modifier = Modifier.fillMaxWidth().height(52.dp)) {
                 Text("Familiencode einrichten", fontWeight = FontWeight.Bold)

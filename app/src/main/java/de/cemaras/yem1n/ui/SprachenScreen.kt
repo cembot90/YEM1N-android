@@ -37,6 +37,7 @@ import de.cemaras.yem1n.logik.Karteikasten
 import de.cemaras.yem1n.logik.Sprachen
 import de.cemaras.yem1n.logik.lehrplan.Vokabel
 import de.cemaras.yem1n.ui.theme.Gelb
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
@@ -99,7 +100,7 @@ fun SprachenScreen(vm: AppViewModel) {
                 val ws = Sprachen.woerter(x.id, sprache)
                 val gelernt = ws.count { Karteikasten.gelernt(vm.fortschritt.wortStand[Karteikasten.schluessel(sprache, x.id, it.de)]) }
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Karte)
+                    Modifier.fillMaxWidth().glas(16.dp)
                         .clickable { thema = x.id }.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -109,7 +110,10 @@ fun SprachenScreen(vm: AppViewModel) {
                         Text(x.titel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                         Text("$gelernt von ${ws.size} gelernt", color = if (gelernt == ws.size && ws.isNotEmpty()) Mint else TextSanft, fontSize = 13.sp)
                     }
-                    if (gelernt == ws.size && ws.isNotEmpty()) Text("✅", fontSize = 20.sp)
+                    de.cemaras.yem1n.ui.theme.Fortschrittsring(
+                        anteil = if (ws.isEmpty()) 0f else gelernt.toFloat() / ws.size, groesse = 36.dp, strich = 4.dp,
+                        farbe = if (gelernt == ws.size && ws.isNotEmpty()) Mint else Gelb,
+                    ) { if (gelernt == ws.size && ws.isNotEmpty()) Text("✓", fontSize = 14.sp, color = Mint) }
                 }
             }
             BreitKnopf("📊 Bericht für Eltern", "Gelernte Wörter, schwierige Wörter, letzte Runden") { modus = "bericht" }
@@ -147,7 +151,7 @@ private fun KnopfChip(text: String, aktiv: Boolean, klick: () -> Unit) {
 @Composable
 private fun BreitKnopf(titel: String, text: String, klick: () -> Unit) {
     Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Karte).clickable(onClick = klick).padding(16.dp),
+        Modifier.fillMaxWidth().glas(18.dp).clickable(onClick = klick).padding(16.dp),
     ) {
         Text(titel, color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
         Text(text, color = TextSanft, fontSize = 14.sp)
@@ -179,7 +183,7 @@ private fun KartenAnsicht(vm: AppViewModel, woerter: List<Vokabel>, sprache: Str
     }
     val w = woerter[i]
     Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Karte).border(2.dp, if (offen) Mint else Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+        Modifier.fillMaxWidth().glas(24.dp).border(2.dp, if (offen) Mint else Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
             .clickable {
                 offen = !offen
                 if (offen) vm.sprecher.sprich(w.text(sprache), sprache = sprache)
@@ -213,7 +217,7 @@ private fun KartenAnsicht(vm: AppViewModel, woerter: List<Vokabel>, sprache: Str
 private fun BreitKnopfKlein(text: String, modifier: Modifier, klick: () -> Unit) {
     Text(
         text, color = Color.White, fontWeight = FontWeight.Black, fontSize = 18.sp, textAlign = TextAlign.Center,
-        modifier = modifier.clip(RoundedCornerShape(16.dp)).background(Karte).border(1.dp, Gelb.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+        modifier = modifier.glas(16.dp).border(1.dp, Gelb.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
             .clickable(onClick = klick).padding(vertical = 14.dp),
     )
 }
@@ -265,8 +269,8 @@ private fun PaareAnsicht(vm: AppViewModel, woerter: List<Vokabel>, sprache: Stri
 private fun PaarKarte(text: String, fertig: Boolean, gewaehlt: Boolean, falsch: Boolean, klick: () -> Unit) {
     val rand = when { fertig -> Mint; gewaehlt -> Gelb; falsch -> Color(0xFFFF6B6B); else -> Color.White.copy(alpha = 0.3f) }
     Box(
-        Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(14.dp))
-            .background(if (fertig) Mint.copy(alpha = 0.18f) else Karte)
+        Modifier.fillMaxWidth().height(56.dp).glas(14.dp)
+            .background(if (fertig) Mint.copy(alpha = 0.18f) else Color.Transparent)
             .border(2.dp, rand, RoundedCornerShape(14.dp)).clickable(onClick = klick),
         contentAlignment = Alignment.Center,
     ) { Text(text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.Center) }
@@ -335,7 +339,7 @@ private fun TippenAnsicht(vm: AppViewModel, woerter: List<Vokabel>, sprache: Str
     }
     val w = fragen[i]
     Text("Wort ${i + 1} von ${fragen.size}", color = TextSanft)
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Karte).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier.fillMaxWidth().glas(24.dp).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         if (w.emoji.isNotEmpty() && !de.cemaras.yem1n.logik.lehrplan.LehrplanEnglisch.nurZiffern(w.emoji)) Text(w.emoji, fontSize = 64.sp)
         Text(w.de, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White, textAlign = TextAlign.Center)
         Text("Wie heißt das auf ${Sprachen.info(sprache).name}?", color = TextSanft, fontSize = 14.sp)

@@ -41,6 +41,7 @@ import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
+import de.cemaras.yem1n.ui.theme.feder
 import de.cemaras.yem1n.ui.theme.glas
 
 @Composable
@@ -185,11 +186,13 @@ private fun ZeitKopf(abschnitt: Int, jetzt: Boolean) {
 @Composable
 private fun ThemaKarte(vm: AppViewModel, t: LernThema) {
     val sterne = vm.lernSterne(t)
+    val quelle = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         Modifier
             .fillMaxWidth()
+            .feder(quelle)
             .glas(22.dp)
-            .clickable { vm.startLernThema(t) }
+            .clickable(interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current) { vm.startLernThema(t) }
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),

@@ -400,6 +400,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var jokerFragen: List<JokerFrage> by mutableStateOf(emptyList())
         private set
     var jokerMeldung: String by mutableStateOf("")
+    /** Name des Kindes mit offener Bitte um neue Joker (nur für Eltern). */
+    var jokerNachschubOffen: String? by mutableStateOf(null)
         private set
     var jokerBeschaeftigt: Boolean by mutableStateOf(false)
         private set
@@ -487,16 +489,55 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 jokerMeldung = if (liste.isEmpty()) "Noch keine Fragen." else ""
             }
             jokerBeschaeftigt = false
+            nachschubPruefen(code)
         }
     }
 
-    private fun jokerSenden(koerper: String) {
+    /** Eltern sehen offene Bitten um Joker, ein Kind-Gerät füllt seine Joker bei neuen Freigaben auf. */
+    private suspend fun nachschubPruefen(code: String) {
+        val (n, fr) = withContext(Dispatchers.IO) {
+            cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_NACHSCHUB, code)) to
+                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_FREIGABE, code))
+        }
+        if (n == null || fr == null) return
+        val nachschub = JokerCloud.datensaetze(n)
+        val freigaben = JokerCloud.datensaetze(fr)
+        if (fortschritt.jokerRolle == "eltern") {
+            jokerNachschubOffen = JokerNachschub.offeneAnfrage(nachschub, freigaben)
+            return
+        }
+        jokerNachschubOffen = null
+        if (fortschritt.jokerFreigabeAb == 0L) {
+            behalte(fortschritt.copy(jokerFreigabeAb = System.currentTimeMillis()))
+            return
+        }
+        val neu = JokerNachschub.neueFreigaben(freigaben, fortschritt.jokerFreigaben, fortschritt.jokerFreigabeAb)
+        if (neu.isNotEmpty()) {
+            behalte(
+                fortschritt.mitJokerAufgefuellt(Tag.heute()).copy(jokerFreigaben = (fortschritt.jokerFreigaben + neu).takeLast(100)),
+            )
+            jokerMeldung = "🎁 Deine Eltern haben dir neue Joker geschenkt!"
+        }
+    }
+
+    fun jokerNachschubAnfragen() {
+        if (jokerCode.isEmpty()) return
+        jokerSenden(ServerAnfrage.nachschub(jokerCode, fortschritt.name))
+    }
+
+    fun jokerFreigeben() {
+        if (jokerCode.isEmpty()) return
+        jokerSenden(ServerAnfrage.freigabe(jokerCode, fortschritt.jokerLimit))
+    }
+
+    private fun jokerSenden(koerper: String, verbraucht: Boolean = false) {
         if (jokerBeschaeftigt) return
         jokerBeschaeftigt = true
         viewModelScope.launch {
             val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
             jokerBeschaeftigt = false
             if (e.ok) {
+                if (verbraucht) behalte(fortschritt.mitJokerGenutzt(Tag.heute()))
                 jokerMeldung = "Gesendet."
                 // CloudKit braucht einen Moment, bis neue Einträge abfragbar sind.
                 kotlinx.coroutines.delay(1500)
@@ -509,7 +550,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun jokerFrageSenden(fach: String, uebung: String, text: String) {
         if (text.isBlank() || jokerCode.isEmpty()) return
-        jokerSenden(ServerAnfrage.frage(jokerCode, fortschritt.name, fach, uebung, text))
+        if (fortschritt.jokerUebrig(Tag.heute()) <= 0) {
+            jokerMeldung = "Heute sind keine Joker mehr übrig. Du kannst neue anfragen."
+            return
+        }
+        jokerSenden(ServerAnfrage.frage(jokerCode, fortschritt.name, fach, uebung, text), verbraucht = true)
     }
 
     fun jokerAntwortSenden(frageId: String, emoji: String, text: String) {

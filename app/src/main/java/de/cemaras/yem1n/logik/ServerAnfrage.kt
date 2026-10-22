@@ -54,6 +54,14 @@ object ServerAnfrage {
             if (e.details.isNotEmpty()) put("details", e.details)
         })
 
+    /** Das Kind bittet um neue Joker. */
+    fun nachschub(code: String, kind: String): String =
+        kopf(code, "nachschub", buildJsonObject { put("kind", kind.trim().take(40).ifEmpty { "Kind" }) })
+
+    /** Die Eltern geben Joker frei (wie bei iOS: wieder auf das Tageslimit auffüllen). */
+    fun freigabe(code: String, anzahl: Int = 3): String =
+        kopf(code, "freigabe", buildJsonObject { put("anzahl", anzahl.coerceIn(1, 10)) })
+
     /** Meldet dieses Gerät für Mitteilungen an. [rolle] ist "kind" oder "eltern". */
     fun geraet(code: String, rolle: String, token: String): String = buildJsonObject {
         put("code", code)

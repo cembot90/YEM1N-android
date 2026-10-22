@@ -99,6 +99,7 @@ fun JokerScreen(vm: AppViewModel) {
         }
 
         if (!eltern) FrageFormular(vm)
+        if (eltern) NachschubKarte(vm)
         if (eltern) {
             Button(onClick = vm::oeffneErgebnisse, modifier = Modifier.fillMaxWidth().height(52.dp)) {
                 Text("📊 Ergebnisse der Kinder", fontWeight = FontWeight.Bold)
@@ -158,6 +159,11 @@ private fun FrageFormular(vm: AppViewModel) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text("Frag deine Eltern", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color.White)
+        val uebrig = vm.fortschritt.jokerUebrig(de.cemaras.yem1n.logik.Tag.heute())
+        Text(
+            "Joker heute: " + "🃏".repeat(uebrig) + "▫️".repeat((vm.fortschritt.jokerLimit - uebrig).coerceAtLeast(0)) + "  ($uebrig von ${vm.fortschritt.jokerLimit})",
+            color = TextSanft, fontSize = 14.sp,
+        )
         OutlinedTextField(
             value = text,
             onValueChange = { text = it.take(500) },
@@ -170,9 +176,38 @@ private fun FrageFormular(vm: AppViewModel) {
                 vm.jokerFrageSenden("", "", text)
                 text = ""
             },
-            enabled = text.isNotBlank() && !vm.jokerBeschaeftigt,
+            enabled = text.isNotBlank() && !vm.jokerBeschaeftigt && uebrig > 0,
             modifier = Modifier.fillMaxWidth().height(48.dp),
         ) { Text("Frage abschicken", fontWeight = FontWeight.Bold) }
+        if (uebrig <= 0) {
+            Text("Heute sind keine Joker mehr übrig.", color = TextSanft, fontSize = 14.sp)
+            OutlinedButton(
+                onClick = vm::jokerNachschubAnfragen,
+                enabled = !vm.jokerBeschaeftigt,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+            ) { Text("🙏 Neue Joker anfragen", color = Color.White) }
+        }
+    }
+}
+
+@Composable
+private fun NachschubKarte(vm: AppViewModel) {
+    val kind = vm.jokerNachschubOffen
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text("Joker-Nachschub", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Gelb)
+        Text(
+            if (kind != null) "$kind hat keine Joker mehr und fragt nach neuen."
+            else "Keine offene Anfrage. Du kannst die Joker trotzdem jederzeit auffüllen.",
+            color = Color.White, fontSize = 15.sp,
+        )
+        Button(
+            onClick = vm::jokerFreigeben,
+            enabled = !vm.jokerBeschaeftigt,
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+        ) { Text("Joker wieder auf ${vm.fortschritt.jokerLimit} auffüllen", fontWeight = FontWeight.Bold) }
     }
 }
 

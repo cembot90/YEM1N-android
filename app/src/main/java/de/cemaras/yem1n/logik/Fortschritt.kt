@@ -81,7 +81,21 @@ data class Fortschritt(
     /** Tägliche Erinnerung ans Üben, mit Uhrzeit in Minuten seit Mitternacht (Standard 16:00). */
     val lernzeitAn: Boolean = false,
     val lernzeitMinuten: Int = 16 * 60,
+    /** Joker am heutigen Tag (Tag als Tageszahl, Zahl der benutzten Joker) und das Limit pro Tag. */
+    val jokerTag: Long = 0,
+    val jokerGenutzt: Int = 0,
+    val jokerLimit: Int = 3,
+    /** Freigaben der Eltern, die dieses Gerät schon angewendet hat, und der Zeitpunkt des ersten Abgleichs. */
+    val jokerFreigaben: List<String> = emptyList(),
+    val jokerFreigabeAb: Long = 0,
 ) {
+
+    fun jokerUebrig(heute: Long): Int = JokerNachschub.uebrig(jokerLimit, jokerTag, jokerGenutzt, heute)
+
+    fun mitJokerGenutzt(heute: Long): Fortschritt =
+        copy(jokerTag = heute, jokerGenutzt = (if (jokerTag == heute) jokerGenutzt else 0) + 1)
+
+    fun mitJokerAufgefuellt(heute: Long): Fortschritt = copy(jokerTag = heute, jokerGenutzt = 0)
 
     fun stand(arbeitSchluessel: String, uebung: String): UebungsStand =
         eintraege[schluessel(arbeitSchluessel, uebung)] ?: UebungsStand()

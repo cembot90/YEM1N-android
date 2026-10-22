@@ -62,6 +62,20 @@ export function pruefeSenden(body) {
       felder = { familienCode: s(code), anfrageID: s(frage), antwortID: s(antwort), absender: s(absender) };
       break;
     }
+    case "nachschub": {
+      const kind = text(d.kind, 40);
+      if (feldFehler(kind)) return { fehler: "Nachschub ungültig" };
+      typ = "JokerNachschub";
+      felder = { familienCode: s(code), kind: s(kind) };
+      break;
+    }
+    case "freigabe": {
+      const anzahl = zahl(d.anzahl === undefined ? 3 : d.anzahl, 1, 10);
+      if (feldFehler(anzahl)) return { fehler: "Freigabe ungültig" };
+      typ = "JokerFreigabe";
+      felder = { familienCode: s(code), anzahl: s(anzahl) };
+      break;
+    }
     case "ergebnis": {
       const id = text(d.eintragId, 80), klasse = text(d.klasse, 40, false), fach = text(d.fach, 40, false);
       const arbeit = text(d.arbeit, 120, false), uebung = text(d.uebung, 120, false), kind = text(d.kind, 40, false);

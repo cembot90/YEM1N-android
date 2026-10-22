@@ -169,3 +169,16 @@ test("Senden: normaler Erfolg bleibt Erfolg", async () => {
     async () => new Response('{"records":[{"recordName":"abc","recordType":"JokerAnfrage"}]}', { status: 200 }));
   assert.equal(a.status, 200);
 });
+
+test("Nachschub und Freigabe werden zu CloudKit-Befehlen", () => {
+  const n = pruefeSenden({ code: CODE, art: "nachschub", daten: { kind: "Yemin" } });
+  const rn = n.operation.operations[0].record;
+  assert.equal(rn.recordType, "JokerNachschub");
+  assert.equal(rn.fields.kind.value, "Yemin");
+  assert.equal(rn.recordName, undefined);
+  const f = pruefeSenden({ code: CODE, art: "freigabe", daten: {} });
+  assert.equal(f.operation.operations[0].record.recordType, "JokerFreigabe");
+  assert.equal(f.operation.operations[0].record.fields.anzahl.value, 3);
+  assert.ok(pruefeSenden({ code: CODE, art: "freigabe", daten: { anzahl: 99 } }).fehler);
+  assert.ok(pruefeSenden({ code: CODE, art: "nachschub", daten: {} }).fehler);
+});

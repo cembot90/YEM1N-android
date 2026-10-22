@@ -29,6 +29,8 @@ import de.cemaras.yem1n.logik.Einwilligung
 import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
 import de.cemaras.yem1n.logik.Klassensiegel
+import de.cemaras.yem1n.logik.KlassenAdmin
+import de.cemaras.yem1n.logik.PaketJson
 import de.cemaras.yem1n.logik.Karteikasten
 import de.cemaras.yem1n.logik.Sprachen
 import de.cemaras.yem1n.logik.SprachRunde
@@ -468,6 +470,78 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun sprachRunde(sprache: String, thema: String, art: String, richtig: Int, gesamt: Int) =
         behalte(fortschritt.copy(sprachVerlauf = Karteikasten.neuerVerlauf(fortschritt.sprachVerlauf, SprachRunde(System.currentTimeMillis(), sprache, thema, art, richtig, gesamt))))
+
+    // Klassencode als Admin: Klasse anlegen, Pakete unterschreiben und senden
+
+    var adminMeldung: String by mutableStateOf("")
+        private set
+    var adminBeschaeftigt: Boolean by mutableStateOf(false)
+        private set
+    /** Pakete dieser Klasse in der Cloud: Name des Datensatzes und Titel. */
+    var adminPakete: List<Pair<String, String>> by mutableStateOf(emptyList())
+        private set
+
+    val istKlassenAdmin: Boolean
+        get() = fortschritt.klassencode.isNotEmpty() && fortschritt.klassenAdmin.containsKey(fortschritt.klassencode)
+
+    fun klasseAnlegen() {
+        if (einwilligungOffen || adminBeschaeftigt) return
+        val code = Familiencode.neu()
+        val seed = KlassenAdmin.neuerSeed()
+        adminBeschaeftigt = true
+        adminMeldung = ""
+        viewModelScope.launch {
+            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_KLASSE, KlassenAdmin.schluesselAnfrage(code, seed)) }
+            if (e.ok) {
+                behalte(fortschritt.copy(klassencode = code, klassenAdmin = fortschritt.klassenAdmin + (code to seed)))
+                adminMeldung = "Deine Klasse ist angelegt. Der Klassencode ist $code. Gib ihn an die Geräte der Klasse weiter."
+                adminPaketeLaden()
+            } else {
+                adminMeldung = e.meldung
+            }
+            adminBeschaeftigt = false
+        }
+    }
+
+    /** Schickt eine Arbeit unterschrieben an die Klasse. */
+    fun klassePaketSenden(arbeit: Arbeit) {
+        val code = fortschritt.klassencode
+        val seed = fortschritt.klassenAdmin[code] ?: return
+        if (adminBeschaeftigt) return
+        val json = PaketJson.text(arbeit)
+        if (json.length > KlassenAdmin.MAX_JSON) {
+            adminMeldung = "\"${arbeit.titel}\" ist zu groß für die Cloud. Bitte in zwei Arbeiten teilen."
+            return
+        }
+        adminBeschaeftigt = true
+        viewModelScope.launch {
+            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_KLASSE, KlassenAdmin.paketAnfrage(code, seed, json)) }
+            adminMeldung = if (e.ok) "\"${arbeit.titel}\" ist bei der Klasse. Alle Geräte mit dem Klassencode laden es von selbst." else e.meldung
+            adminBeschaeftigt = false
+            if (e.ok) adminPaketeLaden()
+        }
+    }
+
+    fun klassePaketLoeschen(name: String) {
+        val code = fortschritt.klassencode
+        val seed = fortschritt.klassenAdmin[code] ?: return
+        if (adminBeschaeftigt) return
+        adminBeschaeftigt = true
+        viewModelScope.launch {
+            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_KLASSE, KlassenAdmin.loeschenAnfrage(code, seed, name)) }
+            adminMeldung = if (e.ok) "Das Paket wurde bei der Klasse gelöscht." else e.meldung
+            adminBeschaeftigt = false
+            if (e.ok) adminPaketeLaden()
+        }
+    }
+
+    fun adminPaketeLaden() {
+        val kcode = Klassensiegel.cloudCode(fortschritt.klassencode) ?: return
+        viewModelScope.launch {
+            val text = withContext(Dispatchers.IO) { cloud.lesen("records/query", JokerCloud.abfrage("Lernpaket", kcode, 100)) }
+            if (text != null) adminPakete = JokerCloud.datensaetze(text).map { it.name to it.text("titel", it.name) }
+        }
+    }
 
     // Klassencode: Aufgabenpakete der Klasse, vom Admin unterschrieben
 

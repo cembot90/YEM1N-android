@@ -8,6 +8,7 @@ import kotlinx.serialization.json.put
 object ServerAnfrage {
     const val PFAD_SENDEN = "/v1/senden"
     const val PFAD_GERAET = "/v1/geraet"
+    const val PFAD_KLASSE = "/v1/klasse"
 
     private fun kopf(code: String, art: String, daten: JsonObject): String = buildJsonObject {
         put("code", code)

@@ -1,5 +1,6 @@
 import { anfrage, schluesselLaden } from "./cloudkit.js";
 import { pruefeGeraet, pruefeSenden } from "./regeln.js";
+import { loeschBefehl, paketBefehl, pruefeKlasse, schluesselAbfrage, schluesselAusAntwort, schluesselBefehl, unterschriftGilt } from "./klasse.js";
 import { neueBremse } from "./limit.js";
 import { pushSenden } from "./fcm.js";
 import { TYPEN, absenderGeraet, abfrageKoerper, inhalt, neueEintraege, typenFuer } from "./mitteilungen.js";
@@ -62,6 +63,31 @@ export async function behandle(request, env, holen = fetch) {
       grund = { code: a.serverErrorCode, grund: a.reason };
     } catch { /* Antwort war kein JSON */ }
     return antwort(502, { fehler: "CloudKit hat abgelehnt", status: r.status, ...grund });
+  }
+
+  if (url.pathname === "/v1/klasse") {
+    const k = pruefeKlasse(body);
+    if (k.fehler) return antwort(400, { fehler: k.fehler });
+    if (!proCode(k.kcode)) return antwort(429, { fehler: "Zu viele Anfragen für diese Klasse" });
+    const key = await schluessel(env);
+    const lookup = await anfrage(env, key, "records/lookup", schluesselAbfrage(k.kcode), holen);
+    const vorhanden = lookup.status === 200 ? schluesselAusAntwort(lookup.text) : null;
+
+    if (k.art === "schluessel") {
+      // Ein vorhandener Schlüssel wird nie überschrieben. Derselbe Schlüssel noch einmal gilt als geschafft.
+      if (vorhanden) return vorhanden === k.publicKey ? antwort(200, { ok: true }) : antwort(409, { fehler: "Diesen Klassencode gibt es schon" });
+      const r = await anfrage(env, key, "records/modify", schluesselBefehl(k.kcode, k.publicKey), holen);
+      const f = r.status === 200 ? ersterFehler(r.text) : { code: String(r.status) };
+      return f ? antwort(502, { fehler: "CloudKit hat abgelehnt", code: f.code, grund: f.grund }) : antwort(200, { ok: true });
+    }
+
+    if (!vorhanden) return antwort(403, { fehler: "Für diesen Klassencode gibt es keinen Schlüssel" });
+    const text = k.art === "paket" ? k.kcode + "|" + k.json : k.kcode + "|loeschen|" + k.name;
+    if (!(await unterschriftGilt(vorhanden, text, k.sig))) return antwort(403, { fehler: "Unterschrift passt nicht" });
+    const befehl = k.art === "paket" ? paketBefehl(k) : loeschBefehl(k.name);
+    const r = await anfrage(env, key, "records/modify", befehl, holen);
+    const f = r.status === 200 ? ersterFehler(r.text) : { code: String(r.status) };
+    return f ? antwort(502, { fehler: "CloudKit hat abgelehnt", code: f.code, grund: f.grund }) : antwort(200, { ok: true });
   }
 
   if (url.pathname === "/v1/geraet") {

@@ -88,6 +88,8 @@ data class Fortschritt(
     val sprachVerlauf: List<SprachRunde> = emptyList(),
     /** Klassencode (XXXXX-XXXXX), von dem Aufgabenpakete der Klasse kommen. Leer ohne. */
     val klassencode: String = "",
+    /** Klassen, die dieses Gerät als Admin angelegt hat: Klassencode zu privatem Schlüssel (Base64). Bleibt auf dem Gerät. */
+    val klassenAdmin: Map<String, String> = emptyMap(),
     /** Gemerkter öffentlicher Schlüssel je Klassencode (Base64), damit ein Wechsel auffällt. */
     val klassenSchluessel: Map<String, String> = emptyMap(),
     /** Erinnerung am Nachmittag, wenn das Haustier hungrig würde. */

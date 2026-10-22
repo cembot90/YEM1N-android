@@ -235,10 +235,36 @@ fun EinstellungenScreen(vm: AppViewModel) {
                 )
                 Button(onClick = { klassenFehler = !vm.setzeKlassencode(klassenEingabe) }, enabled = klassenEingabe.isNotBlank() && !vm.einwilligungOffen) { Text("Eintragen") }
                 if (vm.einwilligungOffen) Text("Zuerst oben die Einwilligung der Eltern geben.", color = TextSanft, fontSize = 13.sp)
+                Text("Du willst selbst Aufgaben an eine Klasse schicken? Dann legst du eine eigene Klasse an und bist ihr Admin. Nur dieses Gerät darf dann Pakete für den Klassencode unterschreiben.", color = TextSanft, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
+                OutlinedButton(onClick = vm::klasseAnlegen, enabled = !vm.einwilligungOffen && !vm.adminBeschaeftigt, border = BorderStroke(1.dp, Gelb)) { Text("Eigene Klasse anlegen", color = Gelb) }
+                if (vm.adminMeldung.isNotEmpty()) Text(vm.adminMeldung, color = Color.White, fontSize = 14.sp)
             } else {
                 Text("Klassencode: ${vm.fortschritt.klassencode}", color = Color.White, fontSize = 16.sp)
                 Button(onClick = vm::klassenPaketeHolen, enabled = !vm.klassenBeschaeftigt) { Text(if (vm.klassenBeschaeftigt) "Suche ..." else "Neue Aufgaben holen") }
                 OutlinedButton(onClick = vm::entferneKlassencode) { Text("Klassencode entfernen") }
+                if (vm.istKlassenAdmin) {
+                    androidx.compose.runtime.LaunchedEffect(vm.fortschritt.klassencode) { vm.adminPaketeLaden() }
+                    Text("Du bist Admin dieser Klasse. Wähle eine Arbeit, die an die Klasse gehen soll:", color = Gelb, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+                    vm.arbeiten.forEach { a ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(a.titel, color = Color.White, fontWeight = FontWeight.SemiBold)
+                                Text("${a.klasse} · ${a.fach}", color = TextSanft, fontSize = 13.sp)
+                            }
+                            TextButton(onClick = { vm.klassePaketSenden(a) }, enabled = !vm.adminBeschaeftigt) { Text("Senden", color = Gelb) }
+                        }
+                    }
+                    if (vm.adminPakete.isNotEmpty()) {
+                        Text("Schon bei der Klasse:", color = TextSanft, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
+                        vm.adminPakete.forEach { (name, titel) ->
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Text(titel, color = Color.White, modifier = Modifier.weight(1f))
+                                TextButton(onClick = { vm.klassePaketLoeschen(name) }, enabled = !vm.adminBeschaeftigt) { Text("Löschen", color = Koralle) }
+                            }
+                        }
+                    }
+                    if (vm.adminMeldung.isNotEmpty()) Text(vm.adminMeldung, color = Color.White, fontSize = 14.sp)
+                }
             }
 
         }

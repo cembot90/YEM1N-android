@@ -34,6 +34,8 @@ object ServerClient {
     internal fun fehlertext(status: Int, text: String): String = when (status) {
         429 -> "Das ging zu schnell. Bitte kurz warten."
         400 -> "Das konnte nicht gesendet werden. Bitte Text und Familiencode prüfen."
+        403 -> "Der Server hat die Unterschrift nicht angenommen. Nur der Admin dieser Klasse darf Pakete senden."
+        409 -> "Diesen Klassencode gibt es schon. Bitte einen neuen anlegen."
         else -> "Der Server hat nicht geantwortet (Code $status)."
     }
 }

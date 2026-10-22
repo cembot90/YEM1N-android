@@ -152,3 +152,20 @@ class LernweltTest {
         assertEquals(listOf(1, 2, 3, 4), g.map { it.abschnitt }.take(4))
     }
 }
+
+class LernweltWeitereTest {
+    @org.junit.Test
+    fun sprachkatalogWirdGeladen() {
+        val w = de.cemaras.yem1n.logik.lehrplan.LehrplanEnglisch.woerter
+        org.junit.Assert.assertTrue(w["farben"].orEmpty().size >= 3)
+        org.junit.Assert.assertTrue(w["wochentage"].orEmpty().size >= 7)
+    }
+
+    @org.junit.Test
+    fun englischMusikKunstHabenThemen() {
+        for (f in listOf(de.cemaras.yem1n.logik.LehrFach.ENGLISCH, de.cemaras.yem1n.logik.LehrFach.MUSIK,
+            de.cemaras.yem1n.logik.LehrFach.KUNST)) {
+            org.junit.Assert.assertTrue("$f", de.cemaras.yem1n.logik.Lernwelt.themen.count { it.fach == f } >= 9)
+        }
+    }
+}

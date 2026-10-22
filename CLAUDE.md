@@ -79,8 +79,13 @@ Veröffentlichung: `store/VEROEFFENTLICHUNG.md` sammelt Checkliste, Data-Safety-
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
 Meilenstein 6 (Cloud ohne Apple-ID): Server läuft auf Cloudflare (`server/`, Adresse in `speicher/ServerClient.kt`), Schreiben mit Server-Schlüssel und Lesen mit API-Token sind bestätigt. Joker-Seite (Familiencode, Frage, Antwort, Daumen) und stilles Senden der Rundenergebnisse sind da (`ui/JokerScreen.kt`, `logik/JokerCloud.kt`, `logik/ServerAnfrage.kt`).
-Noch offen: Elternansicht der Ergebnisse, Mitteilungen über FCM, Duell, Wechsel auf die Production-Umgebung (eigener API-Token, Server-Schlüssel und Schema dort).
-Danach: Stimmen, CloudKit-Anbindung, Joker, Haustier, Spiele, Widget.
+Mitteilungen laufen über FCM und den Server (Abfrage jede Minute, höchstens etwa 5 Familien). Joker haben ein Tageslimit mit Nachschub und Freigabe durch die Eltern (`logik/JokerNachschub.kt`). Dazu kommen Elternansicht der Ergebnisse mit Details, Wochenbericht in Worten, Radar, Duell (Records `Duell` und `DuellAntwort`, gleiche wie iOS), Lernzeit mit täglicher Erinnerung und Notizblock.
+Die CloudKit-Typen `JokerNachschub` und `JokerFreigabe` legt iOS selbst an (`anzahl` ist eine Zahl). `cloud/schema.ckdb` ist das ganze Schema, nur nötig, wenn Production fehlt.
+Einwilligung der Eltern vor dem Familiencode (`logik/Einwilligung.kt`), ohne sie geht nichts in die Cloud. QR-Code für den Familiencode (zeigen und scannen, Format `yem1n://familie/CODE`).
+Meilenstein 7 (Lernwelt): Aufgaben nach dem Lehrplan für Hessen, Bayern und NRW, Klassen 1 bis 4, Fächer Mathe, Deutsch, Englisch, Musik, Kunst, dazu Türkisch und Italienisch als Extras aus dem Sprachkatalog (`app/src/main/resources/sprachkatalog.json`, Wörter anhören und erkennen). Themen stehen in `logik/lehrplan/`, Bilder in `ui/AufgabenBild.kt`, Sterne je Thema bleiben erhalten. Bundesland und Klasse stellt man in der Lernwelt ein.
+Meilenstein 8 (Erklären): Erklär-Freund (nach einer falschen Antwort "Warum war das falsch?", feste Sätze aus `logik/FehlerAnalyse.kt`, keine KI), Olli die Eule beim Haustier (`logik/Eule.kt`, Einführung und Tipps), Rechenweg als Bild (`logik/ErklaerBild.kt`, `ui/ErklaerBildView.kt`). Unter Einstellungen > Bereiche lassen sich Vorschule und Sprachen ausblenden.
+Noch nicht von iOS übernommen: Stift und Handschrift, Klassencode mit Unterschrift, Sprachen als eigener Bereich mit Karten, Paaren und Bericht (nur die Lernwelt-Version ist da), KI-Formulierung beim Erklär-Freund, Schlaf des Haustiers von 20 bis 7 Uhr, Sonntagserinnerung zum Wochenbericht.
+Noch offen in der Cloud: Wechsel der Production-Schlüssel nach dem Test, Seiten für mehr als 300 Ergebnisse.
 
 ## Designüberarbeitung (begonnen)
 

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -144,115 +145,146 @@ fun StartScreen(vm: AppViewModel) {
     val ziel = vm.fortschritt.tagesziel
     val (faellig, wartend) = vm.fehlerStand
     val sichtbar = vm.arbeiten.withIndex().filter { vm.fachFilter == null || it.value.fach == vm.fachFilter }
-    Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 16.dp)) {
-        Spacer(Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text("YEM1N", fontSize = 40.sp, fontWeight = FontWeight.Black, color = Gelb)
-                val gruss = vm.fortschritt.name.trim().let {
-                    if (it.isEmpty()) "Was wollen wir heute üben?" else "Hallo $it! Was üben wir heute?"
+    var menue by remember { mutableStateOf(false) }
+    val klassen = sichtbar.map { it.value.klasse }.distinct().sorted()
+    LazyColumn(
+        Modifier.fillMaxSize().systemBarsPadding(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("YEM1N", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Gelb, letterSpacing = 3.sp)
+                    Text("Schule", fontSize = 38.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    val gruss = vm.fortschritt.name.trim().let {
+                        if (it.isEmpty()) "Such dir eine Übung aus" else "Hallo $it! Such dir eine Übung aus"
+                    }
+                    Text(gruss, color = TextSanft, fontSize = 16.sp)
                 }
-                Text(gruss, color = TextSanft, fontSize = 18.sp)
-            }
-            TextButton(onClick = vm::oeffneEinstellungen) { Text("⚙", fontSize = 28.sp, color = Gelb) }
-        }
-        Spacer(Modifier.height(12.dp))
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .glas(18.dp)
-                .clickable(onClick = vm::oeffneErfolge)
-                .padding(14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")
-            Kennzahl("🪙", "${vm.fortschritt.muenzen}", "Münzen")
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                de.cemaras.yem1n.ui.theme.Fortschrittsring(
-                    anteil = if (ziel > 0) minOf(runden, ziel).toFloat() / ziel else 1f,
-                    groesse = 52.dp, strich = 6.dp,
-                ) { Text("🎯", fontSize = 18.sp) }
-                Text("${minOf(runden, ziel)} / $ziel heute", color = TextSanft, fontSize = 13.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RundKnopf("🎮") { vm.oeffneSpiele() }
+                    RundKnopf("🏆") { vm.oeffneErfolge() }
+                    Box {
+                        RundKnopf("＋", betont = true) { menue = true }
+                        androidx.compose.material3.DropdownMenu(expanded = menue, onDismissRequest = { menue = false }) {
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("Arbeit einfügen") }, onClick = { menue = false; einfuegen = true })
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("Datei öffnen") }, onClick = { menue = false; oeffner.launch(arrayOf("*/*")) })
+                            if (vm.fortschritt.klassencode.isNotEmpty()) {
+                                androidx.compose.material3.DropdownMenuItem(text = { Text("Neue Aufgaben der Klasse holen") }, onClick = { menue = false; vm.klassenPaketeHolen() })
+                            }
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("Einstellungen") }, onClick = { menue = false; vm.oeffneEinstellungen() })
+                        }
+                    }
+                }
             }
         }
-        Spacer(Modifier.height(10.dp))
-        FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (vm.fortschritt.vorschulAn) {
-                SonderKnopf("🧸", "Vorschule", "für die Kleinen", Modifier.weight(1f)) { vm.oeffneVorschule() }
+        item {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .glas(18.dp)
+                    .clickable(onClick = vm::oeffneErfolge)
+                    .padding(14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")
+                Kennzahl("🪙", "${vm.fortschritt.muenzen}", "Münzen")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    de.cemaras.yem1n.ui.theme.Fortschrittsring(
+                        anteil = if (ziel > 0) minOf(runden, ziel).toFloat() / ziel else 1f,
+                        groesse = 52.dp, strich = 6.dp,
+                    ) { Text("🎯", fontSize = 18.sp) }
+                    Text("${minOf(runden, ziel)} / $ziel heute", color = TextSanft, fontSize = 13.sp)
+                }
             }
-            SonderKnopf("🎮", "Spiele", "mit Münzen", Modifier.weight(1f)) { vm.oeffneSpiele() }
         }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SonderKnopf("📝", "Probearbeit", "30 Minuten", Modifier.weight(1f)) { vm.startProbe() }
-            SonderKnopf("🎯", "Training", "deine Schwächen", Modifier.weight(1f)) { vm.startTraining() }
-        }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val tier = vm.haustier
-            SonderKnopf(
-                tier?.emoji ?: "🥚", if (tier == null) "Haustier" else tier.name,
-                if (tier == null) "such dir eins aus" else tier.stufe.titel, Modifier.weight(1f),
-            ) { vm.oeffneHaustier() }
-            SonderKnopf("🆘", "Joker", "Frag deine Eltern", Modifier.weight(1f)) { vm.oeffneJoker() }
-        }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SonderKnopf("⚔️", "Duell", "Gegen die Familie", Modifier.weight(1f)) { vm.oeffneDuell() }
-            SonderKnopf("🌍", "Lernwelt", "nach dem Lehrplan", Modifier.weight(1f)) { vm.oeffneLernwelt() }
+        item {
+            KartenZeile(onClick = vm::oeffneLernwelt) {
+                Text("🌍", fontSize = 32.sp)
+                Spacer(Modifier.size(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Lernwelt", fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color.White)
+                    Text("Fertige Aufgaben nach dem Lehrplan", fontSize = 14.sp, color = TextSanft)
+                }
+                Text("›", color = Gelb, fontSize = 26.sp)
+            }
         }
         if (vm.fortschritt.sprachenAn) {
-            Spacer(Modifier.height(8.dp))
+            item {
+                KartenZeile(onClick = vm::oeffneSprachen) {
+                    Text("🗣️", fontSize = 32.sp)
+                    Spacer(Modifier.size(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Sprachen", fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color.White)
+                        Text("Englisch, Türkisch, Italienisch", fontSize = 14.sp, color = TextSanft)
+                    }
+                    Text("›", color = Gelb, fontSize = 26.sp)
+                }
+            }
+        }
+        item { Titel("Extra") }
+        item { FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() } }
+        item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SonderKnopf("🗣️", "Sprachen", "Englisch, Türkisch, Italienisch", Modifier.weight(1f)) { vm.oeffneSprachen() }
+                SonderKnopf("📝", "Probearbeit", "30 Minuten", Modifier.weight(1f)) { vm.startProbe() }
+                SonderKnopf("🎯", "Training", "deine Schwächen", Modifier.weight(1f)) { vm.startTraining() }
+            }
+        }
+        item { Titel("Mehr") }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val tier = vm.haustier
+                SonderKnopf(
+                    tier?.emoji ?: "🥚", if (tier == null) "Haustier" else tier.name,
+                    if (tier == null) "such dir eins aus" else tier.stufe.titel, Modifier.weight(1f),
+                ) { vm.oeffneHaustier() }
+                SonderKnopf("🆘", "Joker", "Frag deine Eltern", Modifier.weight(1f)) { vm.oeffneJoker() }
+            }
+        }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SonderKnopf("⚔️", "Duell", "Gegen die Familie", Modifier.weight(1f)) { vm.oeffneDuell() }
+                if (vm.fortschritt.vorschulAn) {
+                    SonderKnopf("🧸", "Vorschule", "für die Kleinen", Modifier.weight(1f)) { vm.oeffneVorschule() }
+                } else {
+                    Spacer(Modifier.weight(1f))
+                }
             }
         }
         val faecher = vm.faecher
         if (faecher.size > 1) {
-            Spacer(Modifier.height(10.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = vm.fachFilter == null,
-                    onClick = { vm.waehleFach(null) },
-                    label = { Text("Alle") },
-                    colors = chipFarben(),
-                )
-                faecher.forEach { f ->
-                    FilterChip(
-                        selected = vm.fachFilter == f,
-                        onClick = { vm.waehleFach(f) },
-                        label = { Text(f) },
-                        colors = chipFarben(),
-                    )
+            item {
+                Row(
+                    Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilterChip(selected = vm.fachFilter == null, onClick = { vm.waehleFach(null) }, label = { Text("Alle") }, colors = chipFarben())
+                    faecher.forEach { f ->
+                        FilterChip(selected = vm.fachFilter == f, onClick = { vm.waehleFach(f) }, label = { Text(f) }, colors = chipFarben())
+                    }
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
-        LazyColumn(
-            Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(sichtbar, key = { it.value.schluessel }) { (i, arbeit) ->
-                ArbeitKarte(vm, arbeit) { vm.oeffne(i) }
+        if (sichtbar.isEmpty()) {
+            item {
+                Text("Noch keine Klassenarbeit. Über das Plus oben lassen sich Arbeiten einfügen.", color = TextSanft, fontSize = 15.sp)
             }
         }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(
-                onClick = { einfuegen = true },
-                modifier = Modifier.weight(1f),
-                border = BorderStroke(1.dp, Gelb),
-            ) { Text("Arbeit einfügen", color = Gelb) }
-            OutlinedButton(
-                onClick = { oeffner.launch(arrayOf("*/*")) },
-                modifier = Modifier.weight(1f),
-                border = BorderStroke(1.dp, Gelb),
-            ) { Text("Datei öffnen", color = Gelb) }
+        for (klasse in klassen) {
+            item(key = "k-$klasse") {
+                Text(klasse, fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 10.dp))
+            }
+            for (fach in sichtbar.filter { it.value.klasse == klasse }.map { it.value.fach }.distinct()) {
+                item(key = "f-$klasse-$fach") {
+                    Text("📘 $fach", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Gelb)
+                }
+                items(sichtbar.filter { it.value.klasse == klasse && it.value.fach == fach }, key = { it.value.schluessel }) { (i, arbeit) ->
+                    ArbeitKarte(vm, arbeit) { vm.oeffne(i) }
+                }
+            }
         }
-        Spacer(Modifier.height(12.dp))
     }
     if (einfuegen) {
         EinfuegenDialog(vm) { einfuegen = false }
@@ -433,5 +465,24 @@ private fun UebungZeile(vm: AppViewModel, arbeit: Arbeit, i: Int) {
             )
         }
         Text(sterneText(stand.sterne), color = Gelb, fontSize = 20.sp)
+    }
+}
+
+@Composable
+private fun Titel(text: String) {
+    Text(text, fontSize = 15.sp, fontWeight = FontWeight.Black, color = Gelb, modifier = Modifier.padding(top = 6.dp))
+}
+
+@Composable
+private fun RundKnopf(symbol: String, betont: Boolean = false, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(if (betont) Gelb else Color.White.copy(alpha = 0.14f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(symbol, fontSize = 20.sp, color = if (betont) Navy else Color.White, fontWeight = FontWeight.Black)
     }
 }

@@ -45,6 +45,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import de.cemaras.yem1n.logik.Eule
+import androidx.compose.foundation.layout.width
 import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.logik.HaustierArt
 import de.cemaras.yem1n.logik.HaustierHut
@@ -148,7 +150,7 @@ private fun HaustierStall(vm: AppViewModel, tier: Haustier) {
     ) {
         Text(tier.name, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
         Text("${tier.stufe.titel} ${tier.stimmung.emoji}", color = Gelb, fontWeight = FontWeight.Bold)
-        Sprechblase(tier.spruch)
+        OlliBlase(vm, tier, muenzen, heute)
         Tierbild(tier)
         val weiter = tier.stufe.naechste
         if (weiter != null) {
@@ -298,6 +300,52 @@ private fun Hutladen(vm: AppViewModel, tier: Haustier) {
                     )
                 }
             }
+        }
+    }
+}
+
+/** Olli erklärt beim ersten Besuch das Haustier, danach gibt sie Tipps. Antippen zeigt den nächsten. */
+@Composable
+private fun OlliBlase(vm: AppViewModel, tier: Haustier, muenzen: Int, heute: Long) {
+    val einfuehrung = remember(tier.name, tier.stufe == HaustierStufe.EI) { Eule.einfuehrung(tier) }
+    var schritt by remember { mutableStateOf(if (vm.fortschritt.euleEinfuehrung) -1 else 0) }
+    var nummer by remember { mutableStateOf(0) }
+    val tipps = remember(tier, muenzen, heute, vm.fortschritt.familiencode) {
+        Eule.tipps(tier, muenzen, vm.fortschritt.familiencode.isNotEmpty(), heute)
+    }
+    val text = if (schritt >= 0) einfuehrung[schritt] else tipps[Math.floorMod(nummer, tipps.size)]
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(
+            Modifier
+                .clip(RoundedCornerShape(18.dp)).glas(18.dp)
+                .clickable { if (schritt < 0) nummer++ }
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Text(Eule.BILD, fontSize = 30.sp)
+            Spacer(Modifier.width(10.dp))
+            Column {
+                Text(text, color = Color.White, fontSize = 16.sp)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "🔊 Vorlesen", color = Gelb, fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { vm.sprecher.sprich(Eule.sprechbar(text)) },
+                )
+            }
+        }
+        if (schritt >= 0) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                if (schritt < einfuehrung.lastIndex) "Weiter (${schritt + 1} von ${einfuehrung.size})" else "Los geht's!",
+                color = Color(0xFF00205B), fontWeight = FontWeight.Black,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50)).background(Gelb)
+                    .clickable {
+                        if (schritt < einfuehrung.lastIndex) schritt++
+                        else { schritt = -1; vm.euleEinfuehrungGesehen() }
+                    }
+                    .padding(horizontal = 18.dp, vertical = 8.dp),
+            )
         }
     }
 }

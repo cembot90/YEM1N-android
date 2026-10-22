@@ -70,6 +70,8 @@ data class Fortschritt(
     val spielHaptik: Boolean = true,
     /** Das Haustier, null solange noch keins gewählt wurde. */
     val haustier: Haustier? = null,
+    /** Olli hat dem Kind das Haustier schon erklärt. */
+    val euleEinfuehrung: Boolean = false,
     /** Erinnerung am Nachmittag, wenn das Haustier hungrig würde. */
     val haustierErinnerung: Boolean = true,
     /** Familiencode für Joker und Ergebnisse, leer solange keiner eingegeben wurde. */

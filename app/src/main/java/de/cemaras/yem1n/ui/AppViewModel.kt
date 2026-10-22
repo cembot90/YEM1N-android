@@ -702,6 +702,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun euleEinfuehrungGesehen() = behalte(fortschritt.copy(euleEinfuehrung = true))
+
     fun setzeErinnerung(an: Boolean) = behalte(fortschritt.copy(haustierErinnerung = an))
 
     fun setzeLernzeit(an: Boolean) = behalte(fortschritt.copy(lernzeitAn = an))

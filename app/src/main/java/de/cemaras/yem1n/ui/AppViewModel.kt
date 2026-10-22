@@ -28,6 +28,7 @@ import de.cemaras.yem1n.speicher.ServerClient
 import de.cemaras.yem1n.logik.Einwilligung
 import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
+import de.cemaras.yem1n.logik.Klassensiegel
 import de.cemaras.yem1n.logik.JokerFrage
 import de.cemaras.yem1n.logik.DuellAntwort
 import de.cemaras.yem1n.logik.DuellHerausforderung
@@ -447,6 +448,58 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         ansicht = Ansicht.Joker
         offeneErgebnisseSenden()
         if (jokerCode.isNotEmpty()) jokerLaden()
+    }
+
+    // Klassencode: Aufgabenpakete der Klasse, vom Admin unterschrieben
+
+    var klassenBeschaeftigt: Boolean by mutableStateOf(false)
+        private set
+
+    /** Nimmt einen Klassencode an und holt gleich die Pakete. Gibt false zurück, wenn er nicht passt. */
+    fun setzeKlassencode(eingabe: String): Boolean {
+        val code = Familiencode.pruefe(eingabe) ?: return false
+        behalte(fortschritt.copy(klassencode = code))
+        klassenPaketeHolen()
+        return true
+    }
+
+    fun entferneKlassencode() {
+        val alt = Klassensiegel.cloudCode(fortschritt.klassencode)
+        behalte(fortschritt.copy(klassencode = "", klassenSchluessel = fortschritt.klassenSchluessel - listOfNotNull(alt)))
+    }
+
+    /** Holt neue Pakete der Klasse, prüft die Unterschrift und legt sie als Arbeiten ab. */
+    fun klassenPaketeHolen() {
+        val cloudCode = Klassensiegel.cloudCode(fortschritt.klassencode) ?: return
+        if (einwilligungOffen || klassenBeschaeftigt) return
+        klassenBeschaeftigt = true
+        viewModelScope.launch {
+            val (liste, schluessel) = withContext(Dispatchers.IO) {
+                val l = cloud.lesen("records/query", JokerCloud.abfrage("Lernpaket", cloudCode, limit = 50))
+                val k = cloud.lesen("records/lookup", Klassensiegel.abfrageSchluessel(cloudCode))
+                l to k
+            }
+            if (liste == null) {
+                meldung = "Keine Verbindung. Ist das Internet an?"
+            } else {
+                val geholt = schluessel?.let { JokerCloud.datensaetze(it).firstOrNull()?.text("publicKey") }?.ifEmpty { null }
+                val e = Klassensiegel.pruefen(cloudCode, JokerCloud.datensaetze(liste), fortschritt.klassenSchluessel[cloudCode], geholt)
+                if (e.neuerSchluessel != null) {
+                    behalte(fortschritt.copy(klassenSchluessel = fortschritt.klassenSchluessel + (cloudCode to e.neuerSchluessel)))
+                }
+                var neu = 0
+                for (json in e.angenommen) if (fuegeArbeitEin(json) == null) neu++
+                val teile = mutableListOf<String>()
+                if (neu > 0) teile += if (neu == 1) "Eine neue Arbeit der Klasse ist da." else "$neu neue Arbeiten der Klasse sind da."
+                if (e.abgelehnt > 0) {
+                    teile += "${e.abgelehnt} Paket(e) ohne gültige Unterschrift wurden ignoriert."
+                    teile += e.gruende.map { it.text }
+                }
+                if (teile.isEmpty()) teile += "Keine neuen Pakete."
+                meldung = teile.joinToString("\n")
+            }
+            klassenBeschaeftigt = false
+        }
     }
 
     /** Nimmt einen eingegebenen Familiencode an. Gibt false zurück, wenn er nicht passt. */

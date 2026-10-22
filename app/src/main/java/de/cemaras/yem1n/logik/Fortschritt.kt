@@ -80,6 +80,10 @@ data class Fortschritt(
     val sprachenAn: Boolean = true,
     /** Olli hat dem Kind das Haustier schon erklärt. */
     val euleEinfuehrung: Boolean = false,
+    /** Klassencode (XXXXX-XXXXX), von dem Aufgabenpakete der Klasse kommen. Leer ohne. */
+    val klassencode: String = "",
+    /** Gemerkter öffentlicher Schlüssel je Klassencode (Base64), damit ein Wechsel auffällt. */
+    val klassenSchluessel: Map<String, String> = emptyMap(),
     /** Erinnerung am Nachmittag, wenn das Haustier hungrig würde. */
     val haustierErinnerung: Boolean = true,
     /** Familiencode für Joker und Ergebnisse, leer solange keiner eingegeben wurde. */

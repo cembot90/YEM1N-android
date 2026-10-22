@@ -181,6 +181,24 @@ fun EinstellungenScreen(vm: AppViewModel) {
             color = TextSanft, fontSize = 13.sp,
         )
 
+        Abschnitt("Klassencode")
+        var klassenEingabe by remember { mutableStateOf("") }
+        var klassenFehler by remember { mutableStateOf(false) }
+        if (vm.fortschritt.klassencode.isEmpty()) {
+            Text("Mit dem Klassencode der Lehrerin oder des Admins kommen die Aufgaben der Klasse von selbst. Nur unterschriebene Pakete werden angenommen.", color = TextSanft, fontSize = 13.sp)
+            androidx.compose.material3.OutlinedTextField(
+                value = klassenEingabe, onValueChange = { klassenEingabe = it; klassenFehler = false },
+                label = { Text("Klassencode") }, singleLine = true, isError = klassenFehler,
+                supportingText = { if (klassenFehler) Text("Der Code besteht aus 10 Zeichen, zum Beispiel ABCDE-23456.") },
+            )
+            Button(onClick = { klassenFehler = !vm.setzeKlassencode(klassenEingabe) }, enabled = klassenEingabe.isNotBlank() && !vm.einwilligungOffen) { Text("Eintragen") }
+            if (vm.einwilligungOffen) Text("Zuerst oben die Einwilligung der Eltern geben.", color = TextSanft, fontSize = 13.sp)
+        } else {
+            Text("Klassencode: ${vm.fortschritt.klassencode}", color = Color.White, fontSize = 16.sp)
+            Button(onClick = vm::klassenPaketeHolen, enabled = !vm.klassenBeschaeftigt) { Text(if (vm.klassenBeschaeftigt) "Suche ..." else "Neue Aufgaben holen") }
+            OutlinedButton(onClick = vm::entferneKlassencode) { Text("Klassencode entfernen") }
+        }
+
         Abschnitt("Haustier")
         val frageErinnerung = rememberErinnerungsFrage(vm)
         Row(verticalAlignment = Alignment.CenterVertically) {

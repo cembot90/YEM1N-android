@@ -1,5 +1,6 @@
 package de.cemaras.yem1n.logik
 
+import de.cemaras.yem1n.daten.Aufgabe
 import kotlin.math.abs
 
 /** Typische Denkfehler. Port von FehlerAnalyse.swift. */

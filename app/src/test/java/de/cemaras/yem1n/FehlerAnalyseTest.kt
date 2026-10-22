@@ -73,7 +73,7 @@ class FehlerAnalyseTest {
         fun t(soll: String, ist: String) = FehlerAnalyse.befund("text", "", "", soll, "", ist)?.muster
         assertEquals(FehlerMuster.GROSS_KLEIN, t("Hund", "hund"))
         assertEquals(FehlerMuster.HART_WEICH, t("Hund", "Hunt"))
-        assertEquals(FehlerMuster.AE_STATT_E, t("Äpfel", "Epfel").let { FehlerMuster.AE_STATT_E })
+        assertEquals(FehlerMuster.AE_STATT_E, t("Äpfel", "Epfel"))
         assertEquals(FehlerMuster.DOPPELTER_MITLAUT, t("Sonne", "Sone"))
         assertEquals(FehlerMuster.IE_STATT_I, t("Biene", "Bine"))
         assertNull(t("Hund", "Hund"))

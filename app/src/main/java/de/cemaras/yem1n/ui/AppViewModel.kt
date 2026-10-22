@@ -772,13 +772,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (code.isEmpty() || ergebnisseBeschaeftigt) return
         ergebnisseBeschaeftigt = true
         viewModelScope.launch {
-            val text = withContext(Dispatchers.IO) {
-                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_ERGEBNIS, code, 300, "zeitpunkt"))
+            val daten = withContext(Dispatchers.IO) {
+                JokerCloud.alleSeiten(JokerCloud.TYP_ERGEBNIS, code, 200, "zeitpunkt", 10) { cloud.lesen("records/query", it) }
             }
-            if (text == null) {
+            if (daten == null) {
                 ergebnisseMeldung = "Keine Verbindung. Ist das Internet an?"
             } else {
-                ergebnisse = JokerCloud.ergebnisse(JokerCloud.datensaetze(text))
+                ergebnisse = JokerCloud.ergebnisse(daten)
                 ergebnisseMeldung = if (ergebnisse.isEmpty()) "Noch keine Runden angekommen." else ""
             }
             ergebnisseBeschaeftigt = false

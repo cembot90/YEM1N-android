@@ -146,7 +146,7 @@ object JokerCloud {
     // Lesen
 
     /** [neuesterZuerstNach]: Feld, nach dem absteigend sortiert wird, damit bei vielen Treffern die neuesten kommen. */
-    fun abfrage(typ: String, code: String, limit: Int = 200, neuesterZuerstNach: String? = null): String = buildJsonObject {
+    fun abfrage(typ: String, code: String, limit: Int = 200, neuesterZuerstNach: String? = null, fortsetzung: String? = null): String = buildJsonObject {
         put("query", buildJsonObject {
             put("recordType", typ)
             put("filterBy", buildJsonArray {
@@ -166,7 +166,31 @@ object JokerCloud {
             })
         }
         put("resultsLimit", limit)
+        if (fortsetzung != null) put("continuationMarker", fortsetzung)
     }.toString()
+
+    /** Der Hinweis, wo die nächste Seite einer langen Abfrage anfängt. Null, wenn es keine mehr gibt. */
+    fun fortsetzung(antwort: String): String? = try {
+        json.parseToJsonElement(antwort).jsonObject["continuationMarker"]?.jsonPrimitive?.contentOrNull?.ifEmpty { null }
+    } catch (e: Exception) {
+        null
+    }
+
+    /**
+     * Holt alle Seiten einer Abfrage, höchstens [maxSeiten]. [holen] bekommt den Text der Abfrage und liefert die Antwort
+     * oder null ohne Verbindung. Gibt null zurück, wenn schon die erste Seite fehlt.
+     */
+    fun alleSeiten(typ: String, code: String, limit: Int, sortierNach: String?, maxSeiten: Int, holen: (String) -> String?): List<Datensatz>? {
+        var marke: String? = null
+        val alle = mutableListOf<Datensatz>()
+        for (seite in 0 until maxSeiten) {
+            val text = holen(abfrage(typ, code, limit, sortierNach, marke))
+            if (text == null) return if (seite == 0) null else alle
+            alle += datensaetze(text)
+            marke = fortsetzung(text) ?: break
+        }
+        return alle
+    }
 
     /** Ein gelesener Datensatz: Name, Zeit der Erstellung in Millisekunden und seine Felder als Text oder Zahl. */
     data class Datensatz(val name: String, val erstellt: Long, val felder: Map<String, JsonPrimitive>) {

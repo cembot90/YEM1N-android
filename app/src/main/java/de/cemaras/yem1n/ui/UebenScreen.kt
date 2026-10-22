@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.cemaras.yem1n.daten.Aufgabe
 import de.cemaras.yem1n.logik.ErklaerFreund
+import de.cemaras.yem1n.logik.ErklaerBildPlan
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
 import de.cemaras.yem1n.logik.Lob
@@ -382,6 +383,15 @@ private fun Rueckmeldung(s: RundenStand, name: String, vm: AppViewModel) {
         }
         val aufgabe = s.aktuell
         val gegeben = s.gegeben.getOrNull(s.index).orEmpty()
+        if (stand != Stand.RICHTIG && aufgabe != null) {
+            val bild = remember(s.index) {
+                ErklaerBildPlan.bild(aufgabe.art, aufgabe.rechnung, aufgabe.erklaerung, aufgabe.antwort, aufgabe.antwort2)
+            }
+            if (bild != null) {
+                Spacer(Modifier.height(10.dp))
+                ErklaerBildKnopf(bild, ruhig = de.cemaras.yem1n.ui.theme.Sparmodus.an) { vm.sprecher.sprich(it) }
+            }
+        }
         if (stand == Stand.FALSCH && aufgabe != null && ErklaerFreund.lohntSich(aufgabe, gegeben)) {
             Spacer(Modifier.height(10.dp))
             EuleErklaert(ErklaerFreund.satz(aufgabe, gegeben), s.index) { vm.sprecher.sprich(it) }

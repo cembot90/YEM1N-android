@@ -103,3 +103,41 @@ object SpielEffekte {
         }
     }
 }
+
+/** Spielt einen einzelnen Ton ab, zum Beispiel zu einer Note in Musik. */
+object TonGeber {
+    private val werkbank = Executors.newSingleThreadExecutor { r -> Thread(r, "tongeber").apply { isDaemon = true } }
+    @Volatile private var spur: AudioTrack? = null
+
+    fun spiele(note: String) {
+        val f = de.cemaras.yem1n.logik.Noten.frequenz[note] ?: return
+        spiele(f)
+    }
+
+    fun spiele(frequenz: Double) {
+        werkbank.execute {
+            try {
+                spur?.let { runCatching { it.stop(); it.release() } }
+                val daten = de.cemaras.yem1n.logik.Noten.pcm(frequenz)
+                val neu = AudioTrack.Builder()
+                    .setAudioAttributes(
+                        AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build(),
+                    )
+                    .setAudioFormat(
+                        AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .setSampleRate(de.cemaras.yem1n.logik.Noten.RATE)
+                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build(),
+                    )
+                    .setBufferSizeInBytes(daten.size * 2)
+                    .setTransferMode(AudioTrack.MODE_STATIC)
+                    .build()
+                neu.write(daten, 0, daten.size)
+                neu.play()
+                spur = neu
+            } catch (e: Exception) {
+                // Kein Ton ist besser als ein Absturz.
+            }
+        }
+    }
+}

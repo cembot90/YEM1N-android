@@ -74,6 +74,7 @@ sealed interface Ansicht {
     data object Joker : Ansicht
     data object ErgebnisseEltern : Ansicht
     data object Duell : Ansicht
+    data object Lernwelt : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -86,12 +87,17 @@ enum class SonderArt { FEHLERHEFT, PROBE, TRAINING }
 /** Platzhalter für die Arbeit, die nicht in der Liste steht (das Fehlerheft). */
 private const val SONDER = -1
 
+/** Platzhalter für die Arbeit, die gerade aus der Lernwelt kommt. */
+private const val LERNWELT = -2
+
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val speicher = Speicher(app)
 
     private var alleArbeiten: List<Arbeit> = emptyList()
     private var sonderArbeit: Arbeit? = null
     private var sonderArt: SonderArt? = null
+    private var lernArbeit: Arbeit? = null
+    private var lernThema: de.cemaras.yem1n.logik.LernThema? = null
 
     /** Beginn der Probearbeit in Millisekunden, für die Uhr. */
     var probeStart: Long by mutableStateOf(0L)
@@ -243,9 +249,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     val aktuelleArbeit: Arbeit?
         get() = when (val a = ansicht) {
             is Ansicht.Uebungen -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
-            is Ansicht.Ueben -> if (a.arbeit == SONDER) sonderArbeit else arbeiten.getOrNull(a.arbeit)
+            is Ansicht.Ueben -> when (a.arbeit) {
+                SONDER -> sonderArbeit
+                LERNWELT -> lernArbeit
+                else -> arbeiten.getOrNull(a.arbeit)
+            }
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -919,6 +929,42 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         ansicht = Ansicht.InfoSeite(seite)
     }
 
+    // Lernwelt
+
+    val bundesland: de.cemaras.yem1n.logik.Bundesland
+        get() = de.cemaras.yem1n.logik.Bundesland.aus(fortschritt.bundesland)
+
+    fun oeffneLernwelt() {
+        ansicht = Ansicht.Lernwelt
+    }
+
+    fun waehleBundesland(land: de.cemaras.yem1n.logik.Bundesland) {
+        behalte(fortschritt.copy(bundesland = land.schluessel))
+    }
+
+    /** 0 heißt: keine Klasse gewählt. */
+    fun waehleLernKlasse(klasse: Int) {
+        behalte(fortschritt.copy(lernKlasse = klasse))
+    }
+
+    /** Startet ein Thema der Lernwelt mit frischen Aufgaben. Sterne und Bestwert bleiben erhalten. */
+    fun startLernThema(thema: de.cemaras.yem1n.logik.LernThema) {
+        val arbeit = de.cemaras.yem1n.logik.Lernwelt.arbeit(thema, bundesland)
+        lernArbeit = arbeit
+        lernThema = thema
+        runde = Runde.start(arbeit.uebungen[0].aufgaben)
+        verdient = 0
+        haustierText = null
+        neuePokale = emptyList()
+        ansicht = Ansicht.Ueben(LERNWELT, 0)
+    }
+
+    /** Die Sterne eines Themas, 0 bis 3. */
+    fun lernSterne(thema: de.cemaras.yem1n.logik.LernThema): Int {
+        val k = "Klasse ${thema.klasse(bundesland)}"
+        return fortschritt.stand("$k|${thema.fach.anzeige}|${de.cemaras.yem1n.logik.Lernwelt.ARBEIT_TITEL}", thema.titel).sterne
+    }
+
     fun oeffneEinstellungen() {
         ansicht = Ansicht.Einstellungen
     }
@@ -990,6 +1036,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** Dieselbe Übung noch einmal von vorn. */
     fun nochmal() {
         val a = ansicht as? Ansicht.Ueben ?: return
+        if (a.arbeit == LERNWELT) {
+            lernThema?.let { startLernThema(it) }
+            return
+        }
         val u = aktuelleUebung ?: return
         runde = Runde.start(u.aufgaben)
         verdient = 0
@@ -1001,13 +1051,15 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         when (val a = ansicht) {
             is Ansicht.Ueben -> {
                 runde = null
-                ansicht = if (a.arbeit != SONDER || sonderArt == SonderArt.TRAINING) {
+                ansicht = if (a.arbeit == LERNWELT) {
+                    Ansicht.Lernwelt
+                } else if (a.arbeit != SONDER || sonderArt == SonderArt.TRAINING) {
                     Ansicht.Uebungen(a.arbeit)
                 } else {
                     Ansicht.Start
                 }
             }
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {
@@ -1053,6 +1105,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val vorher = alt.staende.getOrNull(i) ?: return
         val nachher = neu.staende.getOrNull(i) ?: return
         if (vorher != Stand.OFFEN || (nachher != Stand.RICHTIG && nachher != Stand.FALSCH)) return
+        if ((ansicht as? Ansicht.Ueben)?.arbeit == LERNWELT) return
         val key = schluesselVon(neu, i) ?: return
         behalte(fortschritt.nachAntwort(istFehlerheft, key, nachher, Tag.heute()))
     }

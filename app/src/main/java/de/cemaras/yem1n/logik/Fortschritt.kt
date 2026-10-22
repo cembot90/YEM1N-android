@@ -90,6 +90,10 @@ data class Fortschritt(
     val jokerFreigabeAb: Long = 0,
     /** Feste, zufällige Kennung dieses Geräts für das Duell. Sie sagt nichts über die Person. */
     val duellGeraet: String = "",
+    /** Bundesland für die Lernwelt ("hessen", "bayern" oder "nrw"). */
+    val bundesland: String = "hessen",
+    /** Klasse des Kindes in der Lernwelt, 0 heißt: nicht gewählt. */
+    val lernKlasse: Int = 0,
 ) {
 
     fun jokerUebrig(heute: Long): Int = JokerNachschub.uebrig(jokerLimit, jokerTag, jokerGenutzt, heute)

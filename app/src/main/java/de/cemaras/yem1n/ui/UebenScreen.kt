@@ -149,7 +149,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         Spacer(Modifier.height(14.dp))
 
         if (a.bild.isNotEmpty()) {
-            Text(a.bild, fontSize = 44.sp, textAlign = TextAlign.Center)
+            AufgabenBild(a.bild, vm)
             Spacer(Modifier.height(10.dp))
         }
         if (a.gross.isNotEmpty()) {
@@ -254,8 +254,8 @@ private fun Eingabe(
         }
         Aufgabe.ART_REST -> {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Zahlenfeld(e1, setze1, "Ergebnis", Modifier.weight(1f).focusRequester(fokus), ImeAction.Next) {}
-                Zahlenfeld(e2, setze2, "Rest", Modifier.weight(1f), ImeAction.Done) { vm.antworte(e1, e2) }
+                Zahlenfeld(e1, setze1, "Ergebnis", Modifier.weight(1f).focusRequester(fokus), ImeAction.Next, laenge(a.antwort)) {}
+                Zahlenfeld(e2, setze2, "Rest", Modifier.weight(1f), ImeAction.Done, laenge(a.antwort2)) { vm.antworte(e1, e2) }
             }
         }
         Aufgabe.ART_TEXT -> {
@@ -271,12 +271,15 @@ private fun Eingabe(
             )
         }
         else -> {
-            Zahlenfeld(e1, setze1, "Antwort", Modifier.fillMaxWidth().focusRequester(fokus), ImeAction.Done) {
+            Zahlenfeld(e1, setze1, "Antwort", Modifier.fillMaxWidth().focusRequester(fokus), ImeAction.Done, laenge(a.antwort)) {
                 vm.antworte(e1)
             }
         }
     }
 }
+
+/** Drei Ziffern reichen fast immer. Große Lösungen ab Klasse 4 bekommen sieben Stellen. */
+private fun laenge(loesung: String): Int = if (loesung.length > 3) 7 else 3
 
 @Composable
 private fun Zahlenfeld(
@@ -285,12 +288,13 @@ private fun Zahlenfeld(
     beschriftung: String,
     modifier: Modifier,
     ime: ImeAction,
+    maxZiffern: Int = 3,
     fertig: () -> Unit,
 ) {
     OutlinedTextField(
         value = wert,
-        // Die Antwortfelder nehmen höchstens 3 Ziffern, wie in der iOS-App.
-        onValueChange = { neu -> if (neu.length <= 3 && neu.all { it.isDigit() }) setze(neu) },
+        // Die Antwortfelder nehmen 3 Ziffern, bei großen Lösungen 7, damit die Länge nichts verrät (wie iOS).
+        onValueChange = { neu -> if (neu.length <= maxZiffern && neu.all { it.isDigit() }) setze(neu) },
         modifier = modifier,
         singleLine = true,
         label = { Text(beschriftung) },

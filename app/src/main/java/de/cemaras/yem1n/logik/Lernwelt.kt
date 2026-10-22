@@ -274,6 +274,9 @@ object Lernwelt {
         return if (n in 1..4) n else null
     }
 
+    /** Die Klasse als Zahl, 0 und alles Ungültige ergibt null. */
+    fun klasse(zahl: Int): Int? = if (zahl in 1..4) zahl else null
+
     /** Zuerst die eigene Klasse, dann die anderen */
     fun klassenReihenfolge(eigene: Int?): List<Int> {
         if (eigene == null) return listOf(1, 2, 3, 4)

@@ -2,6 +2,7 @@ import { anfrage, schluesselLaden } from "./cloudkit.js";
 import { pruefeGeraet, pruefeSenden } from "./regeln.js";
 import { loeschBefehl, paketBefehl, pruefeKlasse, schluesselAbfrage, schluesselAusAntwort, schluesselBefehl, unterschriftGilt } from "./klasse.js";
 import { neueBremse } from "./limit.js";
+import { TYPEN_LOESCHEN, abgelaufene, istAufraeumzeit, loeschKoerper } from "./loeschfrist.js";
 import { pushSenden } from "./fcm.js";
 import { TYPEN, absenderGeraet, abfrageKoerper, inhalt, neueEintraege, typenFuer } from "./mitteilungen.js";
 
@@ -166,7 +167,27 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
   return verschickt;
 }
 
+/** Löscht abgelaufene Einträge aller bekannten Familien. Zurück: Anzahl der Löschaufträge. */
+export async function raeumeAuf(env, holen = fetch, jetzt = Date.now()) {
+  let geloescht = 0;
+  for (const code of await familienCodes(env)) {
+    for (const typ of TYPEN_LOESCHEN) {
+      const r = await anfrage(env, await schluessel(env), "records/query", abfrageKoerper(typ, code, 200), holen);
+      if (r.status !== 200) continue;
+      const namen = abgelaufene(r.text, jetzt);
+      if (!namen.length) continue;
+      const e = await anfrage(env, await schluessel(env), "records/modify", loeschKoerper(namen), holen);
+      console.log("raeumeAuf:", typ, namen.length, "Status", e.status);
+      if (e.status === 200) geloescht += namen.length;
+    }
+  }
+  return geloescht;
+}
+
 export default {
   fetch: (request, env) => behandle(request, env),
-  scheduled: (event, env, ctx) => ctx.waitUntil(pruefeNeues(env).catch((e) => console.log("pruefeNeues", String(e)))),
+  scheduled: (event, env, ctx) => {
+    ctx.waitUntil(pruefeNeues(env).catch((e) => console.log("pruefeNeues", String(e))));
+    if (istAufraeumzeit(event.scheduledTime)) ctx.waitUntil(raeumeAuf(env).catch((e) => console.log("raeumeAuf", String(e))));
+  },
 };

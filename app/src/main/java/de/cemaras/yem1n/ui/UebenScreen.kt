@@ -54,6 +54,7 @@ import de.cemaras.yem1n.logik.ErklaerFreund
 import de.cemaras.yem1n.logik.ErklaerBildPlan
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
 import de.cemaras.yem1n.logik.Lob
 import de.cemaras.yem1n.logik.Mauer
 import de.cemaras.yem1n.logik.RundenStand
@@ -134,6 +135,9 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
     val fokus = remember { FocusRequester() }
     val brauchtTastatur = !s.bewertet && (a.art == Aufgabe.ART_ZAHL || a.art == Aufgabe.ART_REST ||
         a.art == Aufgabe.ART_TEXT || a.art == Aufgabe.ART_MAUER)
+    LaunchedEffect(s.index) {
+        if (vm.fortschritt.autoVorlesen && vm.fortschritt.vorlesen && !s.bewertet) vm.aufgabeVorlesen(a)
+    }
     LaunchedEffect(s.index, s.mauerSchritt, s.bewertet) {
         if (brauchtTastatur) runCatching { fokus.requestFocus() }
     }
@@ -149,6 +153,16 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         }
         if (a.tr.isNotEmpty()) {
             Text(a.tr, fontSize = 15.sp, color = Himmel, textAlign = TextAlign.Center)
+        }
+        if (vm.fortschritt.vorlesen && de.cemaras.yem1n.logik.VorleseText.vorlesbar(a.art)) {
+            Text(
+                "🔊 Vorlesen", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Gelb,
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .heightIn(min = 44.dp)
+                    .clickable { vm.aufgabeVorlesen(a) }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            )
         }
         Spacer(Modifier.height(14.dp))
 

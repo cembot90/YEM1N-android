@@ -905,6 +905,17 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         behalte(fortschritt.copy(vorlesen = an))
     }
 
+    fun setzeAutoVorlesen(an: Boolean) {
+        if (!an) sprecher.stopp()
+        behalte(fortschritt.copy(autoVorlesen = an))
+    }
+
+    /** Die Aufgabe beim Üben vorlesen (Lautsprecher-Knopf oder automatisch). */
+    fun aufgabeVorlesen(a: de.cemaras.yem1n.daten.Aufgabe) {
+        if (!de.cemaras.yem1n.logik.VorleseText.vorlesbar(a.art)) return
+        sprecher.sprich(de.cemaras.yem1n.logik.VorleseText.aufgabe(a.frage, a.rechnung))
+    }
+
     fun startVorschul(art: VorschulArt) {
         paketStand = null
         vorschulArt = art

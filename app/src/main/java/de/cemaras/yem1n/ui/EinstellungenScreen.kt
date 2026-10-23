@@ -289,6 +289,14 @@ fun EinstellungenScreen(vm: AppViewModel) {
                 )
                 androidx.compose.material3.Switch(checked = vm.fortschritt.vorlesen, onCheckedChange = vm::setzeVorlesen)
             }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Aufgaben beim Üben von selbst vorlesen", color = Color.White, fontSize = 16.sp,
+                    modifier = Modifier.weight(1f).padding(end = 12.dp),
+                )
+                androidx.compose.material3.Switch(checked = vm.fortschritt.autoVorlesen, onCheckedChange = vm::setzeAutoVorlesen)
+            }
+            Text("Rechtschreib-Aufgaben und Zahlenmauern werden nicht vorgelesen, sonst wäre die Lösung verraten.", color = TextSanft, fontSize = 13.sp)
             Text("Dafür braucht das Gerät eine deutsche Sprachausgabe. Sie lässt sich in den Android-Einstellungen unter Sprache und Eingabe laden.", color = TextSanft, fontSize = 13.sp)
 
         }

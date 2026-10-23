@@ -55,6 +55,8 @@ data class Fortschritt(
     val vorschulTuerkisch: Boolean = false,
     /** Liest die App Fragen und Lob vor? */
     val vorlesen: Boolean = true,
+    /** Wird jede neue Aufgabe beim Üben von selbst vorgelesen? */
+    val autoVorlesen: Boolean = false,
     /** Bester Punktestand je Spiel, Schlüssel siehe [SpielArt.schluessel]. */
     val bestwerte: Map<String, Int> = emptyMap(),
     /** Tag, an dem zuletzt ein Spiel bezahlt wurde, und wie viele es an dem Tag waren. */

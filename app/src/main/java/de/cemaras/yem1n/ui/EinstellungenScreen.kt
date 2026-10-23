@@ -377,6 +377,7 @@ fun EinstellungenScreen(vm: AppViewModel) {
                     TextButton(onClick = { loeschen = a }) { Text("Löschen", color = Koralle) }
                 }
             }
+        }
         if (seite == "technik") {
             Abschnitt("Cloud")
             Text("Hier prüfst du, ob Server und Cloud erreichbar sind.", color = TextSanft, fontSize = 14.sp)

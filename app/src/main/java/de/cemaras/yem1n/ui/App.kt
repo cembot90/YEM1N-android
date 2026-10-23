@@ -170,6 +170,7 @@ fun StartScreen(vm: AppViewModel) {
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     RundKnopf("🎮") { vm.oeffneSpiele() }
+                    RundKnopf("⚙️") { vm.oeffneEinstellungen() }
                     RundKnopf("🏆") { vm.oeffneErfolge() }
                     Box {
                         RundKnopf("＋", betont = true) { menue = true }

@@ -18,6 +18,9 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 
 ## Der Startbildschirm
 
+- Oben rechts: Spiele, Einstellungen (⚙️), Erfolge und das Plus-Menü.
+- Beim ersten Start fragt die Einrichtung im letzten Schritt freiwillig nach Familiencode (mit Einwilligung der Eltern) und Klassencode.
+
 - Kopf: Serie, Münzen und Tagesziel. Oben rechts Spiele, Erfolge und das Plus-Menü.
 - **Lernwelt:** fertige Aufgaben nach dem Lehrplan (Hessen, Bayern, Nordrhein-Westfalen, Klassen 1 bis 4). Bundesland und Klasse stellen Sie in der Lernwelt ein.
 - **Sprachen:** Karten, Paare, Tippen und Fragen in Englisch, Türkisch und Italienisch, dazu Wiederholen und ein Bericht für Eltern.

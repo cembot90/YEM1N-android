@@ -50,7 +50,11 @@ fun EinrichtungScreen(vm: AppViewModel) {
     var rosa by rememberSaveable { mutableStateOf(vm.fortschritt.rosa) }
     var ziel by rememberSaveable { mutableIntStateOf(vm.fortschritt.tagesziel) }
     var auto by rememberSaveable { mutableStateOf(vm.fortschritt.autoVorlesen) }
-    val letzter = if (rolle == "kind") 4 else 1
+    var familie by rememberSaveable { mutableStateOf("") }
+    var klassencode by rememberSaveable { mutableStateOf("") }
+    var haken by rememberSaveable { mutableStateOf(false) }
+    var fehler by rememberSaveable { mutableStateOf("") }
+    val letzter = if (rolle == "kind") 5 else 1
 
     androidx.activity.compose.BackHandler(enabled = schritt > 0) { schritt -= 1 }
 
@@ -70,9 +74,9 @@ fun EinrichtungScreen(vm: AppViewModel) {
                     Wahl("🎓 Kind", "Ich übe für die Schule.", rolle == "kind") { rolle = "kind" }
                     Wahl("🔔 Eltern", "Ich sehe den Fortschritt.", rolle == "eltern") { rolle = "eltern" }
                 }
-                rolle == "eltern" -> {
-                    Frage("So geht es weiter", "Öffne auf dem Startbildschirm Mehr > Joker. Dort gibst du die Einwilligung und legst den Familiencode an oder gibst den Code vom anderen Elternteil ein. Dann trägst du den Code auf dem Gerät deines Kindes ein.")
-                }
+                rolle == "eltern" -> FamilienSchritt(
+                    vm, familie, { familie = it; fehler = "" }, klassencode, { klassencode = it; fehler = "" }, haken, { haken = it }, fehler,
+                )
                 schritt == 1 -> {
                     Frage("Wie heißt das Kind?", "Ein Vorname oder Spitzname reicht, bitte keinen Nachnamen. Der Name erscheint bei den Eltern.")
                     OutlinedTextField(
@@ -90,6 +94,9 @@ fun EinrichtungScreen(vm: AppViewModel) {
                     Wahl("Ja, Sprachen anzeigen", "", sprachen) { sprachen = true }
                     Wahl("Nein, erstmal nicht", "", !sprachen) { sprachen = false }
                 }
+                schritt == 5 -> FamilienSchritt(
+                    vm, familie, { familie = it; fehler = "" }, klassencode, { klassencode = it; fehler = "" }, haken, { haken = it }, fehler,
+                )
                 else -> {
                     Frage("Farben, Ziel und Vorlesen", "Alles lässt sich später in den Einstellungen ändern.")
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -112,8 +119,23 @@ fun EinrichtungScreen(vm: AppViewModel) {
 
         Button(
             onClick = {
-                if (schritt < letzter) schritt += 1
-                else vm.einrichtungAbschliessen(rolle, name, klasse, sprachen, rosa, ziel, auto)
+                if (schritt < letzter) {
+                    schritt += 1
+                } else {
+                    val f = familie.trim()
+                    val k = klassencode.trim()
+                    if (f.isNotEmpty() && de.cemaras.yem1n.logik.Familiencode.pruefe(f) == null) {
+                        fehler = "Der Familiencode sieht nicht richtig aus. Er hat die Form XXXXX-XXXXX."
+                    } else if (k.isNotEmpty() && de.cemaras.yem1n.logik.Familiencode.pruefe(k) == null) {
+                        fehler = "Der Klassencode sieht nicht richtig aus."
+                    } else if (f.isNotEmpty() && !haken) {
+                        fehler = "Für den Familiencode brauchen wir die Einwilligung der Eltern. Bitte den Haken setzen."
+                    } else {
+                        vm.einrichtungAbschliessen(rolle, name, klasse, sprachen, rosa, ziel, auto)
+                        if (f.isNotEmpty()) { vm.einwilligen(); vm.setzeFamiliencode(f) }
+                        if (k.isNotEmpty()) vm.setzeKlassencode(k)
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
         ) { Text(if (schritt < letzter) "Weiter" else "Los geht's", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
@@ -138,4 +160,39 @@ private fun Wahl(titel: String, text: String, gewaehlt: Boolean, modifier: Modif
         Text(titel, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
         if (text.isNotEmpty()) Text(text, fontSize = 13.sp, color = TextSanft)
     }
+}
+
+@Composable
+private fun FamilienSchritt(
+    vm: AppViewModel, familie: String, familieAendern: (String) -> Unit,
+    klassencode: String, klassencodeAendern: (String) -> Unit,
+    haken: Boolean, hakenAendern: (Boolean) -> Unit, fehler: String,
+) {
+    Frage(
+        "Familie und Klasse (freiwillig)",
+        "Mit dem Familiencode sehen die Eltern den Fortschritt und das Kind kann Joker erbitten. Den Code legt ein Elternteil unter Mehr > Joker an (oder gibt ihn vom anderen Gerät ein). Mit dem Klassencode holt die App Aufgaben der Klasse. Ohne beides bleibt alles auf diesem Gerät. Du kannst es später nachholen.",
+    )
+    OutlinedTextField(
+        value = familie, onValueChange = { familieAendern(it.take(24)) }, singleLine = true,
+        modifier = Modifier.fillMaxWidth(), label = { Text("Familiencode (XXXXX-XXXXX)") },
+    )
+    OutlinedTextField(
+        value = klassencode, onValueChange = { klassencodeAendern(it.take(24)) }, singleLine = true,
+        modifier = Modifier.fillMaxWidth(), label = { Text("Klassencode (freiwillig)") },
+    )
+    if (familie.isNotBlank()) {
+        Text(
+            "Mit dem Familiencode gehen Ergebnisse und Nachrichten über einen kleinen Server in die Cloud. Es gibt keine Werbung und kein Benutzerkonto.",
+            color = TextSanft, fontSize = 13.sp,
+        )
+        Text("Die Datenschutzerklärung findest du nach der Einrichtung unter Einstellungen > Info.", color = TextSanft, fontSize = 13.sp)
+        Row(verticalAlignment = Alignment.Top) {
+            androidx.compose.material3.Checkbox(checked = haken, onCheckedChange = hakenAendern)
+            Text(
+                "Ich bin Elternteil oder erziehungsberechtigte Person. Ich habe die Hinweise gelesen und willige in die beschriebene Verarbeitung für mein Kind ein.",
+                color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 12.dp),
+            )
+        }
+    }
+    if (fehler.isNotEmpty()) Text(fehler, color = de.cemaras.yem1n.ui.theme.Koralle, fontSize = 14.sp, fontWeight = FontWeight.Bold)
 }

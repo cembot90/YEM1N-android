@@ -17,11 +17,13 @@ object Sprachen {
 
     fun info(code: String): SprachInfo = alle.firstOrNull { it.code == code } ?: alle[0]
 
-    val themen: List<LehrplanSprachen.Thema> get() = LehrplanSprachen.themenListe
+    val themen: List<LehrplanSprachen.Thema>
+        get() = LehrplanSprachen.themenListe +
+            EigeneThemen.liste.map { LehrplanSprachen.Thema(it.id, it.titel, it.emoji, it.klasse) }
 
     /** Alle Wörter eines Themas, die es in der Sprache gibt. */
     fun woerter(katalog: String, sprache: String): List<Vokabel> =
-        LehrplanEnglisch.woerter[katalog].orEmpty().filter { it.text(sprache).isNotEmpty() }
+        (EigeneThemen.woerter(katalog) ?: LehrplanEnglisch.woerter[katalog].orEmpty()).filter { it.text(sprache).isNotEmpty() }
 
     /** Das Thema der Lernwelt zu einem Katalog-Thema, für den Knopf "Fragen". */
     fun lernThema(katalog: String, sprache: String): LernThema? {

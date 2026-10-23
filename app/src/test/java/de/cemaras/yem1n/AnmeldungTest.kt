@@ -42,4 +42,17 @@ class AnmeldungTest {
     @Test fun kinderAuswahlHaengtNurAngemeldeteAn() {
         assertEquals(listOf("Yemin", "Evin"), Anmeldung.kinder(listOf("Yemin"), listOf("yemin", "Evin")))
     }
+
+    @Test fun kinderZeilenZaehlenRundenUndNehmenAngemeldeteDazu() {
+        val runden = listOf(runde("Yemin", 10), runde("yemin ", 30), runde("Mia", 20))
+        val anm = listOf(
+            Anmeldung.eintrag("C", "Evin", "g3", 5),
+            Anmeldung.eintrag("C", "Yemin", "g1", 6),
+        )
+        val z = Anmeldung.kinderZeilen(runden, anm)
+        assertEquals(listOf("Evin", "Mia", "yemin"), z.map { it.name })
+        assertEquals(listOf(0, 1, 2), z.map { it.runden })
+        assertEquals(30L, z.first { it.name == "yemin" }.zuletzt)
+        assertEquals(5L, z.first { it.name == "Evin" }.zuletzt)
+    }
 }

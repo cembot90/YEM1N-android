@@ -63,30 +63,10 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
     val u = ErgebnisUebersicht.von(liste)
     val kinder = de.cemaras.yem1n.logik.Anmeldung.kinder(ErgebnisUebersicht.von(alle).proKind.map { it.first }, vm.angemeldeteKinder)
     val format = remember { SimpleDateFormat("dd.MM. HH:mm", Locale.GERMANY) }
+    val imZeitraum = AntwortProtokoll.imZeitraum(liste, tage, Tag.heute())
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
-        Text("📊 Ergebnisse", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
-
-        if (kinder.size > 1) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val farben = FilterChipDefaults.filterChipColors(
-                    labelColor = Color.White, selectedContainerColor = Gelb, selectedLabelColor = Navy,
-                )
-                FilterChip(selected = kind == null, onClick = { kind = null }, label = { Text("Alle") }, colors = farben)
-                kinder.forEach { k ->
-                    FilterChip(selected = kind == k, onClick = { kind = k }, label = { Text(k) }, colors = farben)
-                }
-            }
-        }
-
+    // Auf dem Tablet (breit) stehen die Karten in zwei Spalten, auf dem Handy untereinander.
+    val uebersicht: @Composable () -> Unit = {
         Row(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -95,18 +75,14 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
             Kennzahl2("${u.prozent} %", "richtig")
             Kennzahl2("${u.sterne} ⭐", "Sterne")
         }
-
         BerichtKarte(Wochenbericht.berichte(alle))
-        val imZeitraum = AntwortProtokoll.imZeitraum(liste, tage, Tag.heute())
+        KinderKarte(de.cemaras.yem1n.logik.Anmeldung.kinderZeilen(alle, vm.anmeldungen), format)
+    }
+    val analyse: @Composable () -> Unit = {
         RadarKarte(imZeitraum, tage) { tage = it }
         ProblemKarte(AntwortProtokoll.problemAufgaben(imZeitraum))
-        ZuletztKarte(AntwortProtokoll.zuletztGeuebt(alle), format)
-
-        OutlinedButton(onClick = vm::ergebnisseLaden, enabled = !vm.ergebnisseBeschaeftigt) {
-            Text(if (vm.ergebnisseBeschaeftigt) "Einen Moment..." else "Neu laden", color = Color.White)
-        }
-        if (vm.ergebnisseMeldung.isNotEmpty()) Text(vm.ergebnisseMeldung, color = TextSanft, fontSize = 14.sp)
-
+    }
+    val runden: @Composable () -> Unit = {
         liste.forEach { e ->
             Column(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).glas(18.dp)
@@ -129,7 +105,50 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
                 if (offen == e.eintragId) AntwortenListe(e)
             }
         }
-        Spacer(Modifier.height(24.dp))
+    }
+
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().systemBarsPadding()) {
+        val breit = maxWidth >= 840.dp
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
+            Text("📊 Ergebnisse", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
+
+            if (kinder.size > 1) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val farben = FilterChipDefaults.filterChipColors(
+                        labelColor = Color.White, selectedContainerColor = Gelb, selectedLabelColor = Navy,
+                    )
+                    FilterChip(selected = kind == null, onClick = { kind = null }, label = { Text("Alle") }, colors = farben)
+                    kinder.forEach { k ->
+                        FilterChip(selected = kind == k, onClick = { kind = k }, label = { Text(k) }, colors = farben)
+                    }
+                }
+            }
+
+            if (breit) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) { uebersicht() }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) { analyse() }
+                }
+            } else {
+                uebersicht()
+                analyse()
+            }
+
+            OutlinedButton(onClick = vm::ergebnisseLaden, enabled = !vm.ergebnisseBeschaeftigt) {
+                Text(if (vm.ergebnisseBeschaeftigt) "Einen Moment..." else "Neu laden", color = Color.White)
+            }
+            if (vm.ergebnisseMeldung.isNotEmpty()) Text(vm.ergebnisseMeldung, color = TextSanft, fontSize = 14.sp)
+
+            runden()
+            Spacer(Modifier.height(24.dp))
+        }
     }
 }
 
@@ -251,17 +270,21 @@ private fun ProblemKarte(probleme: List<ProblemAufgabe>) {
 }
 
 @Composable
-private fun ZuletztKarte(kinder: List<Pair<String, Long>>, format: SimpleDateFormat) {
-    if (kinder.isEmpty()) return
+private fun KinderKarte(zeilen: List<de.cemaras.yem1n.logik.Anmeldung.KindZeile>, format: SimpleDateFormat) {
+    if (zeilen.isEmpty()) return
     Column(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text("Kinder in der Familie", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Gelb)
-        kinder.forEach { (name, zeit) ->
-            Row {
-                Text(name, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text("zuletzt geübt " + format.format(Date(zeit)), color = TextSanft, fontSize = 13.sp)
+        zeilen.forEach { z ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(z.name, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(
+                    if (z.runden == 0) "angemeldet, noch keine Runde"
+                    else "${z.runden} ${if (z.runden == 1) "Runde" else "Runden"}, zuletzt " + format.format(Date(z.zuletzt)),
+                    color = TextSanft, fontSize = 13.sp,
+                )
             }
         }
     }

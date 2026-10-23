@@ -37,4 +37,25 @@ object Anmeldung {
         for (n in angemeldet) if (ergebnis.none { it.trim().lowercase() == n.trim().lowercase() }) ergebnis += n
         return ergebnis
     }
+
+    /** Eine Zeile der Kinderliste für die Eltern. [runden] ist 0, wenn sich das Kind nur angemeldet hat. */
+    data class KindZeile(val name: String, val runden: Int, val zuletzt: Long)
+
+    private fun schluessel(name: String) = name.trim().lowercase().ifEmpty { "kind" }
+
+    /** Kinder mit Zahl der Runden und letzter Aktivität, dazu Kinder, die sich nur angemeldet haben. Nach Name sortiert. */
+    fun kinderZeilen(runden: List<RundenErgebnisEintrag>, anmeldungen: List<RundenErgebnisEintrag>): List<KindZeile> {
+        val aus = LinkedHashMap<String, KindZeile>()
+        for (e in runden.sortedBy { it.zeitpunkt }) {
+            val k = schluessel(e.kind)
+            val alt = aus[k]
+            aus[k] = KindZeile(e.kind.trim().ifEmpty { "Kind" }, (alt?.runden ?: 0) + 1, maxOf(alt?.zuletzt ?: 0L, e.zeitpunkt))
+        }
+        for (a in anmeldungen.sortedBy { it.zeitpunkt }) {
+            val k = schluessel(a.kind)
+            val alt = aus[k]
+            if (alt == null) aus[k] = KindZeile(a.kind.trim().ifEmpty { "Kind" }, 0, a.zeitpunkt)
+        }
+        return aus.values.sortedBy { it.name.lowercase() }
+    }
 }

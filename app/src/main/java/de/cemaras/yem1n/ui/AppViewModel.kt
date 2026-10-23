@@ -853,8 +853,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var ergebnisse: List<de.cemaras.yem1n.logik.RundenErgebnisEintrag> by mutableStateOf(emptyList())
         private set
     /** Kinder, die sich angemeldet haben, auch wenn noch keine Runde angekommen ist. */
-    var angemeldeteKinder: List<String> by mutableStateOf(emptyList())
+    var anmeldungen: List<de.cemaras.yem1n.logik.RundenErgebnisEintrag> by mutableStateOf(emptyList())
         private set
+    val angemeldeteKinder: List<String> get() = de.cemaras.yem1n.logik.Anmeldung.namen(anmeldungen)
     var ergebnisseMeldung: String by mutableStateOf("")
         private set
     var ergebnisseBeschaeftigt: Boolean by mutableStateOf(false)
@@ -878,7 +879,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             } else {
                 val alle = JokerCloud.ergebnisse(daten)
                 ergebnisse = alle.filterNot { de.cemaras.yem1n.logik.Anmeldung.istAnmeldung(it) }
-                angemeldeteKinder = de.cemaras.yem1n.logik.Anmeldung.namen(alle)
+                anmeldungen = alle.filter { de.cemaras.yem1n.logik.Anmeldung.istAnmeldung(it) }
                 ergebnisseMeldung = when {
                     ergebnisse.isNotEmpty() -> ""
                     angemeldeteKinder.isNotEmpty() -> "Angemeldet: ${angemeldeteKinder.joinToString(", ")}. Noch keine Runde angekommen."

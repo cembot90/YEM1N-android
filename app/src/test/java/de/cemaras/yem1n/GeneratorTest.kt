@@ -184,4 +184,18 @@ class SonderrundenTest {
         assertEquals(2, t.uebungen.size)
         assertEquals(2, t.uebungen.map { it.titel }.toSet().size)
     }
+
+    @Test fun sachaufgabenHabenStimmendeLoesungen() {
+        val texte = HashSet<String>()
+        for (seed in 1..400) {
+            val a = MatheGenerator(Random(seed)).sach()
+            val antwort = a.antwort.toInt()
+            assertTrue("Antwort im Zahlenraum: ${a.rechnung}", antwort in 0..999)
+            assertTrue("Keine Gedankenstriche: ${a.rechnung}", !a.rechnung.contains('–') && !a.rechnung.contains('—'))
+            // Die Erklärung endet mit dem Ergebnis, das auch die Antwort ist.
+            assertTrue("Erklärung passt zur Antwort: ${a.erklaerung}", a.erklaerung.endsWith("= ${a.antwort}"))
+            texte += a.rechnung.lines().last()
+        }
+        assertTrue("Mindestens zehn verschiedene Fragen", texte.size >= 10)
+    }
 }

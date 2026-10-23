@@ -228,7 +228,49 @@ class MatheGenerator(private val zufall: Random = Random.Default) {
         val na = n[0]
         val nb = n[1]
         val frage = "Lies genau. Rechne und antworte."
-        when (z(1, 5)) {
+        when (z(1, 11)) {
+            6 -> {
+                val a = z(2, 9); val b = z(1, 6)
+                return zahl(
+                    frage, "$na kauft ein Heft für $a Euro.\nDazu kauft $na einen Stift für $b Euro.\nWie viel Euro kostet das zusammen?",
+                    a + b, erklaerung = "$a + $b = ${a + b}",
+                )
+            }
+            7 -> {
+                val c = z(3, 15)
+                return zahl(
+                    frage, "$na bezahlt mit 20 Euro.\nDas Eis kostet $c Euro.\nWie viel Euro bekommt $na zurück?",
+                    20 - c, erklaerung = "20 - $c = ${20 - c}",
+                )
+            }
+            8 -> {
+                val a = z(20, 60); val b = z(5, 19)
+                return zahl(
+                    frage, "Ein Seil ist $a m lang.\n$na schneidet $b m ab.\nWie viele Meter bleiben übrig?",
+                    a - b, erklaerung = "$a - $b = ${a - b}",
+                )
+            }
+            9 -> {
+                val a = z(20, 50); val b = z(5, 20); val c = z(3, 15)
+                return zahl(
+                    frage, "$na hat $a Murmeln.\n$nb schenkt $na noch $b Murmeln.\nDann verliert $na $c Murmeln.\nWie viele Murmeln hat $na jetzt?",
+                    a + b - c, erklaerung = "$a + $b = ${a + b}, dann ${a + b} - $c = ${a + b - c}",
+                )
+            }
+            10 -> {
+                val r = z(5, 12); val p = z(2, 6)
+                return zahl(
+                    frage, "Ein Bus hat $r Reihen.\nIn jeder Reihe sind $p Plätze.\nWie viele Plätze hat der Bus?",
+                    r * p, erklaerung = "$r · $p = ${r * p}",
+                )
+            }
+            11 -> {
+                val s = z(3, 6); val gr = z(3, 8)
+                return zahl(
+                    frage, "${s * gr} Kinder bilden Gruppen.\nIn jeder Gruppe sind $s Kinder.\nWie viele Gruppen gibt es?",
+                    gr, erklaerung = "${s * gr} : $s = $gr",
+                )
+            }
             1 -> {
                 val x = z(30, 80); val d = z(8, 20)
                 return zahl(

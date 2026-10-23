@@ -209,7 +209,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         sprecher.an = fortschritt.vorlesen
         SpielEffekte.ton = fortschritt.spielTon
         val schwach = (app.getSystemService(android.content.Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true
-        de.cemaras.yem1n.ui.theme.Sparmodus.an = fortschritt.sparmodus || schwach
+        // "Animationen entfernen" in den Android-Einstellungen (Bedienungshilfen) wie "Bewegung reduzieren" bei iOS
+        val ohneAnimation = runCatching {
+            android.provider.Settings.Global.getFloat(app.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+        }.getOrDefault(false)
+        de.cemaras.yem1n.ui.theme.Sparmodus.an = fortschritt.sparmodus || schwach || ohneAnimation
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
         Erinnerung.planenLernzeit(app, fortschritt.lernzeitAn, fortschritt.lernzeitMinuten, fortschritt.rundenHeute(Tag.heute()) > 0)
         Erinnerung.planenBericht(app, fortschritt.wochenberichtAn && fortschritt.jokerRolle == "eltern")

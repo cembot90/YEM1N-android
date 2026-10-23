@@ -175,7 +175,7 @@ fun EinstellungenScreen(vm: AppViewModel) {
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Sparmodus (weniger Bewegung, für ältere Geräte)", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
+                Text("Sparmodus (weniger Bewegung, für ältere Geräte, geht auch mit "Animationen entfernen" in den Android-Einstellungen)", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))
                 androidx.compose.material3.Switch(checked = vm.fortschritt.sparmodus, onCheckedChange = vm::setzeSparmodus)
             }
 

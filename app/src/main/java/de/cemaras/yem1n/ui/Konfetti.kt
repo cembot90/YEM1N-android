@@ -24,6 +24,8 @@ private val KonfettiFarben = listOf(
 /** Bunte Papierschnipsel, die einmal von oben nach unten fallen. Kein Eingriff in die Bedienung. */
 @Composable
 fun Konfetti(modifier: Modifier = Modifier.fillMaxSize(), dauer: Float = 3.2f) {
+    // Im Sparmodus und bei "Animationen entfernen" fällt kein Konfetti
+    if (de.cemaras.yem1n.ui.theme.Sparmodus.an) return
     val stuecke = remember {
         val z = Random(System.nanoTime())
         List(70) {

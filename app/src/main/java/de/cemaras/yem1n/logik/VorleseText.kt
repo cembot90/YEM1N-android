@@ -24,6 +24,6 @@ object VorleseText {
             "=" to " gleich ", " ? " to " und ", "<" to " kleiner ", ">" to " größer ",
         )
         for ((alt, neu) in tausch) t = t.replace(alt, neu)
-        return gesprochen(t)
+        return gesprochen(t.replace("..", "."))
     }
 }

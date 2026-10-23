@@ -61,7 +61,7 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
     val alle = vm.ergebnisse
     val liste = ErgebnisUebersicht.fuerKind(alle, kind)
     val u = ErgebnisUebersicht.von(liste)
-    val kinder = ErgebnisUebersicht.von(alle).proKind.map { it.first }
+    val kinder = de.cemaras.yem1n.logik.Anmeldung.kinder(ErgebnisUebersicht.von(alle).proKind.map { it.first }, vm.angemeldeteKinder)
     val format = remember { SimpleDateFormat("dd.MM. HH:mm", Locale.GERMANY) }
 
     Column(

@@ -615,6 +615,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         jokerFragen = emptyList()
         jokerLaden()
         geraetMelden()
+        offeneErgebnisseSenden()
         return true
     }
 
@@ -634,6 +635,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (rolle == "kind" || rolle == "eltern") {
             behalte(fortschritt.copy(jokerRolle = rolle))
             geraetMelden()
+            offeneErgebnisseSenden()
         }
     }
 
@@ -850,6 +852,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     var ergebnisse: List<de.cemaras.yem1n.logik.RundenErgebnisEintrag> by mutableStateOf(emptyList())
         private set
+    /** Kinder, die sich angemeldet haben, auch wenn noch keine Runde angekommen ist. */
+    var angemeldeteKinder: List<String> by mutableStateOf(emptyList())
+        private set
     var ergebnisseMeldung: String by mutableStateOf("")
         private set
     var ergebnisseBeschaeftigt: Boolean by mutableStateOf(false)
@@ -871,8 +876,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             if (daten == null) {
                 ergebnisseMeldung = "Keine Verbindung. Ist das Internet an?"
             } else {
-                ergebnisse = JokerCloud.ergebnisse(daten)
-                ergebnisseMeldung = if (ergebnisse.isEmpty()) "Noch keine Runden angekommen." else ""
+                val alle = JokerCloud.ergebnisse(daten)
+                ergebnisse = alle.filterNot { de.cemaras.yem1n.logik.Anmeldung.istAnmeldung(it) }
+                angemeldeteKinder = de.cemaras.yem1n.logik.Anmeldung.namen(alle)
+                ergebnisseMeldung = when {
+                    ergebnisse.isNotEmpty() -> ""
+                    angemeldeteKinder.isNotEmpty() -> "Angemeldet: ${angemeldeteKinder.joinToString(", ")}. Noch keine Runde angekommen."
+                    else -> "Noch keine Runden angekommen."
+                }
             }
             ergebnisseBeschaeftigt = false
         }
@@ -1455,6 +1466,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun einrichtungAbschliessen(rolle: String, name: String, klasse: String, sprachen: Boolean, rosa: Boolean, ziel: Int, auto: Boolean) {
         behalte(Profil.uebernehmen(fortschritt, rolle, name, klasse, sprachen, rosa, ziel, auto))
         einrichtungNochmal = false
+        offeneErgebnisseSenden()
     }
 
     fun einrichtungUeberspringen() {
@@ -1484,7 +1496,20 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** Meldet das Kind einmal bei den Eltern an (Ergebnis ohne Aufgaben), damit es dort schon vor der ersten Runde erscheint. */
+    private fun anmeldungMelden() {
+        val code = jokerCode
+        if (code.isEmpty() || fortschritt.jokerRolle != "kind" || fortschritt.duellGeraet.isEmpty()) return
+        val name = fortschritt.name.trim()
+        if (name.isEmpty()) return
+        val sk = de.cemaras.yem1n.logik.Anmeldung.schluessel(code, name, fortschritt.duellGeraet)
+        if (sk == fortschritt.angemeldet) return
+        val e = de.cemaras.yem1n.logik.Anmeldung.eintrag(code, name, fortschritt.duellGeraet, System.currentTimeMillis())
+        behalte(fortschritt.copy(angemeldet = sk, offeneErgebnisse = (fortschritt.offeneErgebnisse + ServerAnfrage.ergebnis(code, e)).takeLast(50)))
+    }
+
     fun offeneErgebnisseSenden() {
+        anmeldungMelden()
         if (ergebnisSendet || fortschritt.offeneErgebnisse.isEmpty()) return
         ergebnisSendet = true
         viewModelScope.launch {

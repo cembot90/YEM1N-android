@@ -100,6 +100,8 @@ data class Fortschritt(
     val familiencode: String = "",
     /** "kind" oder "eltern": wer dieses Gerät benutzt (für die Joker-Seite). */
     val jokerRolle: String = "kind",
+    /** Für welchen Code, Namen und welches Gerät die Anmeldung bei den Eltern schon geschickt wurde. */
+    val angemeldet: String = "",
     /** Fertige Anfragen an den Server (Rundenergebnisse), die noch nicht angekommen sind. Werden erneut geschickt. */
     val offeneErgebnisse: List<String> = emptyList(),
     /** Tägliche Erinnerung ans Üben, mit Uhrzeit in Minuten seit Mitternacht (Standard 16:00). */

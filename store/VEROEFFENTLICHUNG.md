@@ -46,7 +46,7 @@ Data-Safety-Antworten für Google Play:
 | In-App-Käufe? | Nein (Münzen sind nur Spielgeld) |
 
 Wichtig für die Löschung: Datensätze, die der Server schreibt, gehören dem Entwickler. Nutzer können sie nicht selbst
-löschen, deshalb gilt das Versprechen "Löschung auf Anfrage" aus dem Datenschutztext. Cem löscht dann im
+löschen. Der Server löscht sie nach 365 Tagen selbst (täglich um 03:00 UTC), vorher gilt "Löschung auf Anfrage" aus dem Datenschutztext. Cem löscht dann im
 CloudKit-Dashboard (Production > Records) alle Einträge mit diesem Familiencode.
 
 Wofür die App noch ins Internet geht:

@@ -49,7 +49,7 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 5. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
 6. Duell: Herausforderung gegen die Familie, auch zwischen Android und iPhone.
 
-**Wichtig:** Wer den Familiencode kennt, kann die Daten der Familie lesen. Geben Sie ihn nur an Familienmitglieder weiter. Die Einwilligung können Sie jederzeit widerrufen, dann sendet die App nichts mehr. Cloud-Daten löscht der Anbieter auf Anfrage per E-Mail (Familiencode nennen).
+**Wichtig:** Wer den Familiencode kennt, kann die Daten der Familie lesen. Geben Sie ihn nur an Familienmitglieder weiter. Die Einwilligung können Sie jederzeit widerrufen, dann sendet die App nichts mehr. Cloud-Daten löscht der Server nach 12 Monaten selbst. Früher geht es auf Anfrage per E-Mail (Familiencode nennen).
 
 ## Klassencode
 

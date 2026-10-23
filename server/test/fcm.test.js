@@ -63,6 +63,9 @@ test("Inhalte der Mitteilungen", () => {
   const f = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, { value: v }]));
   assert.match(inhalt("JokerAnfrage", f({ kind: "Yemin", text: "Hilfe bei 7 · 8" })).titel, /Yemin/);
   assert.equal(inhalt("RundenErgebnis", f({ kind: "Yemin", uebung: "Geteilt", richtig: 8, gesamt: 10 })).text, "Geteilt: 8 von 10 richtig");
+  const an = inhalt("RundenErgebnis", f({ kind: "Evin", uebung: "Angemeldet", richtig: 0, gesamt: 0 }));
+  assert.match(an.titel, /Evin ist angemeldet/);
+  assert.doesNotMatch(an.text, /von 0/);
   assert.equal(inhalt("JokerFreigabe", {}).titel, "🎁 Neue Joker!");
   assert.equal(inhalt("Unbekannt", {}), null);
   assert.ok(inhalt("JokerAnfrage", f({ kind: "A", text: "x".repeat(300) })).text.length <= 100);

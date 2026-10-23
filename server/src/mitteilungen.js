@@ -37,6 +37,9 @@ export function inhalt(typ, felder) {
     case "JokerAnfrage":
       return { titel: `🆘 Joker-Frage von ${kurz(f("kind"), 30) || "deinem Kind"}`, text: kurz(f("text")) };
     case "RundenErgebnis":
+      if (Number(f("gesamt")) === 0 && f("uebung") === "Angemeldet") {
+        return { titel: `👋 ${kurz(f("kind"), 30) || "Dein Kind"} ist angemeldet`, text: "Das Gerät ist jetzt mit eurer Familie verbunden." };
+      }
       return {
         titel: `📊 ${kurz(f("kind"), 30) || "Dein Kind"} hat geübt`,
         text: `${kurz(f("uebung"), 60)}: ${f("richtig")} von ${f("gesamt")} richtig`,

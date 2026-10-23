@@ -18,3 +18,13 @@
 
 # KI auf dem Gerät und Scanner: bringen ihre eigenen Regeln mit
 -dontwarn com.google.mlkit.**
+
+# WorkManager (kommt über ML Kit und FCM mit) legt seine Room-Datenbank per Namen an.
+# Ohne diese Regeln stürzt die Release-App beim Start ab (WorkDatabase_Impl fehlt).
+-keep class * extends androidx.room.RoomDatabase { <init>(...); }
+-keep class androidx.work.impl.WorkDatabase { *; }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
+-keep class androidx.work.** { *; }
+-keep class androidx.room.** { *; }
+-keep class * extends androidx.startup.Initializer { <init>(); }
+-dontwarn androidx.room.paging.**

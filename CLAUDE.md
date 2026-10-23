@@ -92,12 +92,13 @@ Noch nicht von iOS übernommen: Stift und Handschrift (bewusst nicht).
 Klassencode als Admin ist da (`logik/KlassenAdmin.kt`, Server `server/src/klasse.js`, Route `/v1/klasse`: Schlüssel anlegen, Pakete unterschreiben, senden, löschen; der Server prüft die Unterschrift). Nach Änderungen im `server/` muss Cem mit `npx wrangler deploy` neu veröffentlichen.
 Sprachen: Tippen der Antworten (mit Sonderzeichen) und Auswahl der Lernsprachen sind da. Ergebnisse werden seitenweise geholt (`JokerCloud.alleSeiten`). Production-Schlüssel sind umgestellt (Development gelöscht).
 Datenschutztext (`daten/InfoTexte.kt`) und `store/VEROEFFENTLICHUNG.md` beschreiben die Cloud mit Einwilligung. R8 ist im Release an (`app/proguard-rules.pro`), Cem testet vor dem Store-Upload ein signiertes Release.
+Aufgaben beim Üben vorlesen (Lautsprecher-Knopf, Schalter "von selbst vorlesen", `logik/VorleseText.kt`). Der Server löscht Cloud-Einträge nach 365 Tagen (`server/src/loeschfrist.js`, täglich 03:00 UTC). "Animationen entfernen" in Android schaltet den Sparmodus ein. Abgleich mit iOS und offene Lücken: `docs/ABGLEICH-IOS.md`. Die iOS-Datenschutzseite hat einen Android-Abschnitt (3a).
 Dokumentation pflegen: bei jeder Funktionsänderung `CLAUDE.md`, `docs/ARCHITEKTUR.md`, `docs/ELTERNANLEITUNG.md`, `InfoTexte.kt`, `store/VEROEFFENTLICHUNG.md` und die Testliste im Claude-Projekt mitziehen.
 
 ## Designüberarbeitung (begonnen)
 
 Schon da: Glas-Karten als Verlauf mit feiner Kante (`ui/theme/Glas.kt`, ohne echte Unschärfe, weil das auf Kinder-Tablets zu viel Leistung braucht), Lichtflecken im Hintergrund, federnde Karten auf dem Startbildschirm, Fortschrittsring für das Tagesziel, Sparmodus (Schalter in den Einstellungen, an bei schwachen Geräten).
-Federn und Ringe sind in Start, Sprachen und Lernwelt da. Noch offen: übrige Bildschirme (Haustier, Erfolge, Einstellungen).
+Federn und Ringe sind in Start, Sprachen und Lernwelt da. Auch Haustier, Erfolge und Einstellungen haben jetzt Glas und Auswahlkarten (`Modifier.auswahl`). Noch offen: Spiele-Bildschirme und Vorschule.
 
 Ursprünglicher Plan:
 

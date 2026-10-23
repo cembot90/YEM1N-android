@@ -16,7 +16,7 @@ Stand 23.10.2026. Grundlage: Dateien und Texte der iOS-App (`cembot90/YEM1N`) ge
 |---|---|---|---|
 | 1 | Aufgaben vorlesen beim Üben (Lautsprecher-Knopf, automatisch) | klein | fertig 23.10. |
 | 2 | Löschfrist 365 Tage für Cloud-Daten | klein | im Server fertig 23.10., Deploy nötig |
-| 3 | Bewegung reduzieren (Systemeinstellung beachten) | klein | offen |
+| 3 | Bewegung reduzieren (Systemeinstellung beachten) | klein | fertig 23.10. (Animationen entfernen schaltet den Sparmodus ein) |
 | 4 | Cloud-Diagnose in den Einstellungen und Anzeige "noch nicht gesendet" | klein | offen |
 | 5 | Einrichtungsassistent beim ersten Start (Kind oder Eltern, zweites Elternteil) | mittel | offen |
 | 6 | Mathe-Editor und Vokabel-Editor in der App | groß | offen, Entscheidung nötig |

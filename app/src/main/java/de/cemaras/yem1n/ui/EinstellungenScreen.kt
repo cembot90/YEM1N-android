@@ -126,6 +126,17 @@ fun EinstellungenScreen(vm: AppViewModel) {
                 ) { Text("+", color = Gelb, fontSize = 20.sp) }
             }
 
+            Abschnitt("Belohnung zu Hause")
+            var belohnung by remember { mutableStateOf(vm.fortschritt.familienBelohnung) }
+            OutlinedTextField(
+                value = belohnung,
+                onValueChange = { belohnung = it.take(60); vm.setzeFamilienBelohnung(belohnung) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text("Zum Beispiel: Eis essen gehen") },
+            )
+            Text("Wer das Wochenziel schafft, bekommt zusätzlich zu den Münzen diese Belohnung von euch. Das Kind sieht den Text bei den Erfolgen. Leer lassen, wenn es keine geben soll.", color = TextSanft, fontSize = 14.sp)
+
         }
         if (seite == "bereiche") {
             Abschnitt("Bereiche")

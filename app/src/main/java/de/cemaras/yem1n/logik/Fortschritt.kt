@@ -45,6 +45,8 @@ data class Fortschritt(
     val rosa: Boolean = false,
     /** Die letzten fertigen Runden (höchstens [MAX_RUNDEN]). */
     val runden: List<RundenEintrag> = emptyList(),
+    /** Belohnung zu Hause, die die Eltern für das Wochenziel festlegen (zum Beispiel "Eis essen gehen"). Leer heißt keine. */
+    val familienBelohnung: String = "",
     /** Anfangstag der Woche, für die die Wochenbelohnung schon abgeholt wurde. */
     val belohnungWoche: Long = -1,
     /** Zahlenraum in der Vorschule: 1 bis 5, 2 bis 10, 3 bis 20. */

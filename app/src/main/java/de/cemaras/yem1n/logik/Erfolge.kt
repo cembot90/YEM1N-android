@@ -126,6 +126,9 @@ object Erfolge {
 
     fun wochenStart(tag: Long): Long = tag - Math.floorMod(tag + 3, 7L)
 
+    /** Der Text der Belohnung zu Hause: Leerzeichen glätten, höchstens 60 Zeichen. */
+    fun familienBelohnungText(roh: String): String = roh.replace(Regex("\\s+"), " ").trim().take(60)
+
     fun wochenziel(tagesziel: Int): Int = maxOf(tagesziel, 1) * 5
 
     fun wochenRunden(f: Fortschritt, heute: Long): Int {

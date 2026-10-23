@@ -1557,6 +1557,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     // Einstellungen
 
+    /** Belohnung zu Hause für das Wochenziel. Das Kind sieht den Text auf der Wochenziel-Karte. */
+    fun setzeFamilienBelohnung(text: String) =
+        behalte(fortschritt.copy(familienBelohnung = de.cemaras.yem1n.logik.Erfolge.familienBelohnungText(text)))
+
     fun setzeName(name: String) = behalte(fortschritt.copy(name = name.trim().take(30)))
 
     fun setzeFarbwelt(rosa: Boolean) {

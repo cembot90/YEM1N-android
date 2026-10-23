@@ -125,6 +125,10 @@ fun ErfolgeScreen(vm: AppViewModel) {
                     )
                 }
             }
+            val zuHause = Erfolge.familienBelohnungText(f.familienBelohnung)
+            if (zuHause.isNotEmpty()) {
+                Text("🎁 Zu Hause wartet: $zuHause", color = Gelb, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            }
             if (holbar) {
                 Button(
                     onClick = {
@@ -134,7 +138,10 @@ fun ErfolgeScreen(vm: AppViewModel) {
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                 ) { Text("🎁 Belohnung abholen: ${Erfolge.WOCHEN_BELOHNUNG} Münzen", fontWeight = FontWeight.Bold) }
             } else if (belohnungInfo != null) {
-                Text("$belohnungInfo auf deinem Konto. Bis nächste Woche!", color = Mint, fontWeight = FontWeight.Bold)
+                Text(
+                    "$belohnungInfo auf deinem Konto. " + (if (zuHause.isNotEmpty()) "Sag es deinen Eltern: $zuHause. " else "") + "Bis nächste Woche!",
+                    color = Mint, fontWeight = FontWeight.Bold,
+                )
             }
         }
 

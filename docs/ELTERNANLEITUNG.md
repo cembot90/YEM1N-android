@@ -20,6 +20,7 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 
 - Oben rechts: Spiele, Einstellungen (⚙️), Erfolge und das Plus-Menü.
 - Beim ersten Start fragt die Einrichtung im letzten Schritt freiwillig nach Familiencode (mit Einwilligung der Eltern) und Klassencode.
+- Unter Einstellungen > Ich legen Sie eine **Belohnung zu Hause** fest (zum Beispiel "Eis essen gehen"). Das Kind sieht sie bei den Erfolgen auf der Wochenziel-Karte und bekommt sie zusätzlich zu den 10 Münzen von Ihnen.
 - Mit Familiencode meldet sich ein Kind-Gerät einmal bei den Eltern an. Auf dem Eltern-Gerät (auch iOS) steht das Kind dann schon vor der ersten Runde in der Liste der Kinder.
 
 - Kopf: Serie, Münzen und Tagesziel. Oben rechts Spiele, Erfolge und das Plus-Menü.

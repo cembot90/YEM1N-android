@@ -43,6 +43,10 @@ fun EinstellungenScreen(vm: AppViewModel) {
     var loeschen by remember { mutableStateOf<Arbeit?>(null) }
     var seite by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
     androidx.activity.compose.BackHandler(enabled = seite != null) { seite = null }
+    val kontext = androidx.compose.ui.platform.LocalContext.current
+    val versionText = remember {
+        runCatching { kontext.packageManager.getPackageInfo(kontext.packageName, 0).versionName }.getOrNull() ?: "?"
+    }
     Column(
         Modifier
             .fillMaxSize()
@@ -373,6 +377,29 @@ fun EinstellungenScreen(vm: AppViewModel) {
                     TextButton(onClick = { loeschen = a }) { Text("Löschen", color = Koralle) }
                 }
             }
+        if (seite == "technik") {
+            Abschnitt("Cloud")
+            Text("Hier prüfst du, ob Server und Cloud erreichbar sind.", color = TextSanft, fontSize = 14.sp)
+            OutlinedButton(
+                onClick = vm::diagnoseStarten, enabled = !vm.diagnoseLaeuft,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp), border = BorderStroke(1.dp, Gelb),
+            ) { Text("Verbindung testen", color = Gelb) }
+            vm.diagnose.forEach { Text(it, color = Color.White, fontSize = 15.sp, modifier = Modifier.padding(top = 6.dp)) }
+            Abschnitt("Ergebnisse")
+            Text("Noch nicht gesendet: ${vm.fortschritt.offeneErgebnisse.size}", color = Color.White, fontSize = 16.sp)
+            Text(
+                "Ergebnisse gehen automatisch an die Eltern, sobald das Gerät online ist und ein Familiencode eingetragen ist.",
+                color = TextSanft, fontSize = 13.sp,
+            )
+            if (vm.fortschritt.offeneErgebnisse.isNotEmpty()) {
+                OutlinedButton(
+                    onClick = vm::offeneErgebnisseSenden,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp), border = BorderStroke(1.dp, Gelb),
+                ) { Text("Jetzt senden", color = Gelb) }
+            }
+            if (vm.ergebnisStatus.isNotEmpty()) Text(vm.ergebnisStatus, color = TextSanft, fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
+            Abschnitt("Version")
+            Text("YEM1N $versionText", color = Color.White, fontSize = 16.sp)
         }
         }
         Spacer(Modifier.height(24.dp))
@@ -405,4 +432,5 @@ private val gruppen = listOf(
     EinstellGruppe("stimmen", "🔊", "Vorlesen und Stimmen", "Sprachausgabe und natürliche Stimmen"),
     EinstellGruppe("familie", "☁️", "Familie und Cloud", "Einwilligung, Familiencode, Klassencode"),
     EinstellGruppe("info", "ℹ️", "Info und Arbeiten", "Anleitung, Datenschutz, Arbeiten löschen"),
+    EinstellGruppe("technik", "🛠", "Technik", "Verbindung testen, Senden, Version"),
 )

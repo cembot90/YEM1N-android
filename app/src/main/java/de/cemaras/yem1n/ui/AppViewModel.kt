@@ -1358,6 +1358,28 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später. */
+    /** Ergebnis des letzten Verbindungstests (Einstellungen > Technik). */
+    var diagnose: List<String> by mutableStateOf(emptyList())
+    var diagnoseLaeuft: Boolean by mutableStateOf(false)
+
+    fun diagnoseStarten() {
+        if (diagnoseLaeuft) return
+        diagnoseLaeuft = true
+        diagnose = listOf("Ich teste die Verbindung ...")
+        viewModelScope.launch {
+            val zeilen = mutableListOf<String>()
+            val server = withContext(Dispatchers.IO) { ServerClient.senden("/v1/ping", "{}") }
+            zeilen += if (server.ok) "✅ Server erreichbar" else "❌ Server: ${server.meldung}"
+            val lesen = withContext(Dispatchers.IO) { cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_FRAGE, "AAAAA-AAAAA", 1)) }
+            zeilen += if (lesen != null) "✅ Cloud lesen geht" else "❌ Cloud lesen geht nicht (Internet oder Schlüssel prüfen)"
+            zeilen += if (fortschritt.familiencode.isNotEmpty()) "✅ Familiencode ist eingetragen" else "ℹ️ Kein Familiencode eingetragen"
+            zeilen += if (!einwilligungOffen) "✅ Einwilligung ist erteilt" else "ℹ️ Einwilligung fehlt, es wird nichts gesendet"
+            zeilen += "ℹ️ Noch nicht gesendet: ${fortschritt.offeneErgebnisse.size}"
+            diagnose = zeilen
+            diagnoseLaeuft = false
+        }
+    }
+
     fun offeneErgebnisseSenden() {
         if (ergebnisSendet || fortschritt.offeneErgebnisse.isEmpty()) return
         ergebnisSendet = true

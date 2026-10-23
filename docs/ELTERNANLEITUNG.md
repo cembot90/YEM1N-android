@@ -11,7 +11,7 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 
 ## Erste Schritte
 
-1. App öffnen. Oben rechts auf das Plus und dann Einstellungen tippen, unter **Ich** den Namen des Kindes eintragen (dann lobt die App mit Namen).
+1. Beim ersten Start führt ein Assistent durch die Einrichtung: Kind oder Eltern, Name, Klasse, Sprachen, Farben, Tagesziel und Vorlesen. Später lässt er sich unter Einstellungen > Technik noch einmal ansehen. Den Namen kannst du auch unter Einstellungen > **Ich** ändern.
 2. Arbeiten bekommen Sie aus Ihrem Claude-Projekt als JSON. Plus > **Arbeit einfügen** (Text einfügen) oder **Datei öffnen**. Man kann auch aus einer anderen App teilen.
 3. Prüfen Sie ein paar Antworten, bevor Ihr Kind übt. Arbeiten stammen von Ihnen, die App prüft nur die Form.
 4. Das Kind wählt eine Arbeit, eine Übung und tippt die Antworten ein. Nach jeder Übung gibt es bis zu drei Sterne.
@@ -24,6 +24,10 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 - **Extra:** Fehlerheft, Probearbeit (30 Minuten mit Note) und Training (die zwei schwächsten Bereiche).
 - **Mehr:** Haustier, Joker, Duell und Vorschule.
 - Darunter die Arbeiten, geordnet nach Klasse und Fach.
+
+## Mit dem Stift schreiben
+
+Bei Rechenaufgaben steht über dem Antwortfeld "Mit dem Stift schreiben". Das Kind schreibt die Zahl mit Stift oder Finger auf ein Karoblatt, die App liest sie und zeigt sie groß an. Beim ersten Mal lädt das Gerät einmal die Handschrift-Erkennung von Google (etwa 20 MB, danach ohne Internet). Die Schrift wird weder gespeichert noch verschickt. "Lieber Tasten" bringt die Zahlentasten zurück.
 
 ## Hilfen und Erklären
 

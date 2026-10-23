@@ -18,3 +18,7 @@ local.properties
 *.pem
 *.p8
 .dev.vars
+
+# Wrangler und Android Studio, nur lokal
+.wrangler/
+/.idea/

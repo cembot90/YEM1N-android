@@ -20,6 +20,7 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 
 - Oben rechts: Spiele, Einstellungen (⚙️), Erfolge und das Plus-Menü.
 - Beim ersten Start fragt die Einrichtung im letzten Schritt freiwillig nach Familiencode (mit Einwilligung der Eltern) und Klassencode.
+- Mit Familiencode meldet sich ein Kind-Gerät einmal bei den Eltern an. Auf dem Eltern-Gerät (auch iOS) steht das Kind dann schon vor der ersten Runde in der Liste der Kinder.
 
 - Kopf: Serie, Münzen und Tagesziel. Oben rechts Spiele, Erfolge und das Plus-Menü.
 - **Lernwelt:** fertige Aufgaben nach dem Lehrplan (Hessen, Bayern, Nordrhein-Westfalen, Klassen 1 bis 4). Bundesland und Klasse stellen Sie in der Lernwelt ein.

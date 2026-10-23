@@ -14,6 +14,7 @@ googleServices = "4.4.3"
 
 [libraries]
 mlkit-genai-prompt = { group = "com.google.mlkit", name = "genai-prompt", version = "1.0.0-beta4" }
+mlkit-digital-ink = { group = "com.google.mlkit", name = "digital-ink-recognition", version = "19.0.0" }
 eddsa = { group = "net.i2p.crypto", name = "eddsa", version = "0.3.0" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

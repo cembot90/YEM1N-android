@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.zxing.core)
     implementation(libs.eddsa)
     implementation(libs.mlkit.genai.prompt)
+    implementation(libs.mlkit.digital.ink)
     implementation(libs.code.scanner)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

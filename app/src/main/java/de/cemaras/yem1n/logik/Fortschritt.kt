@@ -120,6 +120,8 @@ data class Fortschritt(
     val lernKlasse: Int = 0,
     /** Hat der Einrichtungsassistent beim ersten Start schon geklappt oder wurde er übersprungen? */
     val profilFertig: Boolean = false,
+    /** Antworten mit Stift oder Finger schreiben statt mit den Zahlentasten. */
+    val stift: Boolean = false,
 ) {
 
     fun jokerUebrig(heute: Long): Int = JokerNachschub.uebrig(jokerLimit, jokerTag, jokerGenutzt, heute)

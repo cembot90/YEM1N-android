@@ -271,9 +271,18 @@ private fun Eingabe(
             }
         }
         Aufgabe.ART_REST -> {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Zahlenfeld(e1, setze1, "Ergebnis", Modifier.weight(1f).focusRequester(fokus), ImeAction.Next, laenge(a.antwort)) {}
-                Zahlenfeld(e2, setze2, "Rest", Modifier.weight(1f), ImeAction.Done, laenge(a.antwort2)) { vm.antworte(e1, e2) }
+            val stift = vm.fortschritt.stift && vm.stiftStand == de.cemaras.yem1n.speicher.StiftLeser.Stand.BEREIT
+            StiftUmschalter(vm)
+            if (stift) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StiftFeld(vm, e1, laenge(a.antwort), "Ergebnis", setze1) {}
+                    StiftFeld(vm, e2, laenge(a.antwort2), "Rest", setze2) { vm.antworte(e1, e2) }
+                }
+            } else {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Zahlenfeld(e1, setze1, "Ergebnis", Modifier.weight(1f).focusRequester(fokus), ImeAction.Next, laenge(a.antwort)) {}
+                    Zahlenfeld(e2, setze2, "Rest", Modifier.weight(1f), ImeAction.Done, laenge(a.antwort2)) { vm.antworte(e1, e2) }
+                }
             }
         }
         Aufgabe.ART_TEXT -> {
@@ -289,8 +298,40 @@ private fun Eingabe(
             )
         }
         else -> {
-            Zahlenfeld(e1, setze1, "Antwort", Modifier.fillMaxWidth().focusRequester(fokus), ImeAction.Done, laenge(a.antwort)) {
-                vm.antworte(e1)
+            val stift = vm.fortschritt.stift && vm.stiftStand == de.cemaras.yem1n.speicher.StiftLeser.Stand.BEREIT
+            StiftUmschalter(vm)
+            if (stift) {
+                StiftFeld(vm, e1, laenge(a.antwort), "Antwort", setze1) { vm.antworte(e1) }
+            } else {
+                Zahlenfeld(e1, setze1, "Antwort", Modifier.fillMaxWidth().focusRequester(fokus), ImeAction.Done, laenge(a.antwort)) {
+                    vm.antworte(e1)
+                }
+            }
+        }
+    }
+}
+
+/** Schalter zwischen Stift und Tasten. Beim ersten Mal lädt das Gerät einmal das Modell der Handschrifterkennung. */
+@Composable
+private fun StiftUmschalter(vm: AppViewModel) {
+    val an = vm.fortschritt.stift
+    val stand = vm.stiftStand
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        TextButton(onClick = { vm.setzeStift(!an) }) {
+            Text(if (an) "⌨️ Lieber Tasten" else "✏️ Mit dem Stift schreiben", color = Himmel)
+        }
+        if (an) {
+            when (stand) {
+                de.cemaras.yem1n.speicher.StiftLeser.Stand.FEHLT, de.cemaras.yem1n.speicher.StiftLeser.Stand.FEHLER -> {
+                    Text(
+                        if (stand == de.cemaras.yem1n.speicher.StiftLeser.Stand.FEHLER) "Das hat nicht geklappt. Ist das Internet an?"
+                        else "Dafür lädt das Gerät einmal die Handschrift-Erkennung von Google (etwa 20 MB). Danach geht es ohne Internet.",
+                        color = TextSanft, fontSize = 13.sp, textAlign = TextAlign.Center,
+                    )
+                    TextButton(onClick = vm::stiftLaden) { Text("Jetzt laden", color = Gelb) }
+                }
+                de.cemaras.yem1n.speicher.StiftLeser.Stand.LAEDT -> Text("Wird geladen ...", color = TextSanft, fontSize = 13.sp)
+                else -> Unit
             }
         }
     }

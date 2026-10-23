@@ -98,7 +98,7 @@ Dokumentation pflegen: bei jeder Funktionsänderung `CLAUDE.md`, `docs/ARCHITEKT
 ## Designüberarbeitung (begonnen)
 
 Schon da: Glas-Karten als Verlauf mit feiner Kante (`ui/theme/Glas.kt`, ohne echte Unschärfe, weil das auf Kinder-Tablets zu viel Leistung braucht), Lichtflecken im Hintergrund, federnde Karten auf dem Startbildschirm, Fortschrittsring für das Tagesziel, Sparmodus (Schalter in den Einstellungen, an bei schwachen Geräten).
-Federn und Ringe sind in Start, Sprachen und Lernwelt da. Auch Haustier, Erfolge und Einstellungen haben jetzt Glas und Auswahlkarten (`Modifier.auswahl`). Noch offen: Spiele-Bildschirme und Vorschule.
+Federn und Ringe sind in Start, Sprachen und Lernwelt da. Auch Haustier, Erfolge und Einstellungen haben jetzt Glas und Auswahlkarten (`Modifier.auswahl`). Auch Vorschule und Spiele federn jetzt (`Modifier.federKarte`). Die Spiele selbst (Zeichenflächen) behalten ihr eigenes Aussehen. Die Designüberarbeitung ist damit abgeschlossen.
 
 Ursprünglicher Plan:
 

@@ -55,6 +55,7 @@ Wofür die App noch ins Internet geht:
 - Download der natürlichen Stimmen aus dem GitHub-Release `stimmen-1`, nur wenn Eltern es auslösen. Größe und Prüfsumme werden geprüft.
 - Klassencode: Pakete der Klasse aus CloudKit lesen. Nur der Klassencode geht über das Netz.
 - Gemini Nano (KI auf dem Gerät) lädt sein Modell einmal von Google. Danach läuft die KI ohne Internet.
+- Die Handschrift-Erkennung (ML Kit Digital Ink, freiwillig) lädt ihr Modell (etwa 20 MB) einmal von Google. Die Schrift wird auf dem Gerät gelesen, nicht gespeichert und nicht verschickt. In Data Safety nichts zusätzlich angeben, weil keine Nutzerdaten das Gerät verlassen; nur die Modell-Anfrage geht an Google.
 
 Berechtigungen:
 

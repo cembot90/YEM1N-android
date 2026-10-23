@@ -39,6 +39,7 @@ import de.cemaras.yem1n.logik.SpielRegeln
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.glas
+import de.cemaras.yem1n.ui.theme.feder
 import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.TextSanft
 
@@ -83,10 +84,12 @@ fun SpieleScreen(vm: AppViewModel) {
                 }
                 Text(art.beschreibung, fontSize = 14.sp, color = TextSanft)
                 if (art.verfuegbar) {
+                    val quelle = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                     Button(
                         onClick = { vm.startSpiel(art) },
                         enabled = sperre == null,
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        interactionSource = quelle,
+                        modifier = Modifier.fillMaxWidth().height(50.dp).feder(quelle),
                     ) {
                         Text(
                             if (sperre == null) "Spielen für ${SpielRegeln.PREIS} Münzen" else "Noch nicht möglich",

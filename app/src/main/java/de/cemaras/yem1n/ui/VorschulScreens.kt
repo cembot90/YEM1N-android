@@ -54,6 +54,7 @@ import de.cemaras.yem1n.logik.VorschulStand
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.glas
+import de.cemaras.yem1n.ui.theme.federKarte
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
@@ -133,8 +134,7 @@ fun VorschulScreen(vm: AppViewModel) {
             Abschnitt("Eigene Pakete")
             pakete.forEach { (nr, a) ->
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).glas(20.dp)
-                        .clickable { vm.oeffneVorschulPaket(nr) }.padding(16.dp),
+                    Modifier.fillMaxWidth().federKarte(20.dp) { vm.oeffneVorschulPaket(nr) }.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("📦", fontSize = 32.sp)
@@ -164,8 +164,7 @@ fun VorschulPaketScreen(vm: AppViewModel, nr: Int) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             arbeit?.uebungen?.forEachIndexed { i, u ->
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).glas(20.dp)
-                        .clickable { vm.startVorschulPaket(nr, i) }.padding(16.dp),
+                    Modifier.fillMaxWidth().federKarte(20.dp) { vm.startVorschulPaket(nr, i) }.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(u.symbol.ifEmpty { "🧸" }, fontSize = 32.sp)
@@ -194,9 +193,7 @@ private fun SpielRaster(arten: List<VorschulArt>, vm: AppViewModel) {
                         Modifier
                             .weight(1f)
                             .heightIn(min = 120.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .glas(24.dp)
-                            .clickable { vm.startVorschul(art) }
+                            .federKarte(24.dp) { vm.startVorschul(art) }
                             .padding(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -225,9 +222,7 @@ private fun EnglischRaster(vm: AppViewModel) {
                         Modifier
                             .weight(1f)
                             .heightIn(min = 110.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .glas(24.dp)
-                            .clickable { vm.oeffneEnglisch(thema) }
+                            .federKarte(24.dp) { vm.oeffneEnglisch(thema) }
                             .padding(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -397,9 +392,7 @@ private fun FragenSpiel(vm: AppViewModel, s: VorschulStand) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(22.dp))
-                .glas(22.dp)
-                .clickable { vm.frageVorlesen() }
+                .federKarte(22.dp) { vm.frageVorlesen() }
                 .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

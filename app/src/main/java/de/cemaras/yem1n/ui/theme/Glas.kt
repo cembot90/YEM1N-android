@@ -13,6 +13,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.composed
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -124,4 +127,13 @@ fun Fortschrittsring(
         }
         inhalt()
     }
+}
+
+/** Glas-Karte zum Antippen, die beim Drücken federt. */
+fun Modifier.federKarte(radius: Dp = 20.dp, onClick: () -> Unit): Modifier = composed {
+    val quelle = remember { MutableInteractionSource() }
+    this
+        .feder(quelle)
+        .glas(radius)
+        .clickable(interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
 }

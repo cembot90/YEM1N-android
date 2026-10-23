@@ -84,8 +84,10 @@ iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
 | KI-Erklärung | Beta-Schnittstelle von Google, nur auf unterstützten Geräten, sonst feste Sätze |
 | Löschen in der Cloud | Server-Datensätze gehören dem Entwickler, Löschung nur auf Anfrage über das CloudKit-Dashboard |
 | Release mit R8 | Keep-Regeln in `app/proguard-rules.pro`, vor dem Store-Upload auf einem echten Gerät prüfen |
-| Stift und Handschrift | nicht umgesetzt |
+| Stift und Handschrift | ML Kit Digital Ink, Modell (etwa 20 MB) lädt einmal, Schrift bleibt auf dem Gerät |
 | Lizenz | GPL-3.0 verlangt Quelltext bei Weitergabe der App |
+
+Editoren: `logik/Editor.kt` (Rechner, `AufgabenBauer` für das Formular, `EntwurfPruefer` rechnet jede Lösung nach und meldet Gedankenstriche, Doppelte und kaputte Mauern, `EntwurfListe` mit Vorlagen aus `MatheGenerator`). Der Entwurf liegt als `entwurf.json` im App-Speicher und wird beim Speichern über `fuegeArbeitEin` zur normalen Arbeit. Vokabel-Editor: `logik/EigeneThemen.kt` (`eigene-themen.json`), die Sprachen-Seite mischt die Themen über `Sprachen.themen` und `Sprachen.woerter` ein. Beides ohne Cloud.
 
 ## 9. Einstieg für neue Entwickler
 

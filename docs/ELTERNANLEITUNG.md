@@ -25,6 +25,11 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 - **Mehr:** Haustier, Joker, Duell und Vorschule.
 - Darunter die Arbeiten, geordnet nach Klasse und Fach.
 
+## Eigene Arbeiten und Wörter bauen
+
+- **Plus > Eigene Arbeit bauen:** Sie legen Klasse, Fach und Titel fest und lassen die App eine komplette Arbeit mit den 13 Übungen erzeugen oder bauen von Hand. Beim Hinzufügen einer Aufgabe wählen Sie die Art (Rechnung, Teilen mit Rest, Größer oder kleiner, Zahlenmauer, Rätsel, Sachaufgabe, Rechnung mit Wörtern, freie Aufgabe). Die App rechnet die Lösung selbst aus. Mit **Prüfen** rechnet sie alles noch einmal nach. **Speichern** legt die Arbeit auf den Startbildschirm, **JSON teilen** schickt sie weiter. Der Entwurf bleibt auf dem Gerät, bis Sie ihn speichern oder verwerfen.
+- **Sprachen > Eigene Wörter:** Ein eigenes Thema mit Wörtern auf Deutsch, Englisch, Türkisch und freiwillig Italienisch. Es erscheint danach bei Karten, Paaren und Tippen.
+
 ## Mit dem Stift schreiben
 
 Bei Rechenaufgaben steht über dem Antwortfeld "Mit dem Stift schreiben". Das Kind schreibt die Zahl mit Stift oder Finger auf ein Karoblatt, die App liest sie und zeigt sie groß an. Beim ersten Mal lädt das Gerät einmal die Handschrift-Erkennung von Google (etwa 20 MB, danach ohne Internet). Die Schrift wird weder gespeichert noch verschickt. "Lieber Tasten" bringt die Zahlentasten zurück.

@@ -19,7 +19,7 @@ Stand 23.10.2026. Grundlage: Dateien und Texte der iOS-App (`cembot90/YEM1N`) ge
 | 3 | Bewegung reduzieren (Systemeinstellung beachten) | klein | fertig 23.10. (Animationen entfernen schaltet den Sparmodus ein) |
 | 4 | Cloud-Diagnose in den Einstellungen und Anzeige "noch nicht gesendet" | klein | fertig 23.10. (Einstellungen > Technik) |
 | 5 | Einrichtungsassistent beim ersten Start | mittel | fertig 23.10. (Familiencode bleibt unter Joker) |
-| 6 | Mathe-Editor und Vokabel-Editor in der App | groß | offen, Entscheidung nötig |
+| 6 | Mathe-Editor und Vokabel-Editor in der App | groß | fertig 23.10. (Plus > Eigene Arbeit bauen, Sprachen > Eigene Wörter) |
 | 7 | Profil-Assistent | mittel | fertig 23.10. (im Einrichtungsassistenten) |
 
 ## Nicht geprüft

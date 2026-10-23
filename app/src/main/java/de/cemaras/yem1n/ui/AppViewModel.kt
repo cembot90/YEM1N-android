@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.daten.PaketLeser
+import de.cemaras.yem1n.daten.zuArbeit
+import de.cemaras.yem1n.logik.MatheGenerator
 import de.cemaras.yem1n.daten.Uebung
 import de.cemaras.yem1n.logik.EnglischThema
 import de.cemaras.yem1n.logik.EnglischWort
@@ -84,6 +86,8 @@ sealed interface Ansicht {
     data object Duell : Ansicht
     data object Lernwelt : Ansicht
     data object Sprachen : Ansicht
+    data object Editor : Ansicht
+    data object VokabelEditor : Ansicht
     data class Spiel(val art: SpielArt) : Ansicht
     data class VorschulSpiel(val art: VorschulArt) : Ansicht
     data class Englisch(val thema: EnglischThema) : Ansicht
@@ -98,6 +102,9 @@ private const val SONDER = -1
 
 /** Platzhalter für die Arbeit, die gerade aus der Lernwelt kommt. */
 private const val LERNWELT = -2
+
+private const val DATEI_ENTWURF = "entwurf.json"
+private const val DATEI_THEMEN = "eigene-themen.json"
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val speicher = Speicher(app)
@@ -271,7 +278,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 else -> arbeiten.getOrNull(a.arbeit)
             }
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen, Ansicht.Editor, Ansicht.VokabelEditor -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -1122,6 +1129,72 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     val bundesland: de.cemaras.yem1n.logik.Bundesland
         get() = de.cemaras.yem1n.logik.Bundesland.aus(fortschritt.bundesland)
 
+    // Editoren
+
+    /** Der angefangene Entwurf einer Arbeit (bleibt auf dem Gerät, bis er gespeichert oder verworfen wird). */
+    var entwurf: Arbeit? by mutableStateOf(
+        speicher.ladeText(DATEI_ENTWURF)?.let {
+            try {
+                PaketLeser.json.decodeFromString(de.cemaras.yem1n.daten.ArbeitPaket.serializer(), it).zuArbeit()
+            } catch (e: Exception) { null }
+        },
+    )
+        private set
+
+    /** 0 = Arbeit, 1 = Übung, 2 = Aufgabe */
+    var editorEbene: Int by mutableStateOf(0)
+    var editorUebung: Int by mutableStateOf(0)
+    var editorAufgabe: Int by mutableStateOf(-1)
+
+    fun oeffneEditor() {
+        editorEbene = 0
+        ansicht = Ansicht.Editor
+    }
+
+    fun setzeEntwurf(neu: Arbeit?) {
+        entwurf = neu
+        speicher.speichereText(DATEI_ENTWURF, neu?.let { de.cemaras.yem1n.logik.PaketJson.text(it) })
+        if (neu == null) editorEbene = 0
+    }
+
+    /** Alle Aufgaben, die es schon gibt, damit Vorlagen nichts doppelt erzeugen. */
+    fun vorhandeneAufgaben(): MutableSet<String> {
+        val s = MatheGenerator.vorhandeneSchluessel(alleArbeiten)
+        entwurf?.let { s += MatheGenerator.vorhandeneSchluessel(listOf(it)) }
+        return s
+    }
+
+    /** Prüft den Entwurf und legt ihn als Arbeit ab. Gibt einen Fehlertext zurück oder null. */
+    fun entwurfSpeichern(): String? {
+        val e = entwurf ?: return "Es gibt keinen Entwurf."
+        val schwer = de.cemaras.yem1n.logik.EntwurfPruefer.pruefe(e).firstOrNull { it.schwer }
+        if (schwer != null) return schwer.text
+        val fehler = fuegeArbeitEin(de.cemaras.yem1n.logik.PaketJson.text(e))
+        if (fehler == null) setzeEntwurf(null)
+        return fehler
+    }
+
+    var eigeneThemen: List<de.cemaras.yem1n.logik.EigenThema> by mutableStateOf(
+        de.cemaras.yem1n.logik.EigeneThemen.lese(speicher.ladeText(DATEI_THEMEN)).also {
+            de.cemaras.yem1n.logik.EigeneThemen.liste = it
+        },
+    )
+        private set
+
+    /** Das Thema, das im Vokabel-Editor gerade bearbeitet wird (null = Liste). */
+    var vokabelThema: de.cemaras.yem1n.logik.EigenThema? by mutableStateOf(null)
+
+    fun oeffneVokabelEditor() {
+        vokabelThema = null
+        ansicht = Ansicht.VokabelEditor
+    }
+
+    fun setzeEigeneThemen(neu: List<de.cemaras.yem1n.logik.EigenThema>) {
+        eigeneThemen = neu
+        de.cemaras.yem1n.logik.EigeneThemen.liste = neu
+        speicher.speichereText(DATEI_THEMEN, if (neu.isEmpty()) null else de.cemaras.yem1n.logik.EigeneThemen.text(neu))
+    }
+
     fun oeffneSprachen() {
         ansicht = Ansicht.Sprachen
     }
@@ -1251,6 +1324,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     Ansicht.Start
                 }
             }
+            Ansicht.Editor -> if (editorEbene > 0) editorEbene-- else ansicht = Ansicht.Start
+            Ansicht.VokabelEditor -> if (vokabelThema != null) vokabelThema = null else ansicht = Ansicht.Start
             is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele

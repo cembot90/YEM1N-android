@@ -96,6 +96,7 @@ fun SprachenScreen(vm: AppViewModel) {
             Text("Wähle ein Thema. Die Wörter sprichst du laut nach.", color = TextSanft, fontSize = 14.sp)
             if (faellig > 0) BreitKnopf("🔁 Heute wiederholen ($faellig)", "Wörter, die wieder dran sind") { modus = "wdh" }
             else Text("🔁 Heute ist nichts zu wiederholen.", color = TextSanft, fontSize = 14.sp)
+            BreitKnopf("✏️ Eigene Wörter", "Ein eigenes Thema mit Wörtern bauen") { vm.oeffneVokabelEditor() }
             for (x in Sprachen.themen) {
                 val ws = Sprachen.woerter(x.id, sprache)
                 val gelernt = ws.count { Karteikasten.gelernt(vm.fortschritt.wortStand[Karteikasten.schluessel(sprache, x.id, it.de)]) }

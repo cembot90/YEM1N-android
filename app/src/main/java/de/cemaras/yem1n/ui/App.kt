@@ -101,6 +101,8 @@ fun App(vm: AppViewModel) {
             Ansicht.Duell -> DuellScreen(vm)
             Ansicht.Lernwelt -> LernweltScreen(vm)
             Ansicht.Sprachen -> SprachenScreen(vm)
+            Ansicht.Editor -> EditorScreen(vm)
+            Ansicht.VokabelEditor -> VokabelEditorScreen(vm)
             Ansicht.ErgebnisseEltern -> ErgebnisseElternScreen(vm)
             is Ansicht.Spiel -> SpielScreen(vm, (vm.ansicht as Ansicht.Spiel).art)
             is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)
@@ -173,6 +175,7 @@ fun StartScreen(vm: AppViewModel) {
                         RundKnopf("＋", betont = true) { menue = true }
                         androidx.compose.material3.DropdownMenu(expanded = menue, onDismissRequest = { menue = false }) {
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Arbeit einfügen") }, onClick = { menue = false; einfuegen = true })
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("Eigene Arbeit bauen") }, onClick = { menue = false; vm.oeffneEditor() })
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Datei öffnen") }, onClick = { menue = false; oeffner.launch(arrayOf("*/*")) })
                             if (vm.fortschritt.klassencode.isNotEmpty()) {
                                 androidx.compose.material3.DropdownMenuItem(text = { Text("Neue Aufgaben der Klasse holen") }, onClick = { menue = false; vm.klassenPaketeHolen() })

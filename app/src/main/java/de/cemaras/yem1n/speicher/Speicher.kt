@@ -63,4 +63,17 @@ class Speicher(private val context: Context) {
             // Speichern ist nicht lebenswichtig, die Runde geht trotzdem weiter.
         }
     }
+
+    /** Kleine Dateien für Entwurf und eigene Vokabel-Themen. Fehler machen nichts kaputt. */
+    fun ladeText(name: String): String? =
+        try { File(context.filesDir, name).takeIf { it.exists() }?.readText(Charsets.UTF_8) } catch (e: Exception) { null }
+
+    fun speichereText(name: String, text: String?) {
+        try {
+            val datei = File(context.filesDir, name)
+            if (text == null) datei.delete() else datei.writeText(text, Charsets.UTF_8)
+        } catch (e: Exception) {
+            // Entwürfe sind nicht lebenswichtig.
+        }
+    }
 }

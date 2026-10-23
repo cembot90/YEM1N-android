@@ -254,7 +254,7 @@ class MatheGenerator(private val zufall: Random = Random.Default) {
                 val a = z(20, 50); val b = z(5, 20); val c = z(3, 15)
                 return zahl(
                     frage, "$na hat $a Murmeln.\n$nb schenkt $na noch $b Murmeln.\nDann verliert $na $c Murmeln.\nWie viele Murmeln hat $na jetzt?",
-                    a + b - c, erklaerung = "$a + $b = ${a + b}, dann ${a + b} - $c = ${a + b - c}",
+                    a + b - c, erklaerung = "$a + $b - $c = ${a + b - c}",
                 )
             }
             10 -> {

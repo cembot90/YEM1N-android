@@ -82,6 +82,10 @@ fun App(vm: AppViewModel) {
                 confirmButton = { TextButton(onClick = vm::meldungGelesen) { Text("OK") } },
             )
         }
+        if (vm.zeigeEinrichtung) {
+            EinrichtungScreen(vm)
+            return@Box
+        }
         when (vm.ansicht) {
             Ansicht.Start -> StartScreen(vm)
             is Ansicht.Uebungen -> UebungenScreen(vm)

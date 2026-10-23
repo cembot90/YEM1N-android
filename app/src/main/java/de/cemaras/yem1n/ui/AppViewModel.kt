@@ -28,6 +28,7 @@ import de.cemaras.yem1n.speicher.ServerClient
 import de.cemaras.yem1n.logik.Einwilligung
 import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerCloud
+import de.cemaras.yem1n.logik.Profil
 import de.cemaras.yem1n.logik.Klassensiegel
 import de.cemaras.yem1n.logik.KlassenAdmin
 import de.cemaras.yem1n.logik.PaketJson
@@ -1358,6 +1359,20 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später. */
+    /** Soll der Einrichtungsassistent gezeigt werden? Beim ersten Start, oder wenn er in Technik noch einmal gewünscht ist. */
+    var einrichtungNochmal: Boolean by mutableStateOf(false)
+    val zeigeEinrichtung: Boolean get() = einrichtungNochmal || Profil.einrichtungNoetig(fortschritt)
+
+    fun einrichtungAbschliessen(rolle: String, name: String, klasse: String, sprachen: Boolean, rosa: Boolean, ziel: Int, auto: Boolean) {
+        behalte(Profil.uebernehmen(fortschritt, rolle, name, klasse, sprachen, rosa, ziel, auto))
+        einrichtungNochmal = false
+    }
+
+    fun einrichtungUeberspringen() {
+        behalte(fortschritt.copy(profilFertig = true))
+        einrichtungNochmal = false
+    }
+
     /** Ergebnis des letzten Verbindungstests (Einstellungen > Technik). */
     var diagnose: List<String> by mutableStateOf(emptyList())
     var diagnoseLaeuft: Boolean by mutableStateOf(false)

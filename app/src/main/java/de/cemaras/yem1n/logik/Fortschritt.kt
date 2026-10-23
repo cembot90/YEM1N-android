@@ -118,6 +118,8 @@ data class Fortschritt(
     val bundesland: String = "hessen",
     /** Klasse des Kindes in der Lernwelt, 0 heißt: nicht gewählt. */
     val lernKlasse: Int = 0,
+    /** Hat der Einrichtungsassistent beim ersten Start schon geklappt oder wurde er übersprungen? */
+    val profilFertig: Boolean = false,
 ) {
 
     fun jokerUebrig(heute: Long): Int = JokerNachschub.uebrig(jokerLimit, jokerTag, jokerGenutzt, heute)

@@ -398,6 +398,12 @@ fun EinstellungenScreen(vm: AppViewModel) {
                 ) { Text("Jetzt senden", color = Gelb) }
             }
             if (vm.ergebnisStatus.isNotEmpty()) Text(vm.ergebnisStatus, color = TextSanft, fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
+            Abschnitt("Gerät")
+            OutlinedButton(
+                onClick = { vm.einrichtungNochmal = true },
+                modifier = Modifier.fillMaxWidth(), border = BorderStroke(1.dp, Gelb),
+            ) { Text("Einrichtung noch einmal ansehen", color = Gelb) }
+            Text("Name, Klasse, Farben und Ziel werden dabei neu abgefragt. Fortschritt und Arbeiten bleiben erhalten.", color = TextSanft, fontSize = 13.sp)
             Abschnitt("Version")
             Text("YEM1N $versionText", color = Color.White, fontSize = 16.sp)
         }

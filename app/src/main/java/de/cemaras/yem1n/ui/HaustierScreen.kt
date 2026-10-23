@@ -56,6 +56,7 @@ import de.cemaras.yem1n.logik.HaustierZeit
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.auswahl
 import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
@@ -111,9 +112,7 @@ private fun HaustierWahl(vm: AppViewModel) {
                 val aktiv = a.id == art
                 Column(
                     Modifier
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(if (aktiv) Gelb.copy(alpha = 0.25f) else Karte)
-                        .border(2.dp, if (aktiv) Gelb else Color.Transparent, RoundedCornerShape(18.dp))
+                        .auswahl(aktiv, 18.dp)
                         .clickable { art = a.id }
                         .padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -258,8 +257,7 @@ private fun Balken(anteil: Float, farbe: Color) {
 private fun TierKnopf(symbol: String, titel: String, preis: String, an: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Column(
         modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (an) Karte else Karte.copy(alpha = 0.04f))
+            .auswahl(false, 18.dp, aktiv = an)
             .clickable(enabled = an, onClick = onClick)
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -283,9 +281,7 @@ private fun Hutladen(vm: AppViewModel, tier: Haustier) {
                 val kann = habe || tier.kannKaufen(h.id, muenzen)
                 Column(
                     Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (traegt) Gelb.copy(alpha = 0.25f) else Karte)
-                        .border(2.dp, if (traegt) Gelb else Color.Transparent, RoundedCornerShape(16.dp))
+                        .auswahl(traegt, 16.dp, aktiv = kann)
                         .clickable(enabled = kann) {
                             if (habe) vm.haustierTragen(if (traegt) "" else h.id) else vm.haustierKaufen(h.id)
                         }

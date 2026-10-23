@@ -55,6 +55,18 @@ fun Modifier.glas(radius: Dp = 20.dp): Modifier {
     return this.clip(form).background(GlasFlaeche).border(1.dp, GlasKante, form)
 }
 
+/**
+ * Auswählbare Glas-Karte (Haustier, Hut, Abzeichen). Die gewählte Karte hat eine gelbe Kante und einen
+ * warmen Schimmer, eine gesperrte ist blasser.
+ */
+fun Modifier.auswahl(gewaehlt: Boolean, radius: Dp = 18.dp, aktiv: Boolean = true): Modifier {
+    val form = RoundedCornerShape(radius)
+    val flaeche = if (gewaehlt) Brush.verticalGradient(listOf(Gelb.copy(alpha = 0.34f), Gelb.copy(alpha = 0.14f))) else GlasFlaeche
+    val kante = if (gewaehlt) Brush.verticalGradient(listOf(Gelb, Gelb.copy(alpha = 0.55f))) else GlasKante
+    return this.clip(form).background(flaeche).border(if (gewaehlt) 2.dp else 1.dp, kante, form)
+        .graphicsLayer { alpha = if (aktiv) 1f else 0.5f }
+}
+
 /** Lässt eine Fläche beim Drücken kurz einfedern. [quelle] gehört auch dem `clickable` der Fläche. */
 @Composable
 fun Modifier.feder(quelle: MutableInteractionSource): Modifier {

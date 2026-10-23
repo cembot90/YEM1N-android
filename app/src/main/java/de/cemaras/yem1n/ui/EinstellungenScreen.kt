@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.ui.theme.Gelb
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.TextSanft
 
@@ -71,6 +72,7 @@ fun EinstellungenScreen(vm: AppViewModel) {
             }
         }
 
+        if (seite != null) Column(Modifier.fillMaxWidth().padding(top = 8.dp).glas(22.dp).padding(horizontal = 16.dp, vertical = 4.dp)) {
         if (seite == "ich") {
             Abschnitt("Name des Kindes")
             OutlinedTextField(
@@ -371,6 +373,7 @@ fun EinstellungenScreen(vm: AppViewModel) {
                     TextButton(onClick = { loeschen = a }) { Text("Löschen", color = Koralle) }
                 }
             }
+        }
         }
         Spacer(Modifier.height(24.dp))
     }

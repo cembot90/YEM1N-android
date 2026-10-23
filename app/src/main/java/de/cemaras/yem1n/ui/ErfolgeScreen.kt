@@ -41,6 +41,8 @@ import de.cemaras.yem1n.logik.Erfolge
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Karte
+import de.cemaras.yem1n.ui.theme.Fortschrittsring
+import de.cemaras.yem1n.ui.theme.auswahl
 import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.Navy
@@ -151,8 +153,7 @@ fun ErfolgeScreen(vm: AppViewModel) {
                         Modifier
                             .width(96.dp)
                             .height(96.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = if (p.erreicht) 0.12f else 0.05f))
+                            .auswahl(p.erreicht, 16.dp)
                             .padding(6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -180,14 +181,7 @@ private fun KarteMit(inhalt: @Composable androidx.compose.foundation.layout.RowS
 
 @Composable
 private fun Ring(anteil: Float, text: String) {
-    Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            progress = { anteil.coerceIn(0f, 1f) },
-            modifier = Modifier.size(64.dp),
-            color = Gelb,
-            trackColor = Color.White.copy(alpha = 0.14f),
-            strokeWidth = 7.dp,
-        )
+    Fortschrittsring(anteil, groesse = 64.dp, strich = 7.dp) {
         Text(text, fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White)
     }
 }

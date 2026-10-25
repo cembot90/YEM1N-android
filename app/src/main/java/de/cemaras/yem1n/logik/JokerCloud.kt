@@ -13,6 +13,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
+import kotlin.random.asKotlinRandom
 
 /** Familiencode wie in der iOS-App: 10 Zeichen, gespeichert und abgefragt als XXXXX-XXXXX (mit Strich). */
 object Familiencode {
@@ -27,7 +28,10 @@ object Familiencode {
     /** Zum Anzeigen, auch für einen älteren Code ohne Strich. */
     fun zeige(code: String): String = pruefe(code) ?: code
 
-    fun neu(zufall: kotlin.random.Random = kotlin.random.Random.Default): String =
+    /** Der Familiencode ist ein Geheimnis. Deshalb kommt der Zufall vom Sicherheits-Zufallsgenerator des Geräts. */
+    private val sicher: kotlin.random.Random by lazy { java.security.SecureRandom().asKotlinRandom() }
+
+    fun neu(zufall: kotlin.random.Random = sicher): String =
         pruefe(String(CharArray(10) { ZEICHEN[zufall.nextInt(ZEICHEN.length)] }))!!
 }
 

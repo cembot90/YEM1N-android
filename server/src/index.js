@@ -8,6 +8,8 @@ import { TYPEN, absenderGeraet, abfrageKoerper, inhalt, neueEintraege, typenFuer
 
 const proGeraet = neueBremse(30, 60000);
 const proCode = neueBremse(120, 60000);
+// Geräteanmeldungen sind selten (nur bei neuer Kennung). Wenige pro Minute und Adresse reichen und erschweren das Füllen der Familienliste.
+const proAnmeldung = neueBremse(5, 60000);
 let schluesselCache = null;
 
 function antwort(status, obj) {
@@ -19,6 +21,12 @@ function antwort(status, obj) {
 async function schluessel(env) {
   if (!schluesselCache) schluesselCache = await schluesselLaden(env.CK_PRIVATE_KEY.trim());
   return schluesselCache;
+}
+
+/** Fehlerdetails von CloudKit gehören ins Protokoll des Servers, nicht an die App (kein Einblick in Aufbau und Schlüssel). */
+function ablehnung(ort, status, f) {
+  console.log("CloudKit lehnt ab:", ort, status, f && f.code ? f.code : "", f && f.grund ? String(f.grund).slice(0, 200) : "");
+  return antwort(502, { fehler: "Der Eintrag wurde nicht angenommen" });
 }
 
 /** Sucht in der Antwort von records/modify nach einem abgelehnten Eintrag. */
@@ -55,15 +63,15 @@ export async function behandle(request, env, holen = fetch) {
       const f = ersterFehler(r.text);
       // "Gibt es schon" (feste Namen bei Daumen und Ergebnis) gilt als geschafft, wie in der iOS-App.
       if (!f || f.code === "CONFLICT") return antwort(200, { ok: true });
-      return antwort(502, { fehler: "CloudKit hat den Eintrag abgelehnt", status: 200, code: f.code, grund: f.grund });
+      return ablehnung("senden", 200, f);
     }
     if (r.status === 409) return antwort(200, { ok: true });
-    let grund = {};
+    let grund = null;
     try {
       const a = JSON.parse(r.text);
       grund = { code: a.serverErrorCode, grund: a.reason };
     } catch { /* Antwort war kein JSON */ }
-    return antwort(502, { fehler: "CloudKit hat abgelehnt", status: r.status, ...grund });
+    return ablehnung("senden", r.status, grund);
   }
 
   if (url.pathname === "/v1/klasse") {
@@ -79,7 +87,7 @@ export async function behandle(request, env, holen = fetch) {
       if (vorhanden) return vorhanden === k.publicKey ? antwort(200, { ok: true }) : antwort(409, { fehler: "Diesen Klassencode gibt es schon" });
       const r = await anfrage(env, key, "records/modify", schluesselBefehl(k.kcode, k.publicKey), holen);
       const f = r.status === 200 ? ersterFehler(r.text) : { code: String(r.status) };
-      return f ? antwort(502, { fehler: "CloudKit hat abgelehnt", code: f.code, grund: f.grund }) : antwort(200, { ok: true });
+      return f ? ablehnung("klasse-schluessel", r.status, f) : antwort(200, { ok: true });
     }
 
     if (!vorhanden) return antwort(403, { fehler: "Für diesen Klassencode gibt es keinen Schlüssel" });
@@ -88,10 +96,11 @@ export async function behandle(request, env, holen = fetch) {
     const befehl = k.art === "paket" ? paketBefehl(k) : loeschBefehl(k.name);
     const r = await anfrage(env, key, "records/modify", befehl, holen);
     const f = r.status === 200 ? ersterFehler(r.text) : { code: String(r.status) };
-    return f ? antwort(502, { fehler: "CloudKit hat abgelehnt", code: f.code, grund: f.grund }) : antwort(200, { ok: true });
+    return f ? ablehnung("klasse-paket", r.status, f) : antwort(200, { ok: true });
   }
 
   if (url.pathname === "/v1/geraet") {
+    if (!proAnmeldung(ip)) return antwort(429, { fehler: "Zu viele Anfragen, bitte kurz warten" });
     const g = pruefeGeraet(body);
     if (g.fehler) return antwort(400, { fehler: g.fehler });
     const key = "geraete:" + g.code;
@@ -107,6 +116,8 @@ export async function behandle(request, env, holen = fetch) {
 }
 
 const MAX_FAMILIEN = 5;
+// Der Stand "bis wohin Mitteilungen verschickt sind" läuft nach 90 Tagen ohne Neues ab. Danach wird er einfach neu gemerkt.
+const STAND_ABLAUF = { expirationTtl: 90 * 24 * 3600 };
 const FAMILIEN_KEY = "familien";
 
 /** Merkt sich den Familiencode in einer eigenen Liste, damit der Minutenlauf nie "list" braucht (Gratis-Grenze 1000 pro Tag). */
@@ -146,10 +157,10 @@ export async function pruefeNeues(env, holen = fetch, jetzt = Date.now()) {
       const stand = Number(await env.GERAETE.get(standKey));
       const r = await anfrage(env, await schluessel(env), "records/query", abfrageKoerper(typ, code), holen);
       if (r.status !== 200) { console.log("pruefeNeues: Abfrage", typ, "Status", r.status, r.text.slice(0, 200)); continue; }
-      if (!stand) { await env.GERAETE.put(standKey, String(jetzt)); continue; }
+      if (!stand) { await env.GERAETE.put(standKey, String(jetzt), STAND_ABLAUF); continue; }
       const neu = neueEintraege(r.text, stand);
       if (!neu.length) continue;
-      await env.GERAETE.put(standKey, String(neu[neu.length - 1].created.timestamp));
+      await env.GERAETE.put(standKey, String(neu[neu.length - 1].created.timestamp), STAND_ABLAUF);
       for (const eintrag of neu.slice(-3)) {
         const text = inhalt(typ, eintrag.fields);
         if (!text) continue;

@@ -4,7 +4,7 @@ import { generateKeyPairSync, createVerify } from "node:crypto";
 import { derAusRoh, nachricht, schluesselLaden, signiere, datumText, pfad, anfrage } from "../src/cloudkit.js";
 import { pruefeCode, pruefeGeraet, pruefeSenden } from "../src/regeln.js";
 import { neueBremse } from "../src/limit.js";
-import { behandle } from "../src/index.js";
+import { behandle, pruefeNeues } from "../src/index.js";
 
 const CODE = "ABCDE-23456";
 
@@ -133,15 +133,17 @@ test("Zu viele Anfragen von einer Adresse werden gebremst", async () => {
   assert.equal(letzter.status, 429);
 });
 
-test("Senden: Apples Fehlergrund wird weitergegeben", async () => {
+test("Senden: Apples Fehlergrund bleibt im Protokoll und geht nicht an die App", async () => {
   const env = await umgebung();
   const q = { code: CODE, art: "frage", daten: { kind: "Y", text: "x" } };
   const a = await behandle(post("/v1/senden", q, "6.6.6.6"), env,
     async () => new Response('{"serverErrorCode":"AUTHENTICATION_FAILED","reason":"Signature"}', { status: 401 }));
   const j = await a.json();
   assert.equal(a.status, 502);
-  assert.equal(j.code, "AUTHENTICATION_FAILED");
-  assert.equal(j.grund, "Signature");
+  assert.equal(j.code, undefined);
+  assert.equal(j.grund, undefined);
+  assert.equal(j.status, undefined);
+  assert.ok(!JSON.stringify(j).includes("Signature"));
 });
 
 test("Senden: abgelehnter Eintrag trotz 200 wird gemeldet", async () => {
@@ -151,7 +153,8 @@ test("Senden: abgelehnter Eintrag trotz 200 wird gemeldet", async () => {
     async () => new Response('{"records":[{"serverErrorCode":"ACCESS_DENIED","reason":"CREATE operation not permitted"}]}', { status: 200 }));
   const j = await a.json();
   assert.equal(a.status, 502);
-  assert.equal(j.code, "ACCESS_DENIED");
+  assert.equal(j.code, undefined);
+  assert.ok(!JSON.stringify(j).includes("ACCESS_DENIED"));
 });
 
 test("Senden: Konflikt im Eintrag gilt als geschafft", async () => {
@@ -200,4 +203,26 @@ test("Gerätemeldung nimmt eine optionale Gerätekennung", () => {
   const g = pruefeGeraet({ code: CODE, rolle: "kind", token: "t", geraet: "G-1" });
   assert.equal(g.geraet, "G-1");
   assert.equal(pruefeGeraet({ code: CODE, rolle: "kind", token: "t" }).geraet, "");
+});
+
+test("Geräteanmeldung: strengere Bremse als das normale Senden", async () => {
+  const env = await umgebung();
+  const g = { code: CODE, rolle: "eltern", token: "t-bremse" };
+  const stati = [];
+  for (let i = 0; i < 7; i++) stati.push((await behandle(post("/v1/geraet", g, "10.10.10.10"), env)).status);
+  assert.deepEqual(stati, [200, 200, 200, 200, 200, 429, 429]);
+});
+
+test("Stand der Mitteilungen läuft nach 90 Tagen ab", async () => {
+  const gespeichert = [];
+  const env = await umgebung();
+  env.FCM_DIENSTKONTO = JSON.stringify({ client_email: "a@b.c", private_key: "x", project_id: "p" });
+  env.GERAETE = {
+    get: async (k) => (k === "familien" ? JSON.stringify([CODE]) : k === "geraete:" + CODE ? JSON.stringify([{ rolle: "eltern", token: "t", geraet: "" }]) : null),
+    put: async (k, v, opt) => { gespeichert.push({ k, opt }); },
+  };
+  await pruefeNeues(env, async () => new Response('{"records":[]}', { status: 200 }), 1000);
+  const staende = gespeichert.filter((x) => x.k.startsWith("stand:"));
+  assert.ok(staende.length > 0);
+  for (const x of staende) assert.equal(x.opt.expirationTtl, 90 * 24 * 3600);
 });

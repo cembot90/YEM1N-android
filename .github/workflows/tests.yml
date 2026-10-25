@@ -5,6 +5,10 @@ on:
     branches: [main, entwicklung]
   pull_request:
 
+# Die Läufe brauchen nur Lesezugriff auf den Code.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

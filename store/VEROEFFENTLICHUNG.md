@@ -37,7 +37,7 @@ Data-Safety-Antworten für Google Play:
 | Erhebt oder teilt die App Nutzerdaten? | Ja, nur wenn Eltern einen Familiencode eintragen und einwilligen |
 | Welche Daten? | Nutzer-IDs (Familiencode und Push-Kennung), App-Aktivität (Rundenergebnisse), Nachrichten in der App (Joker-Fragen und Antworten), Name des Kindes (freiwillig) |
 | Zweck | App-Funktionen (Joker, Ergebnisse für Eltern, Duell, Mitteilungen) |
-| Teilen mit Dritten? | Verarbeiter: Apple (CloudKit), Cloudflare (Vermittler), Google (FCM). Keine Weitergabe zu Werbung oder Analyse |
+| Teilen mit Dritten? | Verarbeiter: Apple (CloudKit), Cloudflare (Vermittler), Google (FCM, bekommt die Push-Kennung und den Text der Mitteilung mit Name des Kindes und Anfang einer Frage). Keine Weitergabe zu Werbung oder Analyse |
 | Daten verschlüsselt übertragen? | Ja (nur HTTPS) |
 | Können Nutzer die Löschung verlangen? | Ja, per E-Mail an cembot@icloud.com mit dem Familiencode. Daten auf dem Gerät löscht die Deinstallation |
 | Ist die Datenerhebung freiwillig? | Ja, ohne Familiencode wird nichts gesendet |

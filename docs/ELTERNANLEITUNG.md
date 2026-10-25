@@ -63,7 +63,7 @@ Bei Rechenaufgaben steht über dem Antwortfeld "Mit dem Stift schreiben". Das Ki
 5. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
 6. Duell: Herausforderung gegen die Familie, auch zwischen Android und iPhone.
 
-**Wichtig:** Wer den Familiencode kennt, kann die Daten der Familie lesen. Geben Sie ihn nur an Familienmitglieder weiter. Die Einwilligung können Sie jederzeit widerrufen, dann sendet die App nichts mehr. Cloud-Daten löscht der Server nach 12 Monaten selbst. Früher geht es auf Anfrage per E-Mail (Familiencode nennen).
+**Wichtig:** Die Daten liegen in einer öffentlich lesbaren Datenbank und sind dort nicht zusätzlich verschlüsselt. Der Familiencode ist der einzige Schutz: Wer ihn kennt, kann die Daten der Familie lesen. Geben Sie ihn nur an Familienmitglieder weiter und schreiben Sie in Fragen keine persönlichen Daten. Der Text einer Mitteilung (zum Beispiel Name des Kindes und Anfang einer Frage) läuft über Google. Die Einwilligung können Sie jederzeit widerrufen, dann sendet die App nichts mehr. Cloud-Daten löscht der Server nach 12 Monaten selbst. Früher geht es auf Anfrage per E-Mail (Familiencode nennen).
 
 ## Klassencode
 

@@ -2,10 +2,11 @@
 <!--
    Regeln für die automatische Sicherung bis Android 11.
    Fortschritt und Arbeiten werden gesichert. Nicht gesichert wird, was auf einem neuen Gerät nicht mehr gilt
-   oder sich neu laden lässt: die Push-Kennung, die Anmeldung bei CloudKit und die heruntergeladenen Stimmen.
+   oder sich neu laden lässt: die Push-Kennung, die Zugehörigkeit zur Familie (der Schlüssel dazu bleibt ohnehin im Gerät), die Anmeldung bei CloudKit und die heruntergeladenen Stimmen.
 -->
 <full-backup-content>
     <exclude domain="sharedpref" path="push.xml" />
+    <exclude domain="sharedpref" path="familie.xml" />
     <exclude domain="file" path="cloud-anmeldung.txt" />
     <exclude domain="file" path="stimmen" />
 </full-backup-content>

@@ -3,16 +3,18 @@
    Regeln für die automatische Sicherung ab Android 12.
    Die Sicherung in der Cloud gibt es nur, wenn sie verschlüsselt werden kann (disableIfNoEncryptionCapabilities).
    Nicht gesichert wird, was auf einem neuen Gerät nicht mehr gilt oder sich neu laden lässt:
-   die Push-Kennung, die Anmeldung bei CloudKit und die heruntergeladenen Stimmen.
+   die Push-Kennung, die Zugehörigkeit zur Familie (der Schlüssel dazu bleibt ohnehin im Gerät), die Anmeldung bei CloudKit und die heruntergeladenen Stimmen.
 -->
 <data-extraction-rules>
     <cloud-backup disableIfNoEncryptionCapabilities="true">
         <exclude domain="sharedpref" path="push.xml" />
+        <exclude domain="sharedpref" path="familie.xml" />
         <exclude domain="file" path="cloud-anmeldung.txt" />
         <exclude domain="file" path="stimmen" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="push.xml" />
+        <exclude domain="sharedpref" path="familie.xml" />
         <exclude domain="file" path="cloud-anmeldung.txt" />
     </device-transfer>
 </data-extraction-rules>

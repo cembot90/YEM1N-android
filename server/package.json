@@ -5,6 +5,6 @@
   "type": "module",
   "description": "Kleiner Vermittler zwischen der Android-App und CloudKit",
   "scripts": {
-    "test": "node --test test/server.test.js test/fcm.test.js test/klasse.test.js test/loeschfrist.test.js"
+    "test": "node --test test/server.test.js test/fcm.test.js test/klasse.test.js test/loeschfrist.test.js test/v2.test.js test/v2-push.test.js test/v2-vektoren.test.js"
   }
 }

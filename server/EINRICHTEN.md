@@ -26,7 +26,32 @@ openssl pkcs8 -topk8 -nocrypt -in eckey.pem -out eckey-pkcs8.pem
 5. `wrangler deploy`. Am Ende steht die Adresse, zum Beispiel `https://yem1n-server.NAME.workers.dev`. Die schickst du mir.
 6. Kontrolle: `https://DEINE-ADRESSE/v1/ping` im Browser muss `{"ok":true}` zeigen.
 
+## 3. Neu: Familien-Dienst (Protokoll 2)
+
+Das ist der neue, sichere Weg (Beschreibung in `cloud/PROTOKOLL-V2.md`). Jede Familie bekommt ein eigenes Fach
+(Durable Object) in der EU, jedes Gerät einen eigenen Schlüssel, und nichts ist mehr öffentlich lesbar.
+Der alte Weg (`/v1/...`) bleibt, bis beide Apps umgestellt sind.
+
+1. Wrangler muss Version 4.36 oder neuer sein. `npx wrangler --version` zeigt es. Mit `npx wrangler@latest deploy` ist man sicher.
+2. Im Ordner `server`: `npx wrangler@latest deploy`. Die Tabellen für die Familien und die Bremsen je Adresse legt Cloudflare dabei selbst an.
+3. Kontrolle: `https://DEINE-ADRESSE/v2/ping` im Browser muss `{"ok":true,"protokoll":2}` zeigen.
+4. Mitteilungen für das iPhone (APNs). Die Datei mit dem Schlüssel schickst du mir **nicht** und legst sie auch in kein Repo.
+   1. Apple Developer, Certificates, Identifiers & Profiles, Keys, neuen Schlüssel anlegen, "Apple Push Notifications service (APNs)" ankreuzen.
+   2. Die Datei `AuthKey_XXXXXXXXXX.p8` herunterladen (geht nur einmal) und sicher aufbewahren.
+   3. Im Ordner `server`, jeweils eingeben oder einfügen:
+      - `npx wrangler secret put APNS_KEY` (kompletter Inhalt der .p8-Datei)
+      - `npx wrangler secret put APNS_KEY_ID` (die zehn Zeichen aus dem Dateinamen)
+      - `npx wrangler secret put APNS_TEAM_ID` (Team-ID aus dem Apple-Developer-Konto, oben rechts unter Mitgliedschaft)
+   4. Die Key-ID und die Team-ID darfst du mir im Chat schicken, den Inhalt der .p8-Datei nicht.
+5. Ob die Familien wirklich in der EU liegen, zeigt `/v2/status` jedes Geräts (`jurisdiktion` muss `eu` sein). Die App zeigt es später in den Einstellungen.
+   Ein Probelauf gegen die echte Adresse legt eine Testfamilie an, spielt alles durch und löscht sie wieder:
+   `node scripts/lokal-pruefen.mjs https://DEINE-ADRESSE --eu` (ohne `--eu` wird die Jurisdiktion nur angezeigt).
+   Die Variable `FAMILIE_JURISDIKTION` darf in der echten Umgebung nie gesetzt werden. Sie gibt es nur für Tests auf dem eigenen Rechner,
+   weil die lokale Laufzeit keine Jurisdiktionen kennt.
+6. Vor der Veröffentlichung auf den Plan "Workers Paid" (5 US-Dollar im Monat) wechseln. Der kostenlose Plan reicht zum Testen, aber nicht für viele Familien.
+   Schreibvorgänge je Familie sind dort das Nadelöhr, deshalb schreibt der Dienst sparsam.
+
 ## Offen (macht Claude danach)
 
-- Android-App an den Server anbinden (Senden und Gerät melden).
-- Push über Google (FCM): braucht später ein Google-Dienstkonto, das beschreibe ich dann Schritt für Schritt.
+- Android-App und iPhone-App auf Protokoll 2 umstellen (Schlüssel im Gerät, Koppeln per QR-Code, Freigabe durch die Eltern).
+- Danach den alten Weg abschalten und die Familiendaten in CloudKit löschen.

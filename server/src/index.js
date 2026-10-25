@@ -5,6 +5,7 @@ import { neueBremse } from "./limit.js";
 import { TYPEN_LOESCHEN, abgelaufene, istAufraeumzeit, loeschKoerper } from "./loeschfrist.js";
 import { pushSenden } from "./fcm.js";
 import { TYPEN, absenderGeraet, abfrageKoerper, inhalt, neueEintraege, typenFuer } from "./mitteilungen.js";
+import { v2Behandle } from "./v2/router.js";
 
 const proGeraet = neueBremse(30, 60000);
 const proCode = neueBremse(120, 60000);
@@ -42,6 +43,7 @@ export function ersterFehler(text) {
 
 export async function behandle(request, env, holen = fetch) {
   const url = new URL(request.url);
+  if (url.pathname.startsWith("/v2/")) return v2Behandle(request, env);
   if (url.pathname === "/v1/ping") return antwort(200, { ok: true });
   if (request.method !== "POST") return antwort(405, { fehler: "Nur POST" });
 

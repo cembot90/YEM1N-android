@@ -50,6 +50,17 @@ iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
 - Schema: `cloud/schema.ckdb`. Details: `cloud/SERVER-KONZEPT.md`, `cloud/CLOUDKIT-ANDROID.md`.
 - Haustier und Pakete bleiben je System getrennt (kein Schreiben ohne Eigentümer).
 
+### 4a. Protokoll 2 (Familien-Dienst, im Aufbau)
+
+Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familiencode zugleich Passwort und Suchschlüssel war.
+
+- Eine Familie ist ein Durable Object (SQLite) in der EU-Jurisdiktion, Kennung zufällig (64 Hex-Zeichen). Code: `server/src/v2/` (`router.js` Eingangstür, `familie-do.js` Hülle, `familie.js` Kern ohne Cloudflare-Abhängigkeit, `typen.js` Rechte und Prüfungen, `krypto.js`, `apns.js`, `push.js`).
+- Jedes Gerät hat ein P-256-Schlüsselpaar (Android Keystore, auf dem iPhone Secure Enclave) und unterschreibt jede Anfrage. Unterschriftstext, Wege, Rechte und Fristen: `cloud/PROTOKOLL-V2.md`. Gemeinsame Prüfwerte für Swift, Kotlin und Worker: `cloud/testvektoren-v2.json` (erzeugt mit `server/scripts/testvektoren.mjs`).
+- Neue Geräte kommen nur per QR-Code und müssen von einem Eltern-Gerät bestätigt werden, auch Kinder-Geräte.
+- Mitteilungen sind neutral (kein Name, kein Inhalt). iPhone über APNs direkt aus dem Worker, Android über FCM.
+- Tests: `server/test/v2*.test.js` (Kern mit echtem SQLite über `node:sqlite`, Router, Rechte, Fristen, Mitteilungen, Testvektoren).
+- Der Klassencode (`/v1/klasse`) bleibt vorerst bei CloudKit, weil dort nur öffentliche, unterschriebene Pakete liegen.
+
 ## 5. Datenschutz
 
 - Einwilligung der Eltern vor dem Familiencode (`logik/Einwilligung.kt`), widerrufbar. Ohne sie: keine Netzzugriffe der Familienfunktionen.

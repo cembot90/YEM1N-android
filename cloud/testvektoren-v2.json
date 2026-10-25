@@ -1,0 +1,54 @@
+{
+  "hinweis": "Beispiele für Protokoll 2. Der Schlüssel ist nur für Tests. Siehe cloud/PROTOKOLL-V2.md.",
+  "geraet": {
+    "privatPkcs8Base64": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgElWT4sxruXsfZoDDSe+2wiAwrBdATfkUCUtJ2DDatrihRANCAAQAgYV1kMDEMMb1lhS+SgpjoHoWZSkpUhE4Z7eXZ4vRm+pWDhbzHU3RKh+iCHmVzTHr6vj/NVV5UVLPR5TQhGKM",
+    "pub": "BACBhXWQwMQwxvWWFL5KCmOgehZlKSlSEThnt5dni9Gb6lYOFvMdTdEqH6IIeZXNMevq-P81VXlRUs9HlNCEYow",
+    "pubHex": "040081857590c0c430c6f59614be4a0a63a07a1665292952113867b797678bd19bea560e16f31d4dd12a1fa2087995cd31ebeaf8ff3555795152cf4794d084628c",
+    "spkiBase64": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAIGFdZDAxDDG9ZYUvkoKY6B6FmUpKVIROGe3l2eL0ZvqVg4W8x1N0Sofogh5lc0x6+r4/zVVeVFSz0eU0IRijA==",
+    "geraetId": "35880c633aaf87fd6ff9d04b"
+  },
+  "anfrage": {
+    "methode": "POST",
+    "pfad": "/v2/senden",
+    "familie": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "geraet": "35880c633aaf87fd6ff9d04b",
+    "zeit": 1800000000000,
+    "body": "{\"typ\":\"frage\",\"daten\":{\"id\":\"frage-0001\",\"kind\":\"Yemin\",\"text\":\"Was ist 56 : 7?\"}}",
+    "bodyHash": "99942f494cdb29c4ce98753fa2dffc82a1d40ea23b6311b29a23b0d10b2a7d1f",
+    "nachricht": "YEM1N-V2\nPOST\n/v2/senden\n0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n35880c633aaf87fd6ff9d04b\n1800000000000\n99942f494cdb29c4ce98753fa2dffc82a1d40ea23b6311b29a23b0d10b2a7d1f",
+    "signatur": "jKEu-8wC5ACgpNyWle7tNvDICOKuCdqNRaHfJ8ZxPgomdMxQvludjrsHAI9UnWoMoeK2Yzelo4DSD8GRRViLRg"
+  },
+  "derUmrechnung": {
+    "derBase64": "MEUCIA/yyUW5wRTlBHSEocrzV7wXcrqggRnjsr7+K73Bfau0AiEAonoihev+2zLxB3BZxUh3UvqkoBpfToUfqkhdcuJtoSY=",
+    "derHex": "304502200ff2c945b9c114e5047484a1caf357bc1772baa08119e3b2befe2bbdc17dabb4022100a27a2285ebfedb32f1077059c5487752faa4a01a5f4e851faa485d72e26da126",
+    "rohBase64url": "D_LJRbnBFOUEdIShyvNXvBdyuqCBGeOyvv4rvcF9q7SieiKF6_7bMvEHcFnFSHdS-qSgGl9OhR-qSF1y4m2hJg"
+  },
+  "base64url": {
+    "hex": "fbff",
+    "kodiert": "-_8",
+    "hexZwei": "00fafbfcfdfeff0102",
+    "kodiertZwei": "APr7_P3-_wEC"
+  },
+  "ungueltig": [
+    {
+      "grund": "anderer Inhalt",
+      "nachricht": "YEM1N-V2\nPOST\n/v2/senden\n0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n35880c633aaf87fd6ff9d04b\n1800000000000\nc6cce9f44f977fd0efd0f86be4300cbece83312106cce9c0b77b63450f38a9f1",
+      "signatur": "jKEu-8wC5ACgpNyWle7tNvDICOKuCdqNRaHfJ8ZxPgomdMxQvludjrsHAI9UnWoMoeK2Yzelo4DSD8GRRViLRg"
+    },
+    {
+      "grund": "andere Zeit",
+      "nachricht": "YEM1N-V2\nPOST\n/v2/senden\n0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n35880c633aaf87fd6ff9d04b\n1800000000001\n99942f494cdb29c4ce98753fa2dffc82a1d40ea23b6311b29a23b0d10b2a7d1f",
+      "signatur": "jKEu-8wC5ACgpNyWle7tNvDICOKuCdqNRaHfJ8ZxPgomdMxQvludjrsHAI9UnWoMoeK2Yzelo4DSD8GRRViLRg"
+    },
+    {
+      "grund": "anderer Weg",
+      "nachricht": "YEM1N-V2\nPOST\n/v2/lesen\n0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n35880c633aaf87fd6ff9d04b\n1800000000000\n99942f494cdb29c4ce98753fa2dffc82a1d40ea23b6311b29a23b0d10b2a7d1f",
+      "signatur": "jKEu-8wC5ACgpNyWle7tNvDICOKuCdqNRaHfJ8ZxPgomdMxQvludjrsHAI9UnWoMoeK2Yzelo4DSD8GRRViLRg"
+    },
+    {
+      "grund": "andere Familie",
+      "nachricht": "YEM1N-V2\nPOST\n/v2/senden\nffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n35880c633aaf87fd6ff9d04b\n1800000000000\n99942f494cdb29c4ce98753fa2dffc82a1d40ea23b6311b29a23b0d10b2a7d1f",
+      "signatur": "jKEu-8wC5ACgpNyWle7tNvDICOKuCdqNRaHfJ8ZxPgomdMxQvludjrsHAI9UnWoMoeK2Yzelo4DSD8GRRViLRg"
+    }
+  ]
+}

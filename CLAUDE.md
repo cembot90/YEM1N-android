@@ -96,6 +96,12 @@ Datenschutztext (`daten/InfoTexte.kt`) und `store/VEROEFFENTLICHUNG.md` beschrei
 Aufgaben beim Üben vorlesen (Lautsprecher-Knopf, Schalter "von selbst vorlesen", `logik/VorleseText.kt`). Der Server löscht Cloud-Einträge nach 365 Tagen (`server/src/loeschfrist.js`, täglich 03:00 UTC). "Animationen entfernen" in Android schaltet den Sparmodus ein. Abgleich mit iOS und offene Lücken: `docs/ABGLEICH-IOS.md`. Die iOS-Datenschutzseite hat einen Android-Abschnitt (3a).
 Dokumentation pflegen: bei jeder Funktionsänderung `CLAUDE.md`, `docs/ARCHITEKTUR.md`, `docs/ELTERNANLEITUNG.md`, `InfoTexte.kt`, `store/VEROEFFENTLICHUNG.md` und die Testliste im Claude-Projekt mitziehen.
 
+## Sicherheitsumbau (Protokoll 2)
+
+Entscheidung 25.10.2026 (Cem): ein Cloudflare-Fach je Familie in der EU, Schlüssel je Gerät, neue Geräte nur per QR-Code mit Freigabe durch ein Eltern-Gerät (auch Kinder). Grund: Der Familiencode war Passwort und Suchschlüssel zugleich in einer öffentlich lesbaren Datenbank.
+Stand: Worker fertig und getestet (`server/src/v2/`, `server/test/v2*.test.js`, Beschreibung `cloud/PROTOKOLL-V2.md`, Prüfwerte `cloud/testvektoren-v2.json`). Cem muss `npx wrangler@latest deploy` ausführen und später die APNs-Geheimnisse setzen (`server/EINRICHTEN.md`, Abschnitt 3). Als Nächstes: Android-Client (Keystore, QR-Koppeln, Geräteliste, Eltern-PIN), dann iPhone, dann alten Weg abschalten und CloudKit-Familiendaten löschen. Vor dem Umbau der iPhone-App darf keine der beiden Apps öffentlich erscheinen.
+Beim Ändern von `server/src/v2/typen.js` die Tabelle in `cloud/PROTOKOLL-V2.md` mitziehen.
+
 ## Designüberarbeitung (begonnen)
 
 Schon da: Glas-Karten als Verlauf mit feiner Kante (`ui/theme/Glas.kt`, ohne echte Unschärfe, weil das auf Kinder-Tablets zu viel Leistung braucht), Lichtflecken im Hintergrund, federnde Karten auf dem Startbildschirm, Fortschrittsring für das Tagesziel, Sparmodus (Schalter in den Einstellungen, an bei schwachen Geräten).

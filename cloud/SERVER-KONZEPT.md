@@ -1,5 +1,9 @@
 # Konzept: kleiner Vermittler-Server für die Android-Cloud
 
+> Stand 25.10.2026: Dieses Konzept beschreibt den bisherigen Weg über CloudKit. Er wird durch Protokoll 2 abgelöst:
+> ein Fach je Familie bei Cloudflare (EU), Schlüssel je Gerät, Koppeln per QR-Code mit Freigabe durch die Eltern.
+> Siehe `cloud/PROTOKOLL-V2.md`. Bis beide Apps umgestellt sind, laufen beide Wege.
+
 Stand 21.10.2026. Grund: Die Apple-Anmeldung im Browser verlangt bei Cem einen Passkey, den Android-Browser
 nicht liefern. Außerdem kann CloudKit Mitteilungen nur an Apple-Geräte schicken. Ein kleiner Server löst beides.
 

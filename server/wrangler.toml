@@ -1,5 +1,5 @@
 name = "yem1n-server"
-main = "src/index.js"
+main = "src/main.js"
 compatibility_date = "2026-01-01"
 workers_dev = true
 preview_urls = false
@@ -15,6 +15,8 @@ enabled = true
 [vars]
 CK_CONTAINER = "iCloud.de.cemaras.yem1n"
 CK_UMGEBUNG = "production"
+# Die Bundle-ID der iPhone-App, für Mitteilungen über Apple (APNs).
+APNS_TOPIC = "de.cemaras.yem1n"
 
 # Eine Ablage für die Geräte (Familiencode, Rolle, Push-Kennung).
 # Anlegen mit: npx wrangler kv namespace create GERAETE, dann die ausgegebene id hier eintragen.
@@ -22,7 +24,34 @@ CK_UMGEBUNG = "production"
 binding = "GERAETE"
 id = "7698527a37de41c782ebfdb7aae4eac9"
 
+# Protokoll 2: je Familie ein Durable Object (SQLite). Die Familien liegen in der EU (Jurisdiktion "eu").
+[[durable_objects.bindings]]
+name = "FAMILIE"
+class_name = "Familie"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Familie"]
+
+# Bremsen je Adresse (nur ungefähr, je Standort von Cloudflare). Brauchen Wrangler 4.36 oder neuer.
+[[ratelimits]]
+name = "RATE_IP"
+namespace_id = "1001"
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
+[[ratelimits]]
+name = "RATE_NEU"
+namespace_id = "1002"
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
 # Geheim (nicht in diese Datei schreiben), setzen mit "npx wrangler secret put NAME":
 #   CK_KEY_ID        Key-ID des Server-Schlüssels aus dem CloudKit-Dashboard
 #   CK_PRIVATE_KEY   privater Schlüssel im PKCS8-Format (PEM)
 #   FCM_DIENSTKONTO  JSON des Google-Dienstkontos (für Mitteilungen über FCM)
+#   APNS_KEY         Inhalt der .p8-Datei (Apple Developer, Schlüssel, Apple Push Notifications service)
+#   APNS_KEY_ID      Key-ID dieses Schlüssels
+#   APNS_TEAM_ID     Team-ID des Apple-Developer-Kontos

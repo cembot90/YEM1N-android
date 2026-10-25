@@ -288,10 +288,11 @@ object FamilienProtokoll {
 
     // ---- Fehlertexte ----
 
-    /** Ein Satz für Kinder und Eltern. [status] 0 heißt: keine Verbindung, -1: der Schlüssel dieses Geräts fehlt. */
+    /** Ein Satz für Kinder und Eltern. [status] 0 heißt: keine Verbindung, -1: der Schlüssel fehlt, -3: keine Familie. */
     fun fehlertext(status: Int): String = when (status) {
         0 -> "Keine Verbindung. Ist das Internet an?"
         -1 -> "Dieses Gerät kann keinen Schlüssel anlegen oder lesen."
+        -3 -> "Dieses Gerät gehört noch nicht zu einer Familie."
         400 -> "Das konnte nicht gesendet werden. Bitte den Text prüfen."
         401 -> "Die Familie kennt dieses Gerät nicht (mehr). Bitte neu verbinden. Auch eine falsche Uhrzeit kann das auslösen."
         403 -> "Das darf dieses Gerät nicht, oder die Einladung gilt nicht mehr."

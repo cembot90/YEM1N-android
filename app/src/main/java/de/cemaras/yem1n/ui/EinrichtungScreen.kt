@@ -50,7 +50,6 @@ fun EinrichtungScreen(vm: AppViewModel) {
     var rosa by rememberSaveable { mutableStateOf(vm.fortschritt.rosa) }
     var ziel by rememberSaveable { mutableIntStateOf(vm.fortschritt.tagesziel) }
     var auto by rememberSaveable { mutableStateOf(vm.fortschritt.autoVorlesen) }
-    var familie by rememberSaveable { mutableStateOf("") }
     var klassencode by rememberSaveable { mutableStateOf("") }
     var haken by rememberSaveable { mutableStateOf(false) }
     var fehler by rememberSaveable { mutableStateOf("") }
@@ -75,7 +74,7 @@ fun EinrichtungScreen(vm: AppViewModel) {
                     Wahl("🔔 Eltern", "Ich sehe den Fortschritt.", rolle == "eltern") { rolle = "eltern" }
                 }
                 rolle == "eltern" -> FamilienSchritt(
-                    vm, familie, { familie = it; fehler = "" }, klassencode, { klassencode = it; fehler = "" }, haken, { haken = it }, fehler,
+                    klassencode, { klassencode = it; fehler = "" }, haken, { haken = it }, fehler,
                 )
                 schritt == 1 -> {
                     Frage("Wie heißt das Kind?", "Ein Vorname oder Spitzname reicht, bitte keinen Nachnamen. Der Name erscheint bei den Eltern.")
@@ -95,7 +94,7 @@ fun EinrichtungScreen(vm: AppViewModel) {
                     Wahl("Nein, erstmal nicht", "", !sprachen) { sprachen = false }
                 }
                 schritt == 5 -> FamilienSchritt(
-                    vm, familie, { familie = it; fehler = "" }, klassencode, { klassencode = it; fehler = "" }, haken, { haken = it }, fehler,
+                    klassencode, { klassencode = it; fehler = "" }, haken, { haken = it }, fehler,
                 )
                 else -> {
                     Frage("Farben, Ziel und Vorlesen", "Alles lässt sich später in den Einstellungen ändern.")
@@ -122,18 +121,14 @@ fun EinrichtungScreen(vm: AppViewModel) {
                 if (schritt < letzter) {
                     schritt += 1
                 } else {
-                    val f = familie.trim()
                     val k = klassencode.trim()
-                    if (f.isNotEmpty() && de.cemaras.yem1n.logik.Familiencode.pruefe(f) == null) {
-                        fehler = "Der Familiencode sieht nicht richtig aus. Er hat die Form XXXXX-XXXXX."
-                    } else if (k.isNotEmpty() && de.cemaras.yem1n.logik.Familiencode.pruefe(k) == null) {
+                    if (k.isNotEmpty() && de.cemaras.yem1n.logik.Familiencode.pruefe(k) == null) {
                         fehler = "Der Klassencode sieht nicht richtig aus."
-                    } else if (f.isNotEmpty() && !haken) {
-                        fehler = "Für den Familiencode brauchen wir die Einwilligung der Eltern. Bitte den Haken setzen."
+                    } else if (k.isNotEmpty() && !haken) {
+                        fehler = "Für den Klassencode brauchen wir die Einwilligung der Eltern. Bitte den Haken setzen."
                     } else {
                         vm.einrichtungAbschliessen(rolle, name, klasse, sprachen, rosa, ziel, auto)
-                        if (f.isNotEmpty()) { vm.einwilligen(); vm.setzeFamiliencode(f) }
-                        if (k.isNotEmpty()) vm.setzeKlassencode(k)
+                        if (k.isNotEmpty()) { vm.einwilligen(); vm.setzeKlassencode(k) }
                     }
                 }
             },
@@ -164,25 +159,21 @@ private fun Wahl(titel: String, text: String, gewaehlt: Boolean, modifier: Modif
 
 @Composable
 private fun FamilienSchritt(
-    vm: AppViewModel, familie: String, familieAendern: (String) -> Unit,
     klassencode: String, klassencodeAendern: (String) -> Unit,
     haken: Boolean, hakenAendern: (Boolean) -> Unit, fehler: String,
 ) {
     Frage(
         "Familie und Klasse (freiwillig)",
-        "Mit dem Familiencode sehen die Eltern den Fortschritt und das Kind kann Joker erbitten. Den Code legt ein Elternteil unter Mehr > Joker an (oder gibt ihn vom anderen Gerät ein). Mit dem Klassencode holt die App Aufgaben der Klasse. Ohne beides bleibt alles auf diesem Gerät. Du kannst es später nachholen.",
-    )
-    OutlinedTextField(
-        value = familie, onValueChange = { familieAendern(it.take(24)) }, singleLine = true,
-        modifier = Modifier.fillMaxWidth(), label = { Text("Familiencode (XXXXX-XXXXX)") },
+        "Die Familie verbindest du nach der Einrichtung unter Einstellungen > Familie: Die Eltern legen sie an, jedes Kind-Gerät scannt einen QR-Code und die Eltern erlauben es. " +
+            "Mit dem Klassencode holt die App Aufgaben der Klasse. Ohne beides bleibt alles auf diesem Gerät.",
     )
     OutlinedTextField(
         value = klassencode, onValueChange = { klassencodeAendern(it.take(24)) }, singleLine = true,
         modifier = Modifier.fillMaxWidth(), label = { Text("Klassencode (freiwillig)") },
     )
-    if (familie.isNotBlank()) {
+    if (klassencode.isNotBlank()) {
         Text(
-            "Mit dem Familiencode gehen Ergebnisse und Nachrichten über einen kleinen Server in die Cloud. Es gibt keine Werbung und kein Benutzerkonto.",
+            "Mit dem Klassencode holt die App öffentliche Aufgabenpakete aus der Cloud von Apple (CloudKit). Es gibt keine Werbung und kein Benutzerkonto.",
             color = TextSanft, fontSize = 13.sp,
         )
         Text("Die Datenschutzerklärung findest du nach der Einrichtung unter Einstellungen > Info.", color = TextSanft, fontSize = 13.sp)

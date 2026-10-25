@@ -3,7 +3,6 @@ package de.cemaras.yem1n
 import de.cemaras.yem1n.logik.Fortschritt
 import de.cemaras.yem1n.logik.JokerCloud
 import de.cemaras.yem1n.logik.JokerNachschub
-import de.cemaras.yem1n.logik.ServerAnfrage
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -40,12 +39,5 @@ class JokerNachschubTest {
         val fr = listOf(ds("alt", 50), ds("benutzt", 150), ds("neu", 250))
         assertEquals(listOf("neu"), JokerNachschub.neueFreigaben(fr, listOf("benutzt"), 100))
         assertEquals(emptyList<String>(), JokerNachschub.neueFreigaben(fr, listOf("neu", "benutzt"), 100))
-    }
-
-    @Test fun serverAnfragenSindGueltigesJson() {
-        val n = ServerAnfrage.nachschub("ABCDE-23456", "Yemin")
-        assert(n.contains("\"art\":\"nachschub\"") && n.contains("Yemin"))
-        val f = ServerAnfrage.freigabe("ABCDE-23456", 99)
-        assert(f.contains("\"anzahl\":10"))
     }
 }

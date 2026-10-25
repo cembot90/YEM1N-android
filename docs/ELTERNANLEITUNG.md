@@ -1,12 +1,12 @@
 # YEM1N Android: Anleitung für Eltern
 
-Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche Anleitung mit Bildern steht auch in der App unter Info.
+Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche Anleitung mit Bildern steht auch in der App unter Info.
 
 ## Das Wichtigste in Kürze
 
 - YEM1N ist eine Übungs-App für Grundschulkinder (Klasse 3) und die Vorschule.
 - Alles Üben, der Fortschritt und das Haustier bleiben auf dem Gerät.
-- Nur wenn Sie einen Familiencode eintragen und einwilligen, nutzt die App eine gemeinsame Cloud für Joker, Ergebnisse und Duelle.
+- Nur wenn Sie eine Familie anlegen und einwilligen, nutzt die App eine gemeinsame Cloud für Joker, Ergebnisse und Duelle. Jede Familie hat darin ein eigenes, abgetrenntes Fach in der EU.
 - Es gibt keine Werbung, kein Konto und keine Apple-ID.
 
 ## Erste Schritte
@@ -19,9 +19,9 @@ Stand 22.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 ## Der Startbildschirm
 
 - Oben rechts: Spiele, Einstellungen (⚙️), Erfolge und das Plus-Menü.
-- Beim ersten Start fragt die Einrichtung im letzten Schritt freiwillig nach Familiencode (mit Einwilligung der Eltern) und Klassencode.
+- Beim ersten Start fragt die Einrichtung im letzten Schritt freiwillig nach dem Klassencode (mit Einwilligung der Eltern). Die Familie verbinden Sie danach unter Einstellungen > Familie und Cloud.
 - Unter Einstellungen > Ich legen Sie eine **Belohnung zu Hause** fest (zum Beispiel "Eis essen gehen"). Das Kind sieht sie bei den Erfolgen auf der Wochenziel-Karte und bekommt sie zusätzlich zu den 10 Münzen von Ihnen.
-- Mit Familiencode meldet sich ein Kind-Gerät einmal bei den Eltern an. Auf dem Eltern-Gerät (auch iOS) steht das Kind dann schon vor der ersten Runde in der Liste der Kinder.
+- Ein Kind-Gerät steht nach der Freigabe durch die Eltern schon vor der ersten Runde in der Liste der Kinder.
 
 - Kopf: Serie, Münzen und Tagesziel. Oben rechts Spiele, Erfolge und das Plus-Menü.
 - **Lernwelt:** fertige Aufgaben nach dem Lehrplan (Hessen, Bayern, Nordrhein-Westfalen, Klassen 1 bis 4). Bundesland und Klasse stellen Sie in der Lernwelt ein.
@@ -51,23 +51,28 @@ Bei Rechenaufgaben steht über dem Antwortfeld "Mit dem Stift schreiben". Das Ki
 - **Bereiche:** Vorschule und Sprachen ein- oder ausblenden, Lernsprachen wählen.
 - **Spiele und Haustier:** Spielzeit, Töne, Vibration, Erinnerung ans Haustier.
 - **Vorlesen und Stimmen:** Sprachausgabe an oder aus, natürliche Stimmen laden (einmal Internet nötig).
-- **Familie und Cloud:** Einwilligung, Familiencode, Klassencode.
+- **Familie und Cloud:** Einwilligung, Familie, Klassencode.
 - **Info und Arbeiten:** Anleitung, Datenschutz, Feedback, Arbeiten löschen.
 
 ## Familie: Joker, Ergebnisse, Duell
 
 1. Einstellungen > Familie und Cloud (oder Joker auf dem Startbildschirm) und die Einwilligung geben. Ohne sie geht nichts in die Cloud.
-2. Auf einem Gerät einen Familiencode anlegen. Auf dem anderen Gerät den Code eintippen oder den QR-Code scannen. Der QR-Code funktioniert auch mit der iPhone-App.
-3. Das Gerät der Eltern wählt die Rolle "Eltern", das des Kindes "Kind".
-4. Das Kind stellt Fragen (Joker), die Eltern antworten, das Kind gibt einen Daumen. Es gibt ein Tageslimit, bei Bedarf bittet das Kind um Nachschub und die Eltern geben ihn frei.
-5. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
-6. Duell: Herausforderung gegen die Familie, auch zwischen Android und iPhone.
+2. **Eltern-Gerät:** Auf **Familie** tippen, einen Namen für das Gerät eingeben (zum Beispiel Mama) und **Neue Familie anlegen**. Danach legen Sie die **Eltern-PIN** fest (4 bis 8 Ziffern). Ohne PIN kommt niemand in den Bereich der Eltern.
+3. **Kind-Gerät:** Auf dem Eltern-Gerät unter Familie auf **Kind-Gerät** tippen. Es erscheint ein QR-Code (gilt 10 Minuten, nur für ein Gerät). Auf dem Kind-Gerät unter Familie den Namen des Kindes eingeben und **QR-Code scannen**.
+4. Das Kind-Gerät zeigt jetzt einen **Prüfcode** aus sechs Zeichen und wartet. Auf dem Eltern-Gerät steht dasselbe Gerät in der Liste, ebenfalls mit Prüfcode. Nur wenn beide gleich sind, tippen Sie auf **Erlauben**. Weitere Eltern-Geräte kommen genauso dazu.
+5. Das Kind stellt Fragen (Joker), die Eltern antworten, das Kind gibt einen Daumen. Es gibt ein Tageslimit, bei Bedarf bittet das Kind um Nachschub und die Eltern geben ihn frei.
+6. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
+7. Duell: Herausforderung gegen die Familie. Zwischen Android und iPhone geht das erst, wenn auch die iPhone-App auf den neuen Weg umgestellt ist.
 
-**Wichtig:** Die Daten liegen in einer öffentlich lesbaren Datenbank und sind dort nicht zusätzlich verschlüsselt. Der Familiencode ist der einzige Schutz: Wer ihn kennt, kann die Daten der Familie lesen. Geben Sie ihn nur an Familienmitglieder weiter und schreiben Sie in Fragen keine persönlichen Daten. Der Text einer Mitteilung (zum Beispiel Name des Kindes und Anfang einer Frage) läuft über Google. Die Einwilligung können Sie jederzeit widerrufen, dann sendet die App nichts mehr. Cloud-Daten löscht der Server nach 12 Monaten selbst. Früher geht es auf Anfrage per E-Mail (Familiencode nennen).
+**Gerät entfernen oder verloren:** Unter Familie in der Geräteliste auf **Entfernen** tippen. Das Gerät gehört dann nicht mehr zur Familie. Ein Kind kann beim Verlassen seine Einträge in der Cloud mitnehmen (löschen lassen). Unter Familie lässt sich auch die **ganze Familie löschen**.
+
+**PIN vergessen:** Das Gerät auf einem anderen Eltern-Gerät aus der Familie nehmen und neu verbinden. Ist es das einzige Eltern-Gerät, hilft nur die Familie neu anzulegen (App-Daten löschen).
+
+**Wichtig:** Zugriff haben nur Geräte der Familie. Jede Anfrage ist mit einem Schlüssel unterschrieben, der im Gerät bleibt. Mitteilungen enthalten weder Namen noch Inhalte. Schreiben Sie trotzdem in Fragen keine persönlichen Daten. Die Einwilligung können Sie jederzeit widerrufen, dann sendet die App nichts mehr. Einträge löscht der Dienst nach spätestens 12 Monaten selbst (Duelle nach 14 Tagen), eine unbenutzte Familie nach 12 Monaten ohne Nutzung.
 
 ## Klassencode
 
-- **Als Empfänger:** Einstellungen > Familie und Cloud > Klassencode eintragen. Die App holt neue Aufgaben der Klasse von selbst. Pakete werden nur angenommen, wenn der Admin der Klasse sie unterschrieben hat. Bei Problemen steht der Grund auf dem Bildschirm.
+- **Als Empfänger:** Einstellungen > Familie und Cloud > Klassencode eintragen (mit PIN, sobald das Gerät zur Familie gehört). Die App holt neue Aufgaben der Klasse von selbst. Pakete werden nur angenommen, wenn der Admin der Klasse sie unterschrieben hat. Bei Problemen steht der Grund auf dem Bildschirm.
 - **Als Admin:** "Eigene Klasse anlegen" erzeugt einen Klassencode und einen Schlüssel, der nur auf diesem Gerät bleibt. Dann bei der Arbeit auf **Senden** tippen. Bereits gesendete Pakete lassen sich dort auch löschen. Geht das Gerät verloren, braucht die Klasse einen neuen Klassencode.
 
 ## Haustier und Spiele

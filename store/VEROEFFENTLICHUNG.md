@@ -25,8 +25,9 @@ Stand: Entwicklung, noch nichts auf einem Gerät getestet.
 
 ## 3. Datenschutz und Data Safety
 
-Stand 22.10.2026. Üben, Fortschritt und Haustier bleiben auf dem Gerät. Mit Einwilligung der Eltern und einem
-Familiencode nutzt die App eine Cloud (Apple CloudKit über einen Vermittler bei Cloudflare, Mitteilungen über Google FCM).
+Stand 25.10.2026. Üben, Fortschritt und Haustier bleiben auf dem Gerät. Mit Einwilligung der Eltern und einer
+Familie nutzt die App einen Dienst (ein abgetrenntes Fach je Familie bei Cloudflare in der EU, Mitteilungen über Google FCM).
+Klassenpakete kommen aus der öffentlichen CloudKit-Datenbank von Apple, dabei geht nur der Klassencode über das Netz.
 Die Texte in der App stehen in `daten/InfoTexte.kt` (Datenschutz). Sie müssen zu den Angaben hier und auf
 `https://cembot90.github.io/YEM1N/` passen. Bitte vor der Veröffentlichung selbst prüfen (kein Rechtsrat).
 
@@ -34,26 +35,36 @@ Data-Safety-Antworten für Google Play:
 
 | Frage | Antwort |
 | --- | --- |
-| Erhebt oder teilt die App Nutzerdaten? | Ja, nur wenn Eltern einen Familiencode eintragen und einwilligen |
-| Welche Daten? | Nutzer-IDs (Familiencode und Push-Kennung), App-Aktivität (Rundenergebnisse), Nachrichten in der App (Joker-Fragen und Antworten), Name des Kindes (freiwillig) |
+| Erhebt oder teilt die App Nutzerdaten? | Ja, nur wenn Eltern eine Familie anlegen oder beitreten und einwilligen |
+| Welche Daten? | Geräte- oder Nutzer-IDs (Geräte-Kennung aus dem öffentlichen Schlüssel, Push-Kennung), App-Aktivität (Rundenergebnisse), Nachrichten in der App (Joker-Fragen und Antworten), Name des Kindes und Name des Geräts (freiwillig) |
 | Zweck | App-Funktionen (Joker, Ergebnisse für Eltern, Duell, Mitteilungen) |
-| Teilen mit Dritten? | Verarbeiter: Apple (CloudKit), Cloudflare (Vermittler), Google (FCM, bekommt die Push-Kennung und den Text der Mitteilung mit Name des Kindes und Anfang einer Frage). Keine Weitergabe zu Werbung oder Analyse |
+| Teilen mit Dritten? | Verarbeiter: Cloudflare (Dienst der Familie, EU-Speicherung), Google (FCM, bekommt die Push-Kennung und eine Mitteilung mit festem Text ohne Namen und Inhalte). Apple CloudKit nur zum Lesen öffentlicher Klassenpakete, ohne Daten des Kindes. Keine Weitergabe zu Werbung oder Analyse |
 | Daten verschlüsselt übertragen? | Ja (nur HTTPS) |
-| Können Nutzer die Löschung verlangen? | Ja, per E-Mail an cembot@icloud.com mit dem Familiencode. Daten auf dem Gerät löscht die Deinstallation |
-| Ist die Datenerhebung freiwillig? | Ja, ohne Familiencode wird nichts gesendet |
+| Können Nutzer die Löschung verlangen? | Ja, in der App unter Familie (ganze Familie löschen, oder als Kind beim Verlassen die eigenen Einträge) und per E-Mail an cembot@icloud.com. Daten auf dem Gerät löscht die Deinstallation |
+| Ist die Datenerhebung freiwillig? | Ja, ohne Familie wird nichts gesendet |
 | Konto nötig? | Nein |
 | Werbung? | Nein |
 | In-App-Käufe? | Nein (Münzen sind nur Spielgeld) |
 
-Wichtig für die Löschung: Datensätze, die der Server schreibt, gehören dem Entwickler. Nutzer können sie nicht selbst
-löschen. Der Server löscht sie nach 365 Tagen selbst (täglich um 03:00 UTC), vorher gilt "Löschung auf Anfrage" aus dem Datenschutztext. Cem löscht dann im
-CloudKit-Dashboard (Production > Records) alle Einträge mit diesem Familiencode.
+Löschung: Die Eltern löschen die ganze Familie mit allen Einträgen in der App (Familie > Ganze Familie löschen), ein Kind-Gerät kann
+beim Verlassen seine Einträge mitnehmen. Der Dienst löscht Einträge nach ihrer Frist selbst (höchstens 365 Tage, Duelle 14 Tage, Nachschub 90 Tage),
+eine unbenutzte Familie nach 365 Tagen ohne Nutzung, eine nie benutzte nach 30 Tagen. Alte Datensätze im CloudKit (aus der Zeit mit Familiencode)
+werden beim Abschalten des alten Weges gelöscht. Für Play ist die Löschung ohne Konto damit in der App möglich (Data-Safety-Angabe "Löschung anfordern": in der App und per E-Mail).
+
+Offene Prüfungen vor der Veröffentlichung:
+
+- Nach dem Deploy des Workers `node server/scripts/lokal-pruefen.mjs https://<adresse> --eu` ausführen, damit feststeht, dass die EU-Jurisdiktion wirkt. Erst dann darf "EU" in Store-Angaben und Datenschutztext stehen bleiben.
+- Auf Cloudflare den Tarif Workers Paid wählen (Free reicht für den Test, nicht für den Betrieb).
+- Auftragsverarbeitungs-Vertrag mit Cloudflare und Google (FCM) prüfen, Verzeichnis der Verarbeitungstätigkeiten ergänzen.
+- Familienrichtlinie von Google: FCM und ML Kit im Kinder-Kontext prüfen, Eltern-Gate ist die Eltern-PIN.
+- Datenschutztext und Texte in der App von einer fachkundigen Stelle prüfen lassen (kein Rechtsrat von Claude).
 
 Wofür die App noch ins Internet geht:
 
 - Bedienungsanleitung von GitHub Pages (`cembot90.github.io`), mit Offline-Kurzfassung.
 - Download der natürlichen Stimmen aus dem GitHub-Release `stimmen-1`, nur wenn Eltern es auslösen. Größe und Prüfsumme werden geprüft.
 - Klassencode: Pakete der Klasse aus CloudKit lesen. Nur der Klassencode geht über das Netz.
+- Familien-Dienst bei Cloudflare (nur mit Familie und Einwilligung): Ergebnisse, Joker, Duelle, Geräteliste.
 - Gemini Nano (KI auf dem Gerät) lädt sein Modell einmal von Google. Danach läuft die KI ohne Internet.
 - Die Handschrift-Erkennung (ML Kit Digital Ink, freiwillig) lädt ihr Modell (etwa 20 MB) einmal von Google. Die Schrift wird auf dem Gerät gelesen, nicht gespeichert und nicht verschickt. In Data Safety nichts zusätzlich angeben, weil keine Nutzerdaten das Gerät verlassen; nur die Modell-Anfrage geht an Google.
 
@@ -61,7 +72,7 @@ Berechtigungen:
 
 - `INTERNET`: für die Punkte oben.
 - `POST_NOTIFICATIONS`: für Erinnerungen (Haustier, Lernzeit, Wochenbericht) und Mitteilungen, wird erst nach Eltern-Schalter und Frage gefordert.
-- Kamera: nur zum Scannen des QR-Codes für den Familiencode, wenn Eltern es auslösen.
+- Kamera: nur zum Scannen des QR-Codes beim Verbinden eines Geräts mit der Familie, wenn Eltern es auslösen (der Scanner kommt von Google Play-Diensten, die App braucht dafür keine eigene Kamera-Erlaubnis).
 
 Datenschutzerklärung (URL für den Store-Eintrag): `https://cembot90.github.io/YEM1N/` (gleiche Seite wie iOS,
 muss die Cloud-Nutzung auf Android beschreiben, siehe Punkt 6).

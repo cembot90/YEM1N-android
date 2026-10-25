@@ -9,11 +9,12 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
-/** Die Antwort des Dienstes. [status] 0 heißt: keine Verbindung, -1: der Schlüssel dieses Geräts fehlt. */
+/** Die Antwort des Dienstes. [status] 0 heißt: keine Verbindung, -1: der Schlüssel dieses Geräts fehlt, -3: das Gerät gehört zu keiner Familie. */
 class FamilienAntwort(val status: Int, val json: JsonObject?) {
     val ok: Boolean get() = status in 200..299
     val keineVerbindung: Boolean get() = status == 0
     fun text(k: String): String = (json?.get(k) as? JsonPrimitive)?.contentOrNull.orEmpty()
+    fun zahl(k: String): Long = (json?.get(k) as? JsonPrimitive)?.longOrNull ?: 0L
     val fehler: String get() = FamilienProtokoll.fehlertext(status)
 }
 

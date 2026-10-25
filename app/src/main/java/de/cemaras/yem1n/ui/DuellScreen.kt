@@ -50,7 +50,6 @@ import de.cemaras.yem1n.logik.DuellRegeln
 import de.cemaras.yem1n.logik.DuellSpiel
 import de.cemaras.yem1n.logik.DuellStand
 import de.cemaras.yem1n.logik.DuellStufe
-import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
@@ -71,7 +70,6 @@ fun DuellScreen(vm: AppViewModel) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DuellStart(vm: AppViewModel) {
-    val code = vm.jokerCode
     var meine by remember { mutableStateOf(vm.duellMeineStufe) }
     var andere by remember { mutableStateOf(if (vm.duellMeineStufe == DuellStufe.PROFI) DuellStufe.KLASSE3 else DuellStufe.PROFI) }
     val geraet = vm.fortschritt.duellGeraet
@@ -88,10 +86,15 @@ private fun DuellStart(vm: AppViewModel) {
         Text("⚔️ Duell", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
         Text("Kopfrechnen gegen deine Familie. Du rechnest vor, die anderen rechnen nach, jeder auf seiner Stufe.", color = TextSanft, fontSize = 15.sp)
 
-        if (Familiencode.pruefe(code) == null) {
-            Text("Für das Duell braucht ihr einen gemeinsamen Familiencode.", color = Color.White, fontSize = 16.sp)
-            Button(onClick = vm::oeffneJoker, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                Text("Familiencode einrichten", fontWeight = FontWeight.Bold)
+        if (!vm.familieBereit) {
+            Text(
+                if (vm.einwilligungOffen) "Für das Duell müssen zuerst die Eltern einwilligen und das Gerät zur Familie gehören."
+                else if (vm.familie.wartet) "Dieses Gerät wartet noch darauf, dass Mama oder Papa es erlaubt."
+                else "Für das Duell muss dieses Gerät zur Familie gehören.",
+                color = Color.White, fontSize = 16.sp,
+            )
+            Button(onClick = vm::oeffneFamilie, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text("Familie öffnen", fontWeight = FontWeight.Bold)
             }
             return@Column
         }

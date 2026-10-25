@@ -32,10 +32,6 @@ class MainActivity : ComponentActivity() {
     /** Eine Arbeit, die eine andere App geschickt hat: als Text geteilt, als Datei geteilt oder geöffnet. */
     private fun verarbeite(intent: Intent?) {
         intent ?: return
-        if (intent.action == Intent.ACTION_VIEW && intent.data?.scheme == "yem1n") {
-            vm.cloudRueckkehr(intent.dataString.orEmpty())
-            return
-        }
         val text: String? = when (intent.action) {
             Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)
                 ?: IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)?.let { lese(it) }

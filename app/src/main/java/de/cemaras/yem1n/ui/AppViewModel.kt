@@ -47,7 +47,7 @@ import de.cemaras.yem1n.logik.DuellStand
 import de.cemaras.yem1n.logik.DuellStufe
 import de.cemaras.yem1n.logik.JokerNachschub
 import de.cemaras.yem1n.logik.ServerAnfrage
-import de.cemaras.yem1n.logik.CloudAdresse
+import de.cemaras.yem1n.logik.FamilienProtokoll
 import de.cemaras.yem1n.speicher.Erinnerung
 import de.cemaras.yem1n.speicher.Mitteilungen
 import de.cemaras.yem1n.speicher.HaustierWidget
@@ -82,6 +82,7 @@ sealed interface Ansicht {
     data object Spiele : Ansicht
     data object HaustierSeite : Ansicht
     data object Joker : Ansicht
+    data object Familie : Ansicht
     data object ErgebnisseEltern : Ansicht
     data object Duell : Ansicht
     data object Lernwelt : Ansicht
@@ -214,6 +215,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     init {
         alleArbeiten = speicher.ladeArbeiten()
         fortschritt = speicher.ladeFortschritt()
+        altesAufraeumen()
         sprecher.an = fortschritt.vorlesen
         SpielEffekte.ton = fortschritt.spielTon
         if (fortschritt.stift) stiftPruefen()
@@ -233,6 +235,19 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
+    }
+
+    /**
+     * Reste aus der Zeit vor dem Familien-Dienst: der alte Familiencode war Passwort und Suchschlüssel zugleich und
+     * gilt nicht mehr. Wartende Ergebnisse im alten Format könnten nie ankommen. Beides wird vergessen.
+     */
+    private fun altesAufraeumen() {
+        val f = fortschritt
+        val offen = f.offeneErgebnisse.filter { it.contains("\"typ\"") }
+        if (f.familiencode.isNotEmpty() || f.angemeldet.isNotEmpty() || offen.size != f.offeneErgebnisse.size) {
+            fortschritt = f.copy(familiencode = "", angemeldet = "", offeneErgebnisse = offen)
+            speicher.speichereFortschritt(fortschritt)
+        }
     }
 
     private fun sichtbarMachen() {
@@ -278,7 +293,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 else -> arbeiten.getOrNull(a.arbeit)
             }
             Ansicht.Start, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Info, is Ansicht.InfoSeite,
-            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen, Ansicht.Editor, Ansicht.VokabelEditor -> null
+            Ansicht.Vorschule, is Ansicht.VorschulPakete, is Ansicht.VorschulSpiel, is Ansicht.Englisch, Ansicht.Spiele, is Ansicht.Spiel, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.Familie, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen, Ansicht.Editor, Ansicht.VokabelEditor -> null
         }
 
     val aktuelleUebung: Uebung?
@@ -378,78 +393,35 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         sprecher.sprich(t.text(wunsch), sprache = t.sprache(wunsch))
     }
 
-    // Cloud (Apple-ID)
+    // Cloud: nur noch zum Lesen öffentlicher, unterschriebener Klassenpakete (kein Benutzerkonto, keine Anmeldung)
 
     private val cloud = CloudClient(app)
 
-    /** Kurzer Text für die Einstellungen: was der letzte Cloud-Test ergeben hat. */
-    var cloudText: String by mutableStateOf(if (cloud.angemeldet) "Mit Apple-ID angemeldet." else "Noch nicht angemeldet.")
-        private set
-    var cloudAngemeldet: Boolean by mutableStateOf(cloud.angemeldet)
-        private set
-    var cloudBeschaeftigt: Boolean by mutableStateOf(false)
-        private set
+    // Familie (Protokoll 2): Schlüssel je Gerät, Koppeln per QR-Code, Freigabe durch die Eltern
 
-    /** Adresse, die im Browser geöffnet werden soll (Apple-Anmeldung), sonst null. Die Oberfläche öffnet sie einmal. */
-    var cloudBrowserUrl: String? by mutableStateOf(null)
-        private set
+    val familie = FamilienModell(app)
 
-    fun cloudBrowserGeoeffnet() {
-        cloudBrowserUrl = null
-    }
-
-    /** Prüft die Verbindung. Ist eine Anmeldung nötig, kommt die Anmelde-Seite von Apple in `cloudBrowserUrl`. */
-    fun cloudPruefen() {
-        cloudBeschaeftigt = true
-        viewModelScope.launch {
-            val a = withContext(Dispatchers.IO) { cloud.aktuellerNutzer() }
-            cloudAngemeldet = cloud.angemeldet && a.ok
-            when {
-                a.ok -> cloudText = "Angemeldet bei Apple. Nutzerkennung: ${a.benutzer?.take(12) ?: "?"}..."
-                a.anmeldungNoetig && a.anmeldeUrl != null -> {
-                    cloudText = "Bitte bei Apple anmelden."
-                    cloudBrowserUrl = a.anmeldeUrl
-                }
-                else -> cloudText = "Fehler: ${a.fehlerCode ?: "?"}. ${a.grund.orEmpty()}"
-            }
-            cloudBeschaeftigt = false
-        }
-    }
-
-    /** Die App wurde von Apple über `yem1n://cloudkit?ckWebAuthToken=...` zurückgerufen. */
-    fun cloudRueckkehr(adresse: String) {
-        val token = CloudAdresse.tokenAusRueckkehr(adresse)
-        if (token == null) {
-            cloudText = "Die Anmeldung hat keinen Schlüssel gebracht."
-            return
-        }
-        cloud.merkeToken(token)
-        cloudAngemeldet = true
-        cloudText = "Schlüssel erhalten, prüfe die Verbindung..."
-        cloudPruefen()
-    }
-
-    fun cloudAbmelden() {
-        cloud.merkeToken(null)
-        cloudAngemeldet = false
-        cloudText = "Abgemeldet."
-    }
-
-    // Joker: Fragen der Kinder und Antworten der Eltern über den eigenen Server
-
-    /** Der Familiencode in der Form XXXXX-XXXXX, leer ohne gültigen Code (auch ältere Codes ohne Strich gehen). */
-    val jokerCode: String
-        get() = if (einwilligungOffen) "" else Familiencode.pruefe(fortschritt.familiencode) ?: ""
+    // Joker: Fragen der Kinder und Antworten der Eltern über den Familien-Dienst
 
     /** Solange die Eltern nicht eingewilligt haben, geht nichts in die Cloud. */
     val einwilligungOffen: Boolean get() = Einwilligung.erforderlich(fortschritt.einwilligung)
 
+    /** Das Gerät gehört zur Familie, ist freigegeben und die Eltern haben eingewilligt. Nur dann geht etwas hin und her. */
+    val familieBereit: Boolean get() = !einwilligungOffen && familie.aktiv
+
     fun einwilligen() = behalte(fortschritt.copy(einwilligung = Einwilligung.AKTUELLE_VERSION, einwilligungDatum = System.currentTimeMillis()))
 
-    /** Widerruf: Der Familiencode wird vergessen, die App sendet nichts mehr. */
+    /**
+     * Widerruf: Die Push-Kennung wird beim Dienst und bei Google gelöscht, danach sendet die App nichts mehr.
+     * Zur Familie gehört das Gerät weiter, bis es unter Familie ausdrücklich entfernt wird.
+     */
     fun einwilligungWiderrufen() {
-        behalte(fortschritt.copy(einwilligung = 0, einwilligungDatum = 0, familiencode = ""))
-        Mitteilungen.ausschalten(getApplication<android.app.Application>())
+        val war = familie.aktiv
+        behalte(fortschritt.copy(einwilligung = 0, einwilligungDatum = 0))
+        viewModelScope.launch {
+            if (war) familie.pushAbmelden()
+            Mitteilungen.ausschalten(getApplication<android.app.Application>())
+        }
         jokerFragen = emptyList()
         jokerMeldung = ""
     }
@@ -463,10 +435,15 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var jokerBeschaeftigt: Boolean by mutableStateOf(false)
         private set
 
+    fun oeffneFamilie() {
+        ansicht = Ansicht.Familie
+        familieAktualisieren()
+    }
+
     fun oeffneJoker() {
         ansicht = Ansicht.Joker
         offeneErgebnisseSenden()
-        if (jokerCode.isNotEmpty()) jokerLaden()
+        if (familieBereit) jokerLaden()
     }
 
     // Sprachen: Karteikasten und Bericht
@@ -609,58 +586,112 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Nimmt einen eingegebenen Familiencode an. Gibt false zurück, wenn er nicht passt. */
-    fun setzeFamiliencode(eingabe: String): Boolean {
-        val code = Familiencode.pruefe(eingabe) ?: return false
-        behalte(fortschritt.copy(familiencode = code))
-        jokerFragen = emptyList()
-        jokerLaden()
-        geraetMelden()
-        offeneErgebnisseSenden()
-        return true
-    }
+    // ---- Familie verbinden (Koppeln per QR-Code, Freigabe durch die Eltern) ----
 
-    fun neuerFamiliencode() {
-        behalte(fortschritt.copy(familiencode = Familiencode.neu()))
-        jokerFragen = emptyList()
-        jokerMeldung = "Neuer Familiencode. Gib ihn auch auf dem Gerät der Eltern ein."
-    }
-
-    fun vergissFamiliencode() {
-        behalte(fortschritt.copy(familiencode = ""))
-        jokerFragen = emptyList()
-        jokerMeldung = ""
-    }
-
-    fun setzeJokerRolle(rolle: String) {
-        if (rolle == "kind" || rolle == "eltern") {
-            behalte(fortschritt.copy(jokerRolle = rolle))
+    /** Nach jeder Änderung an der Familie: Rolle des Geräts angleichen, Push anmelden, Wartendes nachschicken. */
+    private fun familieGeaendert() {
+        val z = familie.zugang
+        if (z != null && z.aktiv && fortschritt.jokerRolle != z.rolle) behalte(fortschritt.copy(jokerRolle = z.rolle))
+        if (familieBereit) {
             geraetMelden()
             offeneErgebnisseSenden()
+        } else {
+            jokerFragen = emptyList()
+            jokerNachschubOffen = null
+        }
+    }
+
+    /** Legt eine neue Familie an. Dieses Gerät wird das erste Eltern-Gerät. */
+    fun familieAnlegen(geraeteName: String, fertig: (String?) -> Unit = {}) {
+        if (einwilligungOffen) {
+            familie.meldung = "Zuerst die Einwilligung der Eltern geben."
+            return
+        }
+        if (familie.beschaeftigt) return
+        viewModelScope.launch {
+            val fehler = familie.anlegen(geraeteName.trim().take(40).ifEmpty { "Eltern" })
+            familie.meldung = fehler.orEmpty()
+            familieGeaendert()
+            fertig(fehler)
+        }
+    }
+
+    /** Tritt einer Familie mit dem Text aus dem QR-Code bei. Danach wartet das Gerät auf die Freigabe der Eltern. */
+    fun familieBeitreten(qrText: String, geraeteName: String, fertig: (String?) -> Unit = {}) {
+        if (einwilligungOffen) {
+            familie.meldung = "Zuerst die Einwilligung der Eltern geben."
+            return
+        }
+        if (familie.beschaeftigt) return
+        viewModelScope.launch {
+            val fehler = familie.koppeln(qrText, geraeteName.trim().take(40).ifEmpty { "Kind" })
+            familie.meldung = fehler.orEmpty()
+            familieGeaendert()
+            fertig(fehler)
+        }
+    }
+
+    /** Fragt nach, ob die Eltern dieses Gerät schon freigegeben haben, und lädt bei Eltern die Geräteliste. */
+    fun familieAktualisieren() {
+        if (einwilligungOffen || familie.zugang == null) return
+        viewModelScope.launch {
+            val geaendert = familie.statusPruefen()
+            if (familie.istEltern) familie.geraeteLaden()
+            if (geaendert) familieGeaendert()
+        }
+    }
+
+    fun familieEinladen(rolle: String) {
+        viewModelScope.launch { familie.meldung = familie.einladungErzeugen(rolle).orEmpty() }
+    }
+
+    fun familieGeraetErlauben(id: String) = viewModelScope.launch { familie.meldung = familie.erlauben(id).orEmpty() }
+
+    fun familieGeraetAblehnen(id: String) = viewModelScope.launch { familie.meldung = familie.ablehnen(id).orEmpty() }
+
+    fun familieGeraetEntfernen(id: String) = viewModelScope.launch { familie.meldung = familie.entfernen(id).orEmpty() }
+
+    /** Dieses Gerät verlässt die Familie. Ein Kind kann seine Einträge dabei löschen lassen. */
+    fun familieVerlassen(eintraegeLoeschen: Boolean) {
+        viewModelScope.launch {
+            val fehler = familie.verlassen(eintraegeLoeschen)
+            familie.meldung = fehler.orEmpty()
+            if (fehler == null) {
+                Mitteilungen.ausschalten(getApplication<android.app.Application>())
+                familieGeaendert()
+            }
+        }
+    }
+
+    /** Löscht die ganze Familie mit allen Einträgen (nur Eltern, mit Bestätigung in der Oberfläche). */
+    fun familieLoeschen() {
+        viewModelScope.launch {
+            val fehler = familie.familieLoeschen()
+            familie.meldung = fehler.orEmpty()
+            if (fehler == null) {
+                Mitteilungen.ausschalten(getApplication<android.app.Application>())
+                familieGeaendert()
+            }
         }
     }
 
     /**
-     * Meldet dieses Gerät (Familiencode, Rolle, Push-Kennung von Google) beim Server an,
-     * damit es Mitteilungen bekommt. Nur wenn sich etwas geändert hat.
+     * Meldet dieses Gerät (Push-Kennung von Google) beim Dienst an, damit es Mitteilungen bekommt.
+     * Nur wenn sich etwas geändert hat. Die Mitteilungen enthalten weder Namen noch Inhalte.
      */
     fun geraetMelden() {
-        val code = jokerCode
-        if (code.isEmpty()) return
+        if (!familieBereit) return
         val app = getApplication<android.app.Application>()
         try {
             Mitteilungen.einschalten()
             com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                 if (token.isNullOrEmpty()) return@addOnSuccessListener
                 Mitteilungen.speichereToken(app, token)
-                val rolle = fortschritt.jokerRolle
-                val schluessel = "$code|$rolle|$token|${fortschritt.duellGeraet}"
+                val z = familie.zugang ?: return@addOnSuccessListener
+                val schluessel = "${z.familie}|${z.geraet}|$token"
                 if (Mitteilungen.gemeldet(app) == schluessel) return@addOnSuccessListener
                 viewModelScope.launch {
-                    val e = withContext(Dispatchers.IO) {
-                        ServerClient.senden(ServerAnfrage.PFAD_GERAET, ServerAnfrage.geraet(code, rolle, token, fortschritt.duellGeraet))
-                    }
-                    if (e.ok) Mitteilungen.merkeGemeldet(app, schluessel)
+                    if (familie.pushAnmelden(token)) Mitteilungen.merkeGemeldet(app, schluessel)
                 }
             }
         } catch (e: Exception) {
@@ -669,40 +700,31 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun jokerLaden() {
-        val code = jokerCode
-        if (code.isEmpty() || jokerBeschaeftigt) return
+        if (!familieBereit || jokerBeschaeftigt) return
         jokerBeschaeftigt = true
         viewModelScope.launch {
-            val liste = withContext(Dispatchers.IO) {
-                val f = cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_FRAGE, code))
-                val a = cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_ANTWORT, code))
-                val d = cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_DAUMEN, code))
-                if (f == null) null
-                else JokerCloud.fragen(
-                    JokerCloud.datensaetze(f), JokerCloud.datensaetze(a.orEmpty()), JokerCloud.datensaetze(d.orEmpty()),
-                )
-            }
-            if (liste == null) {
+            val f = familie.lesen(FamilienProtokoll.TYP_FRAGE)
+            val a = if (f == null) null else familie.lesen(FamilienProtokoll.TYP_ANTWORT)
+            val d = if (a == null) null else familie.lesen(FamilienProtokoll.TYP_DAUMEN)
+            if (f == null || a == null || d == null) {
                 jokerMeldung = "Keine Verbindung. Ist das Internet an?"
             } else {
+                val liste = FamilienProtokoll.fragen(f, a, d)
                 jokerFragen = liste
                 jokerMeldung = if (liste.isEmpty()) "Noch keine Fragen." else ""
             }
             jokerBeschaeftigt = false
-            nachschubPruefen(code)
+            nachschubPruefen()
         }
     }
 
     /** Eltern sehen offene Bitten um Joker, ein Kind-Gerät füllt seine Joker bei neuen Freigaben auf. */
-    private suspend fun nachschubPruefen(code: String) {
-        val (n, fr) = withContext(Dispatchers.IO) {
-            cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_NACHSCHUB, code)) to
-                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_FREIGABE, code))
-        }
-        if (n == null || fr == null) return
-        val nachschub = JokerCloud.datensaetze(n)
-        val freigaben = JokerCloud.datensaetze(fr)
-        if (fortschritt.jokerRolle == "eltern") {
+    private suspend fun nachschubPruefen() {
+        val n = familie.lesen(FamilienProtokoll.TYP_NACHSCHUB) ?: return
+        val fr = familie.lesen(FamilienProtokoll.TYP_FREIGABE) ?: return
+        val nachschub = n.map { it.alsDatensatz() }
+        val freigaben = fr.map { it.alsDatensatz() }
+        if (familie.istEltern) {
             jokerNachschubOffen = JokerNachschub.offeneAnfrage(nachschub, freigaben)
             return
         }
@@ -742,20 +764,17 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun duellLaden() {
-        val code = jokerCode
-        if (code.isEmpty() || duellBeschaeftigt) return
+        if (!familieBereit || duellBeschaeftigt) return
         duellBeschaeftigt = true
         viewModelScope.launch {
-            val (d, a) = withContext(Dispatchers.IO) {
-                cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_DUELL, code, 200)) to
-                    cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_DUELLANTWORT, code, 400))
-            }
+            val d = familie.lesen(FamilienProtokoll.TYP_DUELL)
+            val a = if (d == null) null else familie.lesen(FamilienProtokoll.TYP_DUELLANTWORT)
             if (d == null || a == null) {
                 duellMeldung = "Die Duelle konnten nicht geladen werden. Ist das Internet an?"
             } else {
-                val neu = JokerCloud.datensaetze(d).mapNotNull { DuellPost.herausforderung(it.text("json")) }
-                val antw = JokerCloud.datensaetze(a).mapNotNull { DuellPost.antwort(it.text("json")) }
-                // Was gerade erst geschickt wurde, steht vielleicht noch nicht in der Cloud.
+                val neu = d.mapNotNull { DuellPost.herausforderung(it.text("json")) }
+                val antw = a.mapNotNull { DuellPost.antwort(it.text("json")) }
+                // Was gerade erst geschickt wurde, steht vielleicht noch nicht in der Liste.
                 val ids = neu.map { it.id }.toSet()
                 val antwIds = antw.map { it.id }.toSet()
                 duelle = neu + duelle.filter { it.id !in ids && it.vonGeraet == fortschritt.duellGeraet }
@@ -781,9 +800,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** Alle Aufgaben sind gerechnet: Ergebnis in die Familien-Cloud schicken. */
     fun duellFertig(stand: DuellStand) {
         val spiel = duellSpiel ?: return
-        val code = jokerCode
         val jetzt = DuellRegeln.zeitpunktJetzt()
-        val koerper: String
+        val koerper: kotlinx.serialization.json.JsonObject
         val herausforderung = spiel.herausforderung
         if (herausforderung == null) {
             val d = DuellHerausforderung(
@@ -791,73 +809,75 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 vonStufe = spiel.stufe, vonStand = stand, anStufe = spiel.anStufe, aufgaben = spiel.fuerAndere, zeitpunkt = jetzt,
             )
             duelle = duelle + d
-            koerper = ServerAnfrage.duell(code, d.id, DuellPost.text(d))
+            koerper = FamilienProtokoll.duell(d.id, DuellPost.text(d))
         } else {
             val a = DuellAntwort(herausforderung.id, duellName, fortschritt.duellGeraet, stand, jetzt)
             duellAntworten = duellAntworten + a
-            koerper = ServerAnfrage.duellAntwort(code, a.duellID, a.geraet, DuellPost.text(a))
+            koerper = FamilienProtokoll.duellAntwort(a.duellID, DuellPost.text(a))
         }
+        if (!familieBereit) return
         viewModelScope.launch {
-            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
-            duellMeldung = if (e.ok) "" else "Das Ergebnis ging nicht raus. ${e.meldung}"
+            val e = familie.senden(koerper)
+            duellMeldung = if (e.ok) "" else "Das Ergebnis ging nicht raus. ${e.fehler}"
         }
     }
 
     fun jokerNachschubAnfragen() {
-        if (jokerCode.isEmpty()) return
-        jokerSenden(ServerAnfrage.nachschub(jokerCode, fortschritt.name))
+        if (!familieBereit) return
+        jokerSenden(FamilienProtokoll.nachschub(neueKennung("nach"), fortschritt.name))
     }
 
     fun jokerFreigeben() {
-        if (jokerCode.isEmpty()) return
-        jokerSenden(ServerAnfrage.freigabe(jokerCode, fortschritt.jokerLimit))
+        if (!familieBereit) return
+        jokerSenden(FamilienProtokoll.freigabe(neueKennung("frei"), fortschritt.jokerLimit))
     }
 
-    private fun jokerSenden(koerper: String, verbraucht: Boolean = false) {
+    private fun neueKennung(vorsatz: String): String =
+        FamilienProtokoll.neueKennung(vorsatz, java.util.UUID.randomUUID().toString())
+
+    private fun jokerSenden(koerper: kotlinx.serialization.json.JsonObject, verbraucht: Boolean = false) {
         if (jokerBeschaeftigt) return
         jokerBeschaeftigt = true
         viewModelScope.launch {
-            val e = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
+            val e = familie.senden(koerper)
             jokerBeschaeftigt = false
             if (e.ok) {
                 if (verbraucht) behalte(fortschritt.mitJokerGenutzt(Tag.heute()))
                 jokerMeldung = "Gesendet."
-                // CloudKit braucht einen Moment, bis neue Einträge abfragbar sind.
-                kotlinx.coroutines.delay(1500)
                 jokerLaden()
             } else {
-                jokerMeldung = e.meldung
+                jokerMeldung = e.fehler
             }
         }
     }
 
     fun jokerFrageSenden(fach: String, uebung: String, text: String) {
-        if (text.isBlank() || jokerCode.isEmpty()) return
+        if (text.isBlank() || !familieBereit) return
         if (fortschritt.jokerUebrig(Tag.heute()) <= 0) {
             jokerMeldung = "Heute sind keine Joker mehr übrig. Du kannst neue anfragen."
             return
         }
-        jokerSenden(ServerAnfrage.frage(jokerCode, fortschritt.name, fach, uebung, text), verbraucht = true)
+        jokerSenden(FamilienProtokoll.frage(neueKennung("frage"), fortschritt.name, fach, uebung, text), verbraucht = true)
     }
 
     fun jokerAntwortSenden(frageId: String, emoji: String, text: String) {
-        if (text.isBlank() || jokerCode.isEmpty()) return
-        jokerSenden(ServerAnfrage.antwort(jokerCode, frageId, fortschritt.name.ifBlank { "Eltern" }, emoji, text))
+        if (text.isBlank() || !familieBereit) return
+        jokerSenden(FamilienProtokoll.antwort(neueKennung("antw"), frageId, emoji, text))
     }
 
     fun jokerDaumen(frageId: String, antwortId: String) {
-        if (jokerCode.isEmpty()) return
-        jokerSenden(ServerAnfrage.daumen(jokerCode, frageId, antwortId, fortschritt.name))
+        if (!familieBereit) return
+        jokerSenden(FamilienProtokoll.daumen(frageId, antwortId))
     }
 
     // Ergebnisse der Kinder für die Eltern
 
     var ergebnisse: List<de.cemaras.yem1n.logik.RundenErgebnisEintrag> by mutableStateOf(emptyList())
         private set
-    /** Kinder, die sich angemeldet haben, auch wenn noch keine Runde angekommen ist. */
-    var anmeldungen: List<de.cemaras.yem1n.logik.RundenErgebnisEintrag> by mutableStateOf(emptyList())
-        private set
-    val angemeldeteKinder: List<String> get() = de.cemaras.yem1n.logik.Anmeldung.namen(anmeldungen)
+    /** Namen der Kinder-Geräte der Familie, auch wenn noch keine Runde angekommen ist (aus der Geräteliste der Eltern). */
+    val angemeldeteKinder: List<String>
+        get() = familie.geraete.filter { it.rolle == "kind" && it.status == "aktiv" }
+            .map { it.name.trim() }.filter { it.isNotEmpty() }.distinctBy { it.lowercase() }
     var ergebnisseMeldung: String by mutableStateOf("")
         private set
     var ergebnisseBeschaeftigt: Boolean by mutableStateOf(false)
@@ -869,22 +889,18 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun ergebnisseLaden() {
-        val code = jokerCode
-        if (code.isEmpty() || ergebnisseBeschaeftigt) return
+        if (!familieBereit || ergebnisseBeschaeftigt) return
         ergebnisseBeschaeftigt = true
         viewModelScope.launch {
-            val daten = withContext(Dispatchers.IO) {
-                JokerCloud.alleSeiten(JokerCloud.TYP_ERGEBNIS, code, 200, "zeitpunkt", 10) { cloud.lesen("records/query", it) }
-            }
+            val daten = familie.lesen(FamilienProtokoll.TYP_ERGEBNIS, 10)
+            familie.geraeteLaden()
             if (daten == null) {
                 ergebnisseMeldung = "Keine Verbindung. Ist das Internet an?"
             } else {
-                val alle = JokerCloud.ergebnisse(daten)
-                ergebnisse = alle.filterNot { de.cemaras.yem1n.logik.Anmeldung.istAnmeldung(it) }
-                anmeldungen = alle.filter { de.cemaras.yem1n.logik.Anmeldung.istAnmeldung(it) }
+                ergebnisse = FamilienProtokoll.ergebnisse(daten)
                 ergebnisseMeldung = when {
                     ergebnisse.isNotEmpty() -> ""
-                    angemeldeteKinder.isNotEmpty() -> "Angemeldet: ${angemeldeteKinder.joinToString(", ")}. Noch keine Runde angekommen."
+                    angemeldeteKinder.isNotEmpty() -> "Verbunden: ${angemeldeteKinder.joinToString(", ")}. Noch keine Runde angekommen."
                     else -> "Noch keine Runden angekommen."
                 }
             }
@@ -1340,7 +1356,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             }
             Ansicht.Editor -> if (editorEbene > 0) editorEbene-- else ansicht = Ansicht.Start
             Ansicht.VokabelEditor -> if (vokabelThema != null) vokabelThema = null else ansicht = Ansicht.Start
-            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen -> ansicht = Ansicht.Start
+            is Ansicht.Uebungen, Ansicht.Einstellungen, Ansicht.Erfolge, Ansicht.Vorschule, Ansicht.Spiele, Ansicht.HaustierSeite, Ansicht.Joker, Ansicht.Familie, Ansicht.ErgebnisseEltern, Ansicht.Duell, Ansicht.Lernwelt, Ansicht.Sprachen -> ansicht = Ansicht.Start
             is Ansicht.VorschulPakete -> ansicht = Ansicht.Vorschule
             is Ansicht.Spiel -> ansicht = Ansicht.Spiele
             is Ansicht.VorschulSpiel -> {
@@ -1427,28 +1443,27 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private var ergebnisSendet = false
 
     /**
-     * Merkt das Ergebnis der Runde vor und schickt es an die Eltern (über den Server), wenn ein Familiencode gesetzt ist
-     * und dieses Gerät dem Kind gehört. Was nicht ankommt, bleibt gemerkt und wird später noch einmal geschickt.
+     * Merkt das Ergebnis der Runde vor und schickt es an die Eltern (über den Familien-Dienst), wenn dieses Gerät
+     * zur Familie gehört und dem Kind gehört. Was nicht ankommt, bleibt gemerkt und wird später noch einmal geschickt.
      */
     private fun ergebnisMelden(klasse: String, fach: String, arbeit: String, uebung: String, s: RundenStand) {
-        val code = jokerCode
-        if (code.isEmpty()) return
-        if (fortschritt.jokerRolle != "kind") {
-            ergebnisStatus = "Dieses Gerät steht auf Eltern, darum wird die Runde nicht gesendet."
+        if (!familieBereit) return
+        if (!familie.aktiv || familie.zugang?.rolle != "kind") {
+            ergebnisStatus = "Dieses Gerät gehört zu den Eltern, darum wird die Runde nicht gesendet."
             return
         }
         val e = de.cemaras.yem1n.logik.RundenErgebnisEintrag(
-            eintragId = java.util.UUID.randomUUID().toString(), klasse = klasse, fach = fach, arbeit = arbeit,
+            eintragId = FamilienProtokoll.neueKennung("erg", java.util.UUID.randomUUID().toString()),
+            klasse = klasse, fach = fach, arbeit = arbeit,
             uebung = uebung, richtig = s.richtig, gesamt = s.aufgaben.size, angesehen = s.angeschaut,
             sterne = s.sterne, kind = fortschritt.name.trim(), zeitpunkt = System.currentTimeMillis(),
             details = de.cemaras.yem1n.logik.AntwortProtokoll.json(de.cemaras.yem1n.logik.AntwortProtokoll.eintraege(s)),
         )
-        val offen = (fortschritt.offeneErgebnisse + ServerAnfrage.ergebnis(code, e)).takeLast(50)
+        val offen = (fortschritt.offeneErgebnisse + FamilienProtokoll.ergebnis(e).toString()).takeLast(50)
         behalte(fortschritt.copy(offeneErgebnisse = offen))
         offeneErgebnisseSenden()
     }
 
-    /** Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später. */
     /** Handschrift: Erkennung von Google, das Modell lädt einmal nach Wunsch. */
     val stiftLeser = de.cemaras.yem1n.speicher.StiftLeser()
     var stiftStand: de.cemaras.yem1n.speicher.StiftLeser.Stand by mutableStateOf(de.cemaras.yem1n.speicher.StiftLeser.Stand.UNBEKANNT)
@@ -1487,11 +1502,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         diagnose = listOf("Ich teste die Verbindung ...")
         viewModelScope.launch {
             val zeilen = mutableListOf<String>()
-            val server = withContext(Dispatchers.IO) { ServerClient.senden("/v1/ping", "{}") }
-            zeilen += if (server.ok) "✅ Server erreichbar" else "❌ Server: ${server.meldung}"
-            val lesen = withContext(Dispatchers.IO) { cloud.lesen("records/query", JokerCloud.abfrage(JokerCloud.TYP_FRAGE, "AAAAA-AAAAA", 1)) }
-            zeilen += if (lesen != null) "✅ Cloud lesen geht" else "❌ Cloud lesen geht nicht (Internet oder Schlüssel prüfen)"
-            zeilen += if (fortschritt.familiencode.isNotEmpty()) "✅ Familiencode ist eingetragen" else "ℹ️ Kein Familiencode eingetragen"
+            val ping = withContext(Dispatchers.IO) { de.cemaras.yem1n.speicher.FamilienNetz.post("/v2/ping", emptyMap(), "{}").first }
+            zeilen += if (ping == 200) "✅ Familien-Dienst erreichbar" else "❌ Familien-Dienst nicht erreichbar (Internet prüfen)"
+            zeilen += when {
+                familie.aktiv -> "✅ Dieses Gerät gehört zur Familie (${if (familie.istEltern) "Eltern" else "Kind"})"
+                familie.wartet -> "ℹ️ Dieses Gerät wartet auf die Freigabe der Eltern"
+                else -> "ℹ️ Noch keine Familie verbunden"
+            }
             zeilen += if (!einwilligungOffen) "✅ Einwilligung ist erteilt" else "ℹ️ Einwilligung fehlt, es wird nichts gesendet"
             zeilen += "ℹ️ Noch nicht gesendet: ${fortschritt.offeneErgebnisse.size}"
             diagnose = zeilen
@@ -1499,34 +1516,32 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Meldet das Kind einmal bei den Eltern an (Ergebnis ohne Aufgaben), damit es dort schon vor der ersten Runde erscheint. */
-    private fun anmeldungMelden() {
-        val code = jokerCode
-        if (code.isEmpty() || fortschritt.jokerRolle != "kind" || fortschritt.duellGeraet.isEmpty()) return
-        val name = fortschritt.name.trim()
-        if (name.isEmpty()) return
-        val sk = de.cemaras.yem1n.logik.Anmeldung.schluessel(code, name, fortschritt.duellGeraet)
-        if (sk == fortschritt.angemeldet) return
-        val e = de.cemaras.yem1n.logik.Anmeldung.eintrag(code, name, fortschritt.duellGeraet, System.currentTimeMillis())
-        behalte(fortschritt.copy(angemeldet = sk, offeneErgebnisse = (fortschritt.offeneErgebnisse + ServerAnfrage.ergebnis(code, e)).takeLast(50)))
-    }
-
+    /** Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später. */
     fun offeneErgebnisseSenden() {
-        anmeldungMelden()
-        if (ergebnisSendet || fortschritt.offeneErgebnisse.isEmpty()) return
+        if (ergebnisSendet || fortschritt.offeneErgebnisse.isEmpty() || !familieBereit) return
         ergebnisSendet = true
         viewModelScope.launch {
             var gesendet = 0
             var fehler: String? = null
             for (koerper in fortschritt.offeneErgebnisse) {
-                val r = withContext(Dispatchers.IO) { ServerClient.senden(ServerAnfrage.PFAD_SENDEN, koerper) }
+                val body = try {
+                    kotlinx.serialization.json.Json.parseToJsonElement(koerper) as? kotlinx.serialization.json.JsonObject
+                } catch (e: Exception) {
+                    null
+                }
+                // Reste aus der Zeit vor dem Familien-Dienst oder kaputte Einträge fliegen raus, damit sie nicht alles blockieren.
+                if (body == null || !body.containsKey("typ")) {
+                    behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
+                    continue
+                }
+                val r = familie.senden(body)
                 if (r.ok) {
                     gesendet++
                     behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
                 } else {
-                    fehler = r.meldung
-                    // Eine abgelehnte Anfrage (400) würde nie ankommen, sie fliegt raus, damit sie nicht alles blockiert.
-                    if (r.abgelehnt) behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
+                    fehler = r.fehler
+                    // Eine abgelehnte Anfrage (400) würde nie ankommen, sie fliegt raus.
+                    if (r.status == 400) behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
                     else break
                 }
             }

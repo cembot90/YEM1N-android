@@ -2,8 +2,6 @@ package de.cemaras.yem1n.logik
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -15,7 +13,7 @@ import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 import kotlin.random.asKotlinRandom
 
-/** Familiencode wie in der iOS-App: 10 Zeichen, gespeichert und abgefragt als XXXXX-XXXXX (mit Strich). */
+/** Klassencode wie in der iOS-App: 10 Zeichen, gespeichert und abgefragt als XXXXX-XXXXX (mit Strich). Familien nutzen ihn nicht mehr. */
 object Familiencode {
     const val ZEICHEN = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
@@ -28,7 +26,7 @@ object Familiencode {
     /** Zum Anzeigen, auch für einen älteren Code ohne Strich. */
     fun zeige(code: String): String = pruefe(code) ?: code
 
-    /** Der Familiencode ist ein Geheimnis. Deshalb kommt der Zufall vom Sicherheits-Zufallsgenerator des Geräts. */
+    /** Der Code ist ein Geheimnis. Deshalb kommt der Zufall vom Sicherheits-Zufallsgenerator des Geräts. */
     private val sicher: kotlin.random.Random by lazy { java.security.SecureRandom().asKotlinRandom() }
 
     fun neu(zufall: kotlin.random.Random = sicher): String =
@@ -73,16 +71,11 @@ data class RundenErgebnisEintrag(
     val details: String = "",
 )
 
-/** Baut die Anfragen an CloudKit und liest die Antworten. Reines Kotlin, damit es ohne Gerät testbar ist. */
+/**
+ * Baut Leseanfragen an CloudKit und liest die Antworten. Nur noch für öffentliche Klassenpakete.
+ * Familien laufen über [FamilienProtokoll]. Reines Kotlin, damit es ohne Gerät testbar ist.
+ */
 object JokerCloud {
-    const val TYP_FRAGE = "JokerAnfrage"
-    const val TYP_ANTWORT = "JokerAntwort"
-    const val TYP_DAUMEN = "JokerDaumen"
-    const val TYP_ERGEBNIS = "RundenErgebnis"
-    const val TYP_DUELL = "Duell"
-    const val TYP_DUELLANTWORT = "DuellAntwort"
-    const val TYP_NACHSCHUB = "JokerNachschub"
-    const val TYP_FREIGABE = "JokerFreigabe"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -96,55 +89,6 @@ object JokerCloud {
             a >= 0.5 -> 1
             else -> 0
         }
-    }
-
-    private fun feld(wert: JsonElement) = buildJsonObject { put("value", wert) }
-
-    private fun anlegen(typ: String, name: String?, felder: Map<String, JsonElement>): JsonObject =
-        buildJsonObject {
-            put("operationType", "create")
-            put("record", buildJsonObject {
-                put("recordType", typ)
-                if (name != null) put("recordName", name)
-                put("fields", buildJsonObject { felder.forEach { (k, v) -> put(k, feld(v)) } })
-            })
-        }
-
-    private fun modify(vararg op: JsonObject): String =
-        buildJsonObject { put("operations", buildJsonArray { op.forEach { add(it) } }) }.toString()
-
-    private fun s(t: String) = JsonPrimitive(t)
-    private fun n(z: Number) = JsonPrimitive(z)
-
-    // Schreiben (nur neu anlegen, wie bei iOS)
-
-    fun frageSenden(code: String, kind: String, fach: String, uebung: String, text: String): String =
-        modify(anlegen(TYP_FRAGE, null, mapOf(
-            "familienCode" to s(code), "kind" to s(kind), "fach" to s(fach),
-            "uebung" to s(uebung), "text" to s(text), "status" to s("offen"),
-        )))
-
-    fun antwortSenden(code: String, frageId: String, absender: String, emoji: String, text: String): String =
-        modify(anlegen(TYP_ANTWORT, null, mapOf(
-            "familienCode" to s(code), "anfrageID" to s(frageId), "absender" to s(absender),
-            "emoji" to s(emoji), "text" to s(text),
-        )))
-
-    fun daumenSenden(code: String, frageId: String, antwortId: String, absender: String): String =
-        modify(anlegen(TYP_DAUMEN, "daumen-$antwortId", mapOf(
-            "familienCode" to s(code), "anfrageID" to s(frageId), "antwortID" to s(antwortId),
-            "absender" to s(absender),
-        )))
-
-    fun ergebnisSenden(code: String, e: RundenErgebnisEintrag): String {
-        val felder = linkedMapOf<String, JsonElement>(
-            "familienCode" to s(code), "eintragID" to s(e.eintragId), "klasse" to s(e.klasse),
-            "fach" to s(e.fach), "arbeit" to s(e.arbeit), "uebung" to s(e.uebung),
-            "richtig" to n(e.richtig), "gesamt" to n(e.gesamt), "angesehen" to n(e.angesehen),
-            "sterne" to n(e.sterne), "kind" to s(e.kind), "zeitpunkt" to n(e.zeitpunkt),
-        )
-        if (e.details.isNotEmpty()) felder["details"] = s(e.details)
-        return modify(anlegen(TYP_ERGEBNIS, "erg-" + e.eintragId, felder))
     }
 
     // Lesen
@@ -223,34 +167,4 @@ object JokerCloud {
         }
         return aus
     }
-
-    /** Setzt Fragen, Antworten und Daumen wie `ladeJoker` in iOS zusammen. Neueste Frage zuerst. */
-    fun fragen(fragen: List<Datensatz>, antworten: List<Datensatz>, daumen: List<Datensatz>): List<JokerFrage> {
-        val daumenIds = daumen.map { it.text("antwortID") }.toSet()
-        val alle = antworten.map {
-            JokerAntwortEintrag(
-                id = it.name, frageId = it.text("anfrageID"), absender = it.text("absender", "?"),
-                emoji = it.text("emoji", "🙂"), text = it.text("text"), erstellt = it.erstellt,
-                daumen = it.name in daumenIds,
-            )
-        }
-        return fragen.map { f ->
-            JokerFrage(
-                id = f.name, kind = f.text("kind", "Kind"), fach = f.text("fach"),
-                uebung = f.text("uebung"), text = f.text("text"), erstellt = f.erstellt,
-                antworten = alle.filter { it.frageId == f.name }.sortedBy { it.erstellt },
-            )
-        }.sortedByDescending { it.erstellt }
-    }
-
-    fun ergebnisse(daten: List<Datensatz>): List<RundenErgebnisEintrag> = daten.map {
-        RundenErgebnisEintrag(
-            eintragId = it.text("eintragID", it.name), klasse = it.text("klasse"), fach = it.text("fach"),
-            arbeit = it.text("arbeit"), uebung = it.text("uebung"), richtig = it.zahl("richtig").toInt(),
-            gesamt = it.zahl("gesamt").toInt(), angesehen = it.zahl("angesehen").toInt(),
-            sterne = it.zahl("sterne").toInt(), kind = it.text("kind"),
-            zeitpunkt = it.zahl("zeitpunkt").takeIf { z -> z > 0 } ?: it.erstellt,
-            details = it.text("details"),
-        )
-    }.sortedByDescending { it.zeitpunkt }
 }

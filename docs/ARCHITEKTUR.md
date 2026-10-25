@@ -34,23 +34,23 @@ Navigation ist ein einfaches `sealed interface Ansicht` im `AppViewModel` (kein 
 ## 4. Cloud
 
 ```
-Android --Lesen (API-Token)------------------> CloudKit (öffentliche DB)
-Android --Schreiben--> Cloudflare Worker --Server-Schlüssel (ECDSA P-256)--> CloudKit
-CloudKit <--Abfrage jede Minute-- Worker --FCM (Dienstkonto)--> Android
-iOS <------------------------------------------> CloudKit (direkt, mit Apple-ID)
+Android --Familie (Protokoll 2, jede Anfrage unterschrieben)--> Cloudflare Worker, ein Fach je Familie (EU)
+Cloudflare Worker --Mitteilung ohne Namen und Inhalt (FCM)--> Android
+Android --Lesen von Klassenpaketen (API-Token)--> CloudKit (öffentliche DB)
 ```
 
-- Warum ein Server: Android-Nutzer sollen keine Apple-ID brauchen (Entscheidung 21.10.2026), und CloudKit kann keine Push an Android senden.
-- Lesen: `speicher/CloudClient.kt`, `logik/JokerCloud.kt`, `logik/CloudKit.kt`. Token ist ein reiner Lese-Token.
-- Schreiben: `speicher/ServerClient.kt` und `logik/ServerAnfrage.kt` an den Worker (`server/src/index.js`). Der Worker signiert gegen CloudKit (`cloudkit.js`), begrenzt Anfragen (`limit.js`), prüft Regeln (`regeln.js`) und verschickt Push (`fcm.js`, `mitteilungen.js`).
-- Records, die der Server schreibt, gehören dem Entwickler. iOS kann sie lesen und neue anlegen, aber nicht ändern. Darum sind alle geteilten Typen "nur neu anlegen": Joker, Antworten, Daumen, Ergebnisse, Duell, DuellAntwort, JokerNachschub, JokerFreigabe.
-- Klassencode (`logik/Klassensiegel.kt`, `logik/KlassenAdmin.kt`, `server/src/klasse.js`): Pakete einer Klasse liegen als `Lernpaket` mit Familiencode `K-XXXXX-XXXXX` in CloudKit. Jedes Paket trägt eine Ed25519-Unterschrift über `K-CODE|<json>`. Der öffentliche Schlüssel liegt als `KlassenSchluessel` (`klassenkey-K-CODE`). Empfänger merken sich den Schlüssel beim ersten Mal und lehnen einen anderen ab. Der Admin erzeugt den Schlüssel auf dem Gerät (privater Teil bleibt im `Fortschritt`, nie im Netz). Der Server (`POST /v1/klasse`, Arten `schluessel`, `paket`, `loeschen`) schreibt ein Paket nur, wenn die Unterschrift zum gespeicherten Schlüssel passt (WebCrypto Ed25519), und legt einen vorhandenen Schlüssel nie neu an. Paketnamen und Unterschriftsformat sind gleich wie bei iOS.
+- Familie: `logik/FamilienProtokoll.kt` (Körper der Anfragen, QR, Auswertung), `logik/FamilienClient.kt` (Unterschrift, Uhrabgleich), `logik/FamilienKrypto.kt` (base64url, Kennungen, DER nach roh), `speicher/GeraetSchluessel.kt` (P-256 im Android Keystore, der private Schlüssel verlässt das Gerät nie), `speicher/FamilienNetz.kt`, `speicher/FamilienSpeicher.kt` (Zugehörigkeit und PIN-Daten, nicht in der Sicherung), `ui/FamilienModell.kt` (Zustand für die Oberfläche), `ui/FamilieScreen.kt`, `ui/PinTor.kt`.
+- Neue Geräte kommen nur per QR-Code und müssen von einem Eltern-Gerät erlaubt werden, auch Kinder-Geräte. Der Prüfcode (6 Zeichen der Geräte-Kennung) steht auf beiden Geräten.
+- Eltern-PIN (`logik/ElternPin.kt`): schützt Familie, Ergebnisse, Joker-Antworten und die Familien-Einstellungen auf Geräten, die zur Familie gehören. 4 bis 8 Ziffern, gesalzener Hash, Wartezeit nach drei falschen Eingaben, 5 Minuten offen. Eine Sperre für Kinder, kein Tresor: Die Daten schützt der Schlüssel des Geräts.
+- Warum ein Server: Android-Nutzer brauchen keine Apple-ID (Entscheidung 21.10.2026), und CloudKit kann keine Push an Android senden.
+- Lesen von Klassenpaketen: `speicher/CloudClient.kt` (nur `lesen`), `logik/JokerCloud.kt` (`abfrage`, `alleSeiten`, `datensaetze`), `logik/CloudKit.kt`. Der Token ist ein reiner Lese-Token. Es gibt keine Anmeldung bei Apple mehr.
+- Klassencode (`logik/Klassensiegel.kt`, `logik/KlassenAdmin.kt`, `server/src/klasse.js`): Pakete einer Klasse liegen als `Lernpaket` mit Code `K-XXXXX-XXXXX` in CloudKit. Jedes Paket trägt eine Ed25519-Unterschrift über `K-CODE|<json>`. Der öffentliche Schlüssel liegt als `KlassenSchluessel` (`klassenkey-K-CODE`). Empfänger merken sich den Schlüssel beim ersten Mal und lehnen einen anderen ab. Der Admin erzeugt den Schlüssel auf dem Gerät (privater Teil bleibt im `Fortschritt`, nie im Netz). Der Server (`POST /v1/klasse`, Arten `schluessel`, `paket`, `loeschen`) schreibt ein Paket nur, wenn die Unterschrift zum gespeicherten Schlüssel passt (WebCrypto Ed25519), und legt einen vorhandenen Schlüssel nie neu an. Paketnamen und Unterschriftsformat sind gleich wie bei iOS. Der Klassencode ist kein Geheimnis der Familie.
 - Seitenabfrage: `JokerCloud.alleSeiten` folgt dem `continuationMarker` von CloudKit (bis zu 10 Seiten à 200 Ergebnisse).
-- Familiencode `XXXXX-XXXXX` (`Familiencode`), QR `yem1n://familie/CODE`. Er ist der einzige Schlüssel zur Familie. Wer ihn kennt, sieht deren Daten (Grenze des Modells, siehe Risiken).
+- Der alte Familiencode (`xxxxx-xxxxx` in der öffentlichen Datenbank) ist abgelöst. Beim Start vergisst die App ihn und wartende Ergebnisse im alten Format (`altesAufraeumen` im ViewModel). Das Format `Familiencode` bleibt nur für den Klassencode.
 - Schema: `cloud/schema.ckdb`. Details: `cloud/SERVER-KONZEPT.md`, `cloud/CLOUDKIT-ANDROID.md`.
-- Haustier und Pakete bleiben je System getrennt (kein Schreiben ohne Eigentümer).
+- Haustier und Pakete bleiben je System getrennt.
 
-### 4a. Protokoll 2 (Familien-Dienst, im Aufbau)
+### 4a. Protokoll 2 (Familien-Dienst)
 
 Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familiencode zugleich Passwort und Suchschlüssel war.
 
@@ -58,13 +58,15 @@ Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familienc
 - Jedes Gerät hat ein P-256-Schlüsselpaar (Android Keystore, auf dem iPhone Secure Enclave) und unterschreibt jede Anfrage. Unterschriftstext, Wege, Rechte und Fristen: `cloud/PROTOKOLL-V2.md`. Gemeinsame Prüfwerte für Swift, Kotlin und Worker: `cloud/testvektoren-v2.json` (erzeugt mit `server/scripts/testvektoren.mjs`).
 - Neue Geräte kommen nur per QR-Code und müssen von einem Eltern-Gerät bestätigt werden, auch Kinder-Geräte.
 - Mitteilungen sind neutral (kein Name, kein Inhalt). iPhone über APNs direkt aus dem Worker, Android über FCM.
-- Tests: `server/test/v2*.test.js` (Kern mit echtem SQLite über `node:sqlite`, Router, Rechte, Fristen, Mitteilungen, Testvektoren).
-- Der Klassencode (`/v1/klasse`) bleibt vorerst bei CloudKit, weil dort nur öffentliche, unterschriebene Pakete liegen.
+- Tests: `server/test/v2*.test.js` (Kern mit echtem SQLite über `node:sqlite`, Router, Rechte, Fristen, Mitteilungen, Testvektoren), auf Android `FamilienKryptoTest`, `FamilienClientTest`, `FamilienProtokollTest`, `ElternPinTest`.
+- Stand: Worker und Android-Client fertig. Das iPhone-Gegenstück fehlt noch. Solange läuft `/v1` für iOS weiter, danach wird es abgeschaltet.
 
 ## 5. Datenschutz
 
-- Einwilligung der Eltern vor dem Familiencode (`logik/Einwilligung.kt`), widerrufbar. Ohne sie: keine Netzzugriffe der Familienfunktionen.
-- Gesendet wird nur: Familiencode, Rundenergebnisse (Fach, Übung, Sterne, richtig/falsch), Joker-Texte, Duelle. Kein Klarname, keine Geräte-ID außer dem FCM-Token pro Familie.
+- Einwilligung der Eltern vor der Familie (`logik/Einwilligung.kt`, Version 2), widerrufbar. Ohne sie: keine Netzzugriffe der Familienfunktionen.
+- Gesendet wird nur: Geräte-Name, öffentlicher Schlüssel und Push-Kennung des Geräts, Rundenergebnisse (Fach, Übung, Sterne, richtig/falsch), Joker-Texte, Duelle. Kein Klarname.
+- Mitteilungen enthalten weder Namen noch Inhalte, nur feste Sätze.
+- Löschen: Eltern können die ganze Familie löschen, ein Kinder-Gerät kann beim Verlassen seine Einträge mitnehmen. Fristen je Art stehen in `cloud/PROTOKOLL-V2.md`.
 - Kein Tracking, keine Werbung, kein Firebase außer als Postbote.
 - Natürliche Stimmen werden einmal geladen (GitHub-Release `stimmen-1`, SHA-256 fest im Code) und laufen danach offline.
 
@@ -90,10 +92,11 @@ Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familienc
 | --- | --- |
 | Production-Schlüssel | App und Server laufen auf Production (Schlüssel in Development gelöscht, 22.10.2026) |
 | Mitteilungen | Worker fragt jede Minute, ausgelegt für etwa 5 Familien (Free-Tarif Cloudflare) |
-| Familiencode | Geheimnis ohne Konto. Rate-Limit im Worker, aber kein Schutz gegen Weitergabe |
+| Familie | Zugriff nur mit Schlüssel des Geräts und Freigabe der Eltern. Ein verlorenes Eltern-Gerät lässt sich von einem anderen Eltern-Gerät entfernen. Ob die EU-Jurisdiktion in der Produktion wirkt, prüft `server/scripts/lokal-pruefen.mjs --eu` nach dem Deploy |
+| Eltern-PIN | Sperre für Kinder, nicht kryptografisch stark. Vergessen heißt: Gerät auf einem anderen Eltern-Gerät entfernen und neu verbinden |
 | Klassencode | Admin-Schlüssel liegt nur auf einem Gerät. Geht das Gerät verloren, braucht die Klasse einen neuen Klassencode (kein Schlüsselwechsel) |
 | KI-Erklärung | Beta-Schnittstelle von Google, nur auf unterstützten Geräten, sonst feste Sätze |
-| Löschen in der Cloud | Server-Datensätze gehören dem Entwickler, Löschung nur auf Anfrage über das CloudKit-Dashboard |
+| Löschen in der Cloud | Familien-Daten löschen die Eltern in der App. Im alten CloudKit liegende Familien-Datensätze werden beim Abschalten von `/v1` gelöscht |
 | Release mit R8 | Keep-Regeln in `app/proguard-rules.pro`, vor dem Store-Upload auf einem echten Gerät prüfen |
 | Stift und Handschrift | ML Kit Digital Ink, Modell (etwa 20 MB) lädt einmal, Schrift bleibt auf dem Gerät |
 | Lizenz | GPL-3.0 verlangt Quelltext bei Weitergabe der App |

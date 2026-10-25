@@ -76,7 +76,7 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
             Kennzahl2("${u.sterne} ⭐", "Sterne")
         }
         BerichtKarte(Wochenbericht.berichte(alle))
-        KinderKarte(de.cemaras.yem1n.logik.Anmeldung.kinderZeilen(alle, vm.anmeldungen), format)
+        KinderKarte(de.cemaras.yem1n.logik.Anmeldung.kinderZeilen(alle, vm.angemeldeteKinder), format)
     }
     val analyse: @Composable () -> Unit = {
         RadarKarte(imZeitraum, tage) { tage = it }
@@ -118,6 +118,7 @@ fun ErgebnisseElternScreen(vm: AppViewModel) {
         ) {
             TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
             Text("📊 Ergebnisse", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
+            if (!PinTor(vm)) return@Column
 
             if (kinder.size > 1) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

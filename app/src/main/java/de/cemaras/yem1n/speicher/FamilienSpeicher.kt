@@ -21,9 +21,33 @@ class FamilienSpeicher(context: Context) {
 
     fun speichern(zugang: FamilienZugang?) {
         val e = prefs.edit()
-        if (zugang == null) e.remove("zugang") else e.putString("zugang", json.encodeToString(zugang))
+        if (zugang == null) {
+            // Ohne Familie gibt es nichts zu schützen, die PIN fällt mit weg.
+            e.remove("zugang").remove("pinSalz").remove("pinHash").remove("pinFehler").remove("pinSperreBis")
+        } else {
+            e.putString("zugang", json.encodeToString(zugang))
+        }
         e.apply()
     }
+
+    // Eltern-PIN: nur Salz und Wert zum Prüfen, nie die PIN selbst. Liegt in derselben Datei wie die Familie (nicht in der Sicherung).
+    var pinSalz: String
+        get() = prefs.getString("pinSalz", "").orEmpty()
+        set(v) { prefs.edit().putString("pinSalz", v).apply() }
+
+    var pinHash: String
+        get() = prefs.getString("pinHash", "").orEmpty()
+        set(v) { prefs.edit().putString("pinHash", v).apply() }
+
+    /** Falsche Eingaben in Folge. */
+    var pinFehler: Int
+        get() = prefs.getInt("pinFehler", 0)
+        set(v) { prefs.edit().putInt("pinFehler", v).apply() }
+
+    /** Bis wann die Sperre nach zu vielen Fehlern gilt (Uhrzeit des Geräts in Millisekunden). */
+    var pinSperreBis: Long
+        get() = prefs.getLong("pinSperreBis", 0L)
+        set(v) { prefs.edit().putLong("pinSperreBis", v).apply() }
 
     /** Der Zeitunterschied zum Dienst, damit nicht bei jedem Start neu ausgeglichen werden muss. */
     var versatz: Long

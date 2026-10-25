@@ -101,13 +101,4 @@ class DuellTest {
         val p = DuellPost.entschieden(duelle, listOf(antwort)).single()
         assertEquals("Evîn", p.siegerName)
     }
-
-    @Test fun serverBodies() {
-        val b = ServerAnfrage.duell("ABCDE-23456", "A1", "{\"x\":1}")
-        assertTrue(b, b.contains("\"art\":\"duell\"") && b.contains("\"id\":\"A1\""))
-        val a = ServerAnfrage.duellAntwort("ABCDE-23456", "A1", "G2", "{}")
-        assertTrue(a, a.contains("\"duellId\":\"A1\"") && a.contains("\"geraet\":\"G2\""))
-        assertTrue(ServerAnfrage.geraet("ABCDE-23456", "kind", "t", "G9").contains("\"geraet\":\"G9\""))
-        assertTrue(!ServerAnfrage.geraet("ABCDE-23456", "kind", "t").contains("geraet"))
-    }
 }

@@ -45,15 +45,11 @@ Farben: Lacivert und Sarı (Navy `#00205B`, Gelb `#FFED00`), wie bei iOS.
 
 ## Cloud-Entscheidung
 
-Keine eigene Android-Cloud (kein Firebase). iOS nutzt nur die öffentliche CloudKit-Datenbank.
-Android soll über die CloudKit-Web-Services-REST-API an dieselbe Datenbank, also eine Cloud für beide Systeme.
-Entschieden (21.10.2026, nach Problemen mit der Apple-Anmeldung auf Android): Android-Nutzer brauchen keine Apple-ID.
-Lesen geht direkt bei CloudKit mit dem API-Token (`speicher/CloudClient.kt`, `logik/JokerCloud.kt`).
-Schreiben und Mitteilungen laufen über einen kleinen Server auf Cloudflare Workers (`server/`) mit CloudKit-Server-Schlüssel.
-Mitteilungen auf Android kommen über Googles FCM (nur als Postbote, keine Firebase-Datenbank).
-Plan und Grenzen: `cloud/SERVER-KONZEPT.md`. Die Apple-Anmeldung in den Einstellungen bleibt vorerst als Zweitweg.
-Records vom Server gehören dem Entwickler: iOS kann sie lesen und neue anlegen, aber nicht ändern.
-Deshalb werden nur Joker, Antworten, Daumen, Ergebnisse und Duelle geteilt (alles nur neu anlegen). Haustier und Pakete bleiben je System getrennt.
+Keine Firebase-Datenbank, keine Apple-ID auf Android. Familien laufen seit dem 25.10.2026 über den eigenen Familien-Dienst (Protokoll 2, siehe "Sicherheitsumbau" unten):
+ein abgetrenntes Fach je Familie bei Cloudflare in der EU, Schlüssel je Gerät im Keystore, neue Geräte nur per QR-Code mit Freigabe der Eltern (`ui/FamilieScreen.kt`, `ui/FamilienModell.kt`, `logik/Familien*.kt`).
+CloudKit wird auf Android nur noch zum Lesen öffentlicher, unterschriebener Klassenpakete benutzt (`speicher/CloudClient.kt`, `logik/JokerCloud.kt`). Es gibt keine Anmeldung bei Apple mehr.
+Mitteilungen auf Android kommen über Googles FCM (nur als Postbote), neutral ohne Namen und Inhalte.
+Plan und Grenzen des alten Wegs: `cloud/SERVER-KONZEPT.md`. Der alte Familiencode-Weg (`/v1`, CloudKit) läuft im Worker nur noch für iOS, bis die iPhone-App umgestellt ist.
 
 ## Stand und nächste Schritte
 
@@ -78,10 +74,10 @@ Meilenstein 5: Haustier (Ei wählen, schlüpft nach der ersten Runde, wächst in
 Veröffentlichung: `store/VEROEFFENTLICHUNG.md` sammelt Checkliste, Data-Safety-Antworten und Store-Texte für Cem.
 Meilenstein 3: Info (Anleitung per WebView mit Kurzfassung ohne Internet, Datenschutz, Impressum,
 Beta und Haftung, Feedback per Mail, Versionsinfo).
-Meilenstein 6 (Cloud ohne Apple-ID): Server läuft auf Cloudflare (`server/`, Adresse in `speicher/ServerClient.kt`), Schreiben mit Server-Schlüssel und Lesen mit API-Token sind bestätigt. Joker-Seite (Familiencode, Frage, Antwort, Daumen) und stilles Senden der Rundenergebnisse sind da (`ui/JokerScreen.kt`, `logik/JokerCloud.kt`, `logik/ServerAnfrage.kt`).
-Mitteilungen laufen über FCM und den Server (Abfrage jede Minute, höchstens etwa 5 Familien). Joker haben ein Tageslimit mit Nachschub und Freigabe durch die Eltern (`logik/JokerNachschub.kt`). Ein Kind-Gerät meldet sich mit Familiencode, Einwilligung und Namen einmal an (Ergebnis ohne Aufgaben, Übung "Angemeldet", `logik/Anmeldung.kt`). iOS zeigt es dann schon vor der ersten Runde unter Kinder, die Mitteilung sagt "ist angemeldet" (Server `mitteilungen.js`, braucht `npx wrangler deploy`). Dazu kommen Elternansicht der Ergebnisse mit Details, Wochenbericht in Worten, Radar, Duell (Records `Duell` und `DuellAntwort`, gleiche wie iOS), Lernzeit mit täglicher Erinnerung und Notizblock.
-Die CloudKit-Typen `JokerNachschub` und `JokerFreigabe` legt iOS selbst an (`anzahl` ist eine Zahl). `cloud/schema.ckdb` ist das ganze Schema, nur nötig, wenn Production fehlt.
-Einwilligung der Eltern vor dem Familiencode (`logik/Einwilligung.kt`), ohne sie geht nichts in die Cloud. QR-Code für den Familiencode (zeigen und scannen, Format `yem1n://familie/CODE`).
+Meilenstein 6 (Cloud ohne Apple-ID): Server läuft auf Cloudflare (`server/`, Adresse in `speicher/ServerClient.kt`), Schreiben mit Server-Schlüssel und Lesen mit API-Token sind bestätigt. Joker-Seite (Frage, Antwort, Daumen) und stilles Senden der Rundenergebnisse sind da (`ui/JokerScreen.kt`). Der Weg über Familiencode und CloudKit ist seit 25.10.2026 durch Protokoll 2 abgelöst.
+Mitteilungen laufen über FCM und den Server (Abfrage jede Minute, höchstens etwa 5 Familien). Joker haben ein Tageslimit mit Nachschub und Freigabe durch die Eltern (`logik/JokerNachschub.kt`). Ein Kind-Gerät steht nach der Freigabe durch die Eltern schon vor der ersten Runde in der Kinderliste (aus der Geräteliste des Dienstes, `logik/Anmeldung.kt`). Dazu kommen Elternansicht der Ergebnisse mit Details, Wochenbericht in Worten, Radar, Duell (über den Familien-Dienst, Typen `duell` und `duellantwort`), Lernzeit mit täglicher Erinnerung und Notizblock.
+`cloud/schema.ckdb` gehört zum alten CloudKit-Weg und wird mit der iPhone-Umstellung (Phase 5) für Familiendaten gelöscht. Pakete der Klasse bleiben in CloudKit.
+Einwilligung der Eltern vor der Familie (`logik/Einwilligung.kt`, Version 2), ohne sie geht nichts in die Cloud. QR-Code zum Koppeln (`yem1n://koppeln?f=...&t=...`, gilt 10 Minuten, einmal).
 Meilenstein 7 (Lernwelt): Aufgaben nach dem Lehrplan für Hessen, Bayern und NRW, Klassen 1 bis 4, Fächer Mathe, Deutsch, Englisch, Musik, Kunst, dazu Türkisch und Italienisch als Extras aus dem Sprachkatalog (`app/src/main/resources/sprachkatalog.json`, Wörter anhören und erkennen). Themen stehen in `logik/lehrplan/`, Bilder in `ui/AufgabenBild.kt`, Sterne je Thema bleiben erhalten. Bundesland und Klasse stellt man in der Lernwelt ein.
 Meilenstein 8 (Erklären): Erklär-Freund (nach einer falschen Antwort "Warum war das falsch?", feste Sätze aus `logik/FehlerAnalyse.kt`, keine KI), Olli die Eule beim Haustier (`logik/Eule.kt`, Einführung und Tipps), Rechenweg als Bild (`logik/ErklaerBild.kt`, `ui/ErklaerBildView.kt`). Unter Einstellungen > Bereiche lassen sich Vorschule und Sprachen ausblenden.
 Belohnung zu Hause: Eltern tragen unter Einstellungen > Ich einen Text ein (`Fortschritt.familienBelohnung`, `Erfolge.familienBelohnungText`), das Kind sieht ihn auf der Wochenziel-Karte (Erfolge). Bleibt auf dem Gerät, wie bei iOS (`familienBelohnung`).
@@ -89,7 +85,7 @@ Sprachen sind ein eigener Bereich (`ui/SprachenScreen.kt`, `logik/Sprachen.kt`):
 Klassencode ist da (Einstellungen > Familie und Cloud): Pakete der Klasse holen, Ed25519-Unterschrift prüfen (`logik/Klassensiegel.kt`, Schlüssel wird beim ersten Mal gemerkt).
 KI-Satz beim Erklär-Freund mit Gemini Nano über ML Kit GenAI (`speicher/KiText.kt`, `logik/KiPrompt.kt`, Beta, nur auf unterstützten Geräten, sonst feste Sätze, Zahlen werden geprüft).
 Hauptmenü wie iOS (Kopf mit Knöpfen, Lernwelt, Extra, Mehr, Arbeiten nach Klasse und Fach), Einstellungen in sechs Gruppen. Sprachen mit Karteikasten (`logik/Karteikasten.kt`), Wiederholen und Elternbericht.
-Stift und Handschrift sind da (`speicher/StiftLeser.kt`, `ui/StiftFeld.kt`, `logik/Handschrift.kt`, ML Kit Digital Ink, Modell lädt einmal nach Wunsch). Einrichtungsassistent beim ersten Start (`ui/EinrichtungScreen.kt`, `logik/Profil.kt`, letzter Schritt optional mit Familiencode samt Einwilligung und Klassencode; Einstellungen haben einen eigenen ⚙️-Knopf im Kopf), Einstellungen > Technik mit Verbindungstest. Mathe-Editor (Plus > Eigene Arbeit bauen: Entwurf auf dem Gerät, Vorlagen, Formular mit Rechner, Prüfen, Speichern, JSON teilen; `logik/Editor.kt`, `ui/EditorScreen.kt`) und Vokabel-Editor (Sprachen > Eigene Wörter, `logik/EigeneThemen.kt`, `ui/VokabelEditorScreen.kt`, Datei `eigene-themen.json`) sind da. Eigene Themen haben keine Fragen aus der Lernwelt und keine Alternativen, nur Karten, Paare und Tippen.
+Stift und Handschrift sind da (`speicher/StiftLeser.kt`, `ui/StiftFeld.kt`, `logik/Handschrift.kt`, ML Kit Digital Ink, Modell lädt einmal nach Wunsch). Einrichtungsassistent beim ersten Start (`ui/EinrichtungScreen.kt`, `logik/Profil.kt`, letzter Schritt optional mit Klassencode samt Einwilligung; Einstellungen haben einen eigenen ⚙️-Knopf im Kopf), Einstellungen > Technik mit Verbindungstest. Mathe-Editor (Plus > Eigene Arbeit bauen: Entwurf auf dem Gerät, Vorlagen, Formular mit Rechner, Prüfen, Speichern, JSON teilen; `logik/Editor.kt`, `ui/EditorScreen.kt`) und Vokabel-Editor (Sprachen > Eigene Wörter, `logik/EigeneThemen.kt`, `ui/VokabelEditorScreen.kt`, Datei `eigene-themen.json`) sind da. Eigene Themen haben keine Fragen aus der Lernwelt und keine Alternativen, nur Karten, Paare und Tippen.
 Klassencode als Admin ist da (`logik/KlassenAdmin.kt`, Server `server/src/klasse.js`, Route `/v1/klasse`: Schlüssel anlegen, Pakete unterschreiben, senden, löschen; der Server prüft die Unterschrift). Nach Änderungen im `server/` muss Cem mit `npx wrangler deploy` neu veröffentlichen.
 Sprachen: Tippen der Antworten (mit Sonderzeichen) und Auswahl der Lernsprachen sind da. Ergebnisse werden seitenweise geholt (`JokerCloud.alleSeiten`). Production-Schlüssel sind umgestellt (Development gelöscht).
 Datenschutztext (`daten/InfoTexte.kt`) und `store/VEROEFFENTLICHUNG.md` beschreiben die Cloud mit Einwilligung. R8 ist im Release an (`app/proguard-rules.pro`), Cem testet vor dem Store-Upload ein signiertes Release.
@@ -99,7 +95,9 @@ Dokumentation pflegen: bei jeder Funktionsänderung `CLAUDE.md`, `docs/ARCHITEKT
 ## Sicherheitsumbau (Protokoll 2)
 
 Entscheidung 25.10.2026 (Cem): ein Cloudflare-Fach je Familie in der EU, Schlüssel je Gerät, neue Geräte nur per QR-Code mit Freigabe durch ein Eltern-Gerät (auch Kinder). Grund: Der Familiencode war Passwort und Suchschlüssel zugleich in einer öffentlich lesbaren Datenbank.
-Stand: Worker fertig und getestet (`server/src/v2/`, `server/test/v2*.test.js`, Beschreibung `cloud/PROTOKOLL-V2.md`, Prüfwerte `cloud/testvektoren-v2.json`). Cem muss `npx wrangler@latest deploy` ausführen und später die APNs-Geheimnisse setzen (`server/EINRICHTEN.md`, Abschnitt 3). Als Nächstes: Android-Client (Keystore, QR-Koppeln, Geräteliste, Eltern-PIN), dann iPhone, dann alten Weg abschalten und CloudKit-Familiendaten löschen. Vor dem Umbau der iPhone-App darf keine der beiden Apps öffentlich erscheinen.
+Stand 25.10.2026: Worker fertig und getestet (`server/src/v2/`, `server/test/v2*.test.js`, Beschreibung `cloud/PROTOKOLL-V2.md`, Prüfwerte `cloud/testvektoren-v2.json`). Android-Client fertig (Keystore, QR-Koppeln, Freigabe, Geräteliste, Eltern-PIN, Familie verlassen und löschen, neutrale Mitteilungen), bisher nur auf `entwicklung`, noch nicht auf einem Gerät getestet.
+Cem muss `npx wrangler@latest deploy` ausführen und später die APNs-Geheimnisse setzen (`server/EINRICHTEN.md`, Abschnitt 3), danach die EU-Jurisdiktion mit `server/scripts/lokal-pruefen.mjs --eu` prüfen.
+Als Nächstes: iPhone-Client (Secure Enclave, gleiche Testvektoren), dann `/v1` für Familien abschalten und CloudKit-Familiendaten löschen. Vor dem Umbau der iPhone-App darf keine der beiden Apps öffentlich erscheinen (Play-Test mit geschlossenem Kreis ist ok).
 Beim Ändern von `server/src/v2/typen.js` die Tabelle in `cloud/PROTOKOLL-V2.md` mitziehen.
 
 ## Designüberarbeitung (begonnen)

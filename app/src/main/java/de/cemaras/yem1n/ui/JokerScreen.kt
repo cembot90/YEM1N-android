@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import de.cemaras.yem1n.logik.Familiencode
 import de.cemaras.yem1n.logik.JokerFrage
 import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Mint
@@ -55,16 +54,16 @@ private fun chipFarbenJoker() = FilterChipDefaults.filterChipColors(
 @Composable
 fun JokerScreen(vm: AppViewModel) {
     val f = vm.fortschritt
-    val code = vm.jokerCode
-    val eltern = f.jokerRolle == "eltern"
+    val bereit = vm.familieBereit
+    val eltern = vm.familie.istEltern
 
-    // Ab Android 13 einmal um die Erlaubnis für Mitteilungen bitten, sobald es einen Familiencode gibt.
+    // Ab Android 13 einmal um die Erlaubnis für Mitteilungen bitten, sobald das Gerät zur Familie gehört.
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val erlaubnis = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
     ) { }
-    androidx.compose.runtime.LaunchedEffect(code) {
-        if (code.isNotEmpty() && !de.cemaras.yem1n.speicher.Erinnerung.erlaubt(ctx)) {
+    androidx.compose.runtime.LaunchedEffect(bereit) {
+        if (bereit && !de.cemaras.yem1n.speicher.Erinnerung.erlaubt(ctx)) {
             erlaubnis.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
@@ -85,28 +84,23 @@ fun JokerScreen(vm: AppViewModel) {
             EinwilligungKarte(vm)
             return@Column
         }
-        if (code.isEmpty()) {
-            CodeEingabe(vm)
+        if (!bereit) {
+            OhneFamilie(vm)
             return@Column
         }
+        // Auf einem Eltern-Gerät gehören Antworten und Nachschub den Eltern: nur mit PIN.
+        if (eltern && !PinTor(vm)) return@Column
 
         Column(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).glas(22.dp).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Familiencode", color = TextSanft, fontSize = 13.sp)
-            Text(Familiencode.zeige(code), fontSize = 24.sp, fontWeight = FontWeight.Black, color = Color.White)
-            Text("Mit diesem Code finden sich Kind und Eltern.", color = TextSanft, fontSize = 13.sp)
-            var qrOffen by remember { mutableStateOf(false) }
-            TextButton(onClick = { qrOffen = true }) { Text("📷 QR-Code zeigen", color = Gelb, fontWeight = FontWeight.Bold) }
-            if (qrOffen) {
-                QrDialog("QR-Code der Familie", de.cemaras.yem1n.logik.QrPaket.inhalt("familie", code),
-                    "Auf dem anderen Gerät bei Joker auf QR-Code scannen tippen.") { qrOffen = false }
-            }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = !eltern, onClick = { vm.setzeJokerRolle("kind") }, label = { Text("Ich bin das Kind") }, colors = chipFarbenJoker())
-                FilterChip(selected = eltern, onClick = { vm.setzeJokerRolle("eltern") }, label = { Text("Ich bin Mama oder Papa") }, colors = chipFarbenJoker())
-            }
+            Text("Familie", color = TextSanft, fontSize = 13.sp)
+            Text(
+                "${vm.familie.zugang?.name.orEmpty()}, ${if (eltern) "Eltern" else "Kind"}",
+                fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color.White,
+            )
+            TextButton(onClick = vm::oeffneFamilie) { Text("👨‍👩‍👧 Familie verwalten", color = Gelb, fontWeight = FontWeight.Bold) }
         }
 
         if (!eltern) FrageFormular(vm)
@@ -128,47 +122,24 @@ fun JokerScreen(vm: AppViewModel) {
 
         vm.jokerFragen.forEach { frage -> FrageKarte(vm, frage, eltern) }
 
-        TextButton(onClick = vm::vergissFamiliencode) { Text("Anderen Familiencode benutzen", color = TextSanft) }
         Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun CodeEingabe(vm: AppViewModel) {
-    var eingabe by remember { mutableStateOf("") }
-    var fehler by remember { mutableStateOf(false) }
+private fun OhneFamilie(vm: AppViewModel) {
+    val z = vm.familie.zugang
     Text(
-        "Hier fragst du deine Eltern um Hilfe. Dafür braucht ihr einen gemeinsamen Familiencode.",
+        when {
+            z == null -> "Hier fragst du deine Eltern um Hilfe. Dafür muss dieses Gerät zur Familie gehören."
+            z.wartet -> "Dieses Gerät wartet noch darauf, dass Mama oder Papa es erlaubt. Danach geht es hier weiter."
+            else -> "Dieses Gerät gehört gerade nicht zur Familie."
+        },
         color = TextSanft, fontSize = 16.sp,
     )
-    Button(onClick = vm::neuerFamiliencode, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-        Text("Neuen Familiencode erstellen", fontWeight = FontWeight.Bold)
+    Button(onClick = vm::oeffneFamilie, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+        Text(if (z == null) "Familie verbinden" else "Familie öffnen", fontWeight = FontWeight.Bold)
     }
-    val ctx = androidx.compose.ui.platform.LocalContext.current
-    OutlinedButton(
-        onClick = {
-            qrScannen(ctx, { roh ->
-                val gelesen = de.cemaras.yem1n.logik.QrPaket.lese(roh)
-                fehler = gelesen == null || gelesen.first != "familie" || !vm.setzeFamiliencode(gelesen.second)
-            }, { fehler = true })
-        },
-        modifier = Modifier.fillMaxWidth().height(52.dp),
-    ) { Text("📷 QR-Code scannen", color = Color.White, fontWeight = FontWeight.Bold) }
-    Text("Oder gib den Code ein, den du schon hast:", color = TextSanft, fontSize = 14.sp)
-    OutlinedTextField(
-        value = eingabe,
-        onValueChange = { eingabe = it.take(12); fehler = false },
-        label = { Text("Familiencode") },
-        placeholder = { Text("XXXXX-XXXXX") },
-        singleLine = true,
-        isError = fehler,
-        supportingText = { if (fehler) Text("Der Code hat 10 Zeichen aus Buchstaben und Zahlen.") },
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Button(
-        onClick = { fehler = !vm.setzeFamiliencode(eingabe) },
-        modifier = Modifier.fillMaxWidth().height(52.dp),
-    ) { Text("Code benutzen", fontWeight = FontWeight.Bold) }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -286,7 +257,7 @@ private fun FrageKarte(vm: AppViewModel, frage: JokerFrage, eltern: Boolean) {
 }
 
 @Composable
-private fun EinwilligungKarte(vm: AppViewModel) {
+internal fun EinwilligungKarte(vm: AppViewModel) {
     var haken by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Text("Bevor es losgeht", fontSize = 26.sp, fontWeight = FontWeight.Black, color = Gelb)
     Text(

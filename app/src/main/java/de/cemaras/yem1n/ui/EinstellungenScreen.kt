@@ -60,6 +60,8 @@ fun EinstellungenScreen(vm: AppViewModel) {
             gruppen.firstOrNull { it.id == seite }?.let { "${it.symbol} ${it.titel}" } ?: "Einstellungen",
             fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White,
         )
+        // Die Familien-Einstellungen (Einwilligung widerrufen, Klassencode) sind nur für Eltern: mit PIN, sobald das Gerät zur Familie gehört.
+        if (seite == "familie" && !PinTor(vm)) return@Column
         if (seite == null) {
             Spacer(Modifier.height(12.dp))
             for (g in gruppen) {
@@ -226,15 +228,22 @@ fun EinstellungenScreen(vm: AppViewModel) {
             if (!vm.einwilligungOffen) {
                 OutlinedButton(onClick = vm::einwilligungWiderrufen) { Text("Einwilligung widerrufen") }
             }
-            val familie = vm.jokerCode
+            val z = vm.familie.zugang
             Text(
-                if (familie.isEmpty()) "Noch kein Familiencode. Ohne ihn läuft die App nur auf diesem Gerät."
-                else "Familiencode: $familie",
+                when {
+                    z == null -> "Noch keine Familie verbunden. Ohne sie läuft die App nur auf diesem Gerät."
+                    z.wartet -> "${z.name}: wartet auf die Freigabe der Eltern."
+                    !z.aktiv -> "Dieses Gerät wurde nicht erlaubt."
+                    else -> "Verbunden als ${z.name} (${if (z.istEltern) "Eltern" else "Kind"})."
+                },
                 color = Color.White, fontSize = 16.sp,
             )
-            Button(onClick = vm::oeffneJoker) { Text(if (familie.isEmpty()) "Familiencode einrichten" else "Joker und Ergebnisse öffnen") }
+            Button(onClick = vm::oeffneFamilie) { Text(if (z == null) "Familie einrichten" else "Familie verwalten") }
+            if (vm.familieBereit) {
+                OutlinedButton(onClick = vm::oeffneJoker) { Text("Joker und Ergebnisse öffnen", color = Color.White) }
+            }
             Text(
-                "Für Joker und Ergebnisse zwischen den Geräten der Familie. Dafür ist keine Apple-ID nötig.",
+                "Für Joker, Duelle und Ergebnisse zwischen den Geräten der Familie. Neue Geräte kommen nur mit QR-Code dazu und müssen von den Eltern erlaubt werden. Dafür ist keine Apple-ID nötig.",
                 color = TextSanft, fontSize = 13.sp,
             )
 
@@ -400,7 +409,7 @@ fun EinstellungenScreen(vm: AppViewModel) {
             Abschnitt("Ergebnisse")
             Text("Noch nicht gesendet: ${vm.fortschritt.offeneErgebnisse.size}", color = Color.White, fontSize = 16.sp)
             Text(
-                "Ergebnisse gehen automatisch an die Eltern, sobald das Gerät online ist und ein Familiencode eingetragen ist.",
+                "Ergebnisse gehen automatisch an die Eltern, sobald das Gerät online ist und zur Familie gehört.",
                 color = TextSanft, fontSize = 13.sp,
             )
             if (vm.fortschritt.offeneErgebnisse.isNotEmpty()) {
@@ -448,7 +457,7 @@ private val gruppen = listOf(
     EinstellGruppe("bereiche", "🧩", "Bereiche", "Vorschule und Sprachen ein- oder ausblenden"),
     EinstellGruppe("spiele", "🎮", "Spiele und Haustier", "Spielzeit, Töne, Erinnerung"),
     EinstellGruppe("stimmen", "🔊", "Vorlesen und Stimmen", "Sprachausgabe und natürliche Stimmen"),
-    EinstellGruppe("familie", "☁️", "Familie und Cloud", "Einwilligung, Familiencode, Klassencode"),
+    EinstellGruppe("familie", "☁️", "Familie und Cloud", "Einwilligung, Familie, Klassencode"),
     EinstellGruppe("info", "ℹ️", "Info und Arbeiten", "Anleitung, Datenschutz, Arbeiten löschen"),
     EinstellGruppe("technik", "🛠", "Technik", "Verbindung testen, Senden, Version"),
 )

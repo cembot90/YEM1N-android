@@ -72,7 +72,7 @@ object Mitteilungen {
 class FcmDienst : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         Mitteilungen.speichereToken(this, token)
-        // Gemeldet wird beim nächsten Start der App, dann kennt sie Familiencode und Rolle.
+        // Gemeldet wird beim nächsten Start der App, dann kennt sie Familie und Rolle.
         Mitteilungen.merkeGemeldet(this, "")
     }
 

@@ -310,8 +310,8 @@ private fun OlliBlase(vm: AppViewModel, tier: Haustier, muenzen: Int, heute: Lon
     val einfuehrung = remember(tier.name, tier.stufe == HaustierStufe.EI) { Eule.einfuehrung(tier) }
     var schritt by remember { mutableStateOf(if (vm.fortschritt.euleEinfuehrung) -1 else 0) }
     var nummer by remember { mutableStateOf(0) }
-    val tipps = remember(tier, muenzen, heute, vm.fortschritt.familiencode, schlaeft) {
-        Eule.tipps(tier, muenzen, vm.fortschritt.familiencode.isNotEmpty(), heute, schlaeft)
+    val tipps = remember(tier, muenzen, heute, vm.familie.aktiv, schlaeft) {
+        Eule.tipps(tier, muenzen, vm.familie.aktiv, heute, schlaeft)
     }
     val text = if (schritt >= 0) einfuehrung[schritt] else tipps[Math.floorMod(nummer, tipps.size)]
     Column(horizontalAlignment = Alignment.CenterHorizontally) {

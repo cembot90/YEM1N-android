@@ -189,6 +189,7 @@ private fun FrageFormular(vm: AppViewModel) {
             value = text,
             onValueChange = { text = it.take(500) },
             label = { Text("Was verstehst du nicht?") },
+            supportingText = { Text("Schreib hier keine Nachnamen, Adressen oder Telefonnummern.") },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
         )

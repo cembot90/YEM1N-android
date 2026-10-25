@@ -70,6 +70,9 @@
         </receiver>
         <receiver android:name=".speicher.ErinnerungEmpfaenger" android:exported="false" />
 
+        <!-- Die Anmeldung bei Google für Mitteilungen startet erst nach der Einwilligung der Eltern (Mitteilungen.einschalten) -->
+        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+
         <!-- Mitteilungen der Familie über FCM (Google dient nur als Postbote) -->
         <service android:name=".speicher.FcmDienst" android:exported="false">
             <intent-filter>

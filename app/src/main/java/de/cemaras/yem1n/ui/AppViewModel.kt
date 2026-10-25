@@ -449,6 +449,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** Widerruf: Der Familiencode wird vergessen, die App sendet nichts mehr. */
     fun einwilligungWiderrufen() {
         behalte(fortschritt.copy(einwilligung = 0, einwilligungDatum = 0, familiencode = ""))
+        Mitteilungen.ausschalten(getApplication<android.app.Application>())
         jokerFragen = emptyList()
         jokerMeldung = ""
     }
@@ -648,6 +649,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (code.isEmpty()) return
         val app = getApplication<android.app.Application>()
         try {
+            Mitteilungen.einschalten()
             com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                 if (token.isNullOrEmpty()) return@addOnSuccessListener
                 Mitteilungen.speichereToken(app, token)

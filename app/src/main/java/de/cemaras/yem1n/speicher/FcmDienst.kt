@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.cemaras.yem1n.MainActivity
@@ -44,6 +45,24 @@ object Mitteilungen {
 
     fun token(ctx: Context): String = prefs(ctx).getString("token", "").orEmpty()
     fun speichereToken(ctx: Context, t: String) = prefs(ctx).edit().putString("token", t).apply()
+
+    /**
+     * Die Push-Kennung von Google gibt es erst nach der Einwilligung der Eltern (im Manifest ist die automatische
+     * Anmeldung bei Google aus). Vorher hat die App keinen Kontakt zu Google.
+     */
+    fun einschalten() {
+        try { FirebaseMessaging.getInstance().isAutoInitEnabled = true } catch (e: Exception) { /* ohne Google-Dienste geht es auch */ }
+    }
+
+    /** Widerruf: Die Push-Kennung wird bei Google gelöscht und nicht mehr neu angelegt. */
+    fun ausschalten(ctx: Context) {
+        try {
+            val fm = FirebaseMessaging.getInstance()
+            fm.isAutoInitEnabled = false
+            fm.deleteToken()
+        } catch (e: Exception) { /* ohne Google-Dienste gibt es nichts zu löschen */ }
+        prefs(ctx).edit().clear().apply()
+    }
 
     /** Was dem Server zuletzt gemeldet wurde (Code, Rolle, Kennung), damit nicht bei jedem Start neu gemeldet wird. */
     fun gemeldet(ctx: Context): String = prefs(ctx).getString("gemeldet", "").orEmpty()

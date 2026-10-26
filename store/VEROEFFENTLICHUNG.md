@@ -6,8 +6,10 @@ Stand: Entwicklung, noch nichts auf einem Gerät getestet.
 ## 1. Vorher (Cem)
 
 1. Play-Konto anlegen (einmalig 25 $). Das Konto früh anlegen, weil vor der ersten Veröffentlichung ein
-   geschlossener Test mit Testern laufen muss. Die genaue Mindestzahl und Dauer in der Play Console nachlesen,
-   sie ändern sich.
+   geschlossener Test mit Testern laufen muss. Bei privaten Konten, die nach dem 13.11.2023 angelegt wurden, verlangt
+   Google mindestens 12 Tester, die den Test 14 Tage lang ohne Unterbrechung mitmachen
+   ([Google-Hilfe](https://support.google.com/googleplay/android-developer/answer/14151465)). Stand 26.10.2026, bitte vor dem Start
+   in der Play Console gegenprüfen. Ein Organisationskonto ist davon nicht betroffen, braucht aber andere Nachweise.
 2. Upload-Schlüssel erzeugen (Android Studio: Build, Generate Signed App Bundle, neuer Keystore). Den Keystore
    und das Passwort sichern. Ohne sie lässt sich die App nicht mehr aktualisieren.
 3. App-Bundle bauen (`.aab`), Play App Signing aktivieren (Standard).
@@ -18,10 +20,20 @@ Stand: Entwicklung, noch nichts auf einem Gerät getestet.
 
 - Die App richtet sich an Kinder. In der Play Console "Zielgruppe: Kinder" wählen und die Richtlinie für
   Familien beachten (keine Werbung, keine Tracker, keine Konten, keine Weitergabe von Daten).
-- Altersgruppe: 5 bis 8 Jahre (Vorschule bis Klasse 3). Eltern sind die Käufer und Verwalter (Eltern-Schalter
-  in den Einstellungen).
+- Altersgruppe: Vorschule bis Klasse 4, also etwa 5 bis 10 Jahre. Welche Gruppen in der Play Console angekreuzt werden, ist
+  eine Entscheidung (siehe Abschnitt 7). Eltern sind die Verwalter (Eltern-PIN und Eltern-Schalter in den Einstellungen).
 - Inhaltseinstufung (IARC-Fragebogen): keine Gewalt, keine Werbung, keine Käufe, keine Nutzerinhalte,
-  kein Standort, kein Chat.
+  kein Standort. Joker (Frage und Antwort) gehen nur innerhalb der Familie hin und her, es gibt keinen Chat mit Fremden.
+- Googles Familienrichtlinie ([Text](https://support.google.com/googleplay/android-developer/answer/9893335)), Stand 26.10.2026,
+  und wie die App sie erfüllt:
+  - Keine Werbe-ID: `AD_ID` ist im Manifest entfernt (`tools:node="remove"`). Keine Standort-Berechtigung, keine Telefon-Kennungen.
+  - "Erwachsenen-Aktion" für Elternfunktionen: die Eltern-PIN (Google nennt eine PIN ausdrücklich als Beispiel).
+  - Datenschutzerklärung beschreibt die Datenverarbeitung (GitHub-Pages-Seite, Abschnitt 3a für Android).
+  - Reine Kinder-Apps dürfen nur Bibliotheken nutzen, die für Kinderdienste zugelassen sind. Die App nutzt Firebase Cloud Messaging
+    (nur als Postbote, Start erst nach Einwilligung), ML Kit (Handschrift, Gemini Nano auf dem Gerät) und den Code-Scanner der
+    Play-Dienste. Die Richtlinienseite nennt diese Bibliotheken nicht einzeln. Bitte in der Play Console beim Zielgruppen-Fragebogen
+    und im SDK-Index (Eintrag je Bibliothek) nachsehen, ob eine Warnung erscheint. Kommt eine, schreibe mir die Meldung.
+  - Eine WebView darf nicht nur eine fremde Webseite zeigen: Die Anleitung ist die eigene Seite (GitHub Pages) mit Offline-Kurzfassung.
 
 ## 3. Datenschutz und Data Safety
 
@@ -49,7 +61,7 @@ Data-Safety-Antworten für Google Play:
 Löschung: Die Eltern löschen die ganze Familie mit allen Einträgen in der App (Familie > Ganze Familie löschen), ein Kind-Gerät kann
 beim Verlassen seine Einträge mitnehmen. Der Dienst löscht Einträge nach ihrer Frist selbst (höchstens 365 Tage, Duelle 14 Tage, Nachschub 90 Tage),
 eine unbenutzte Familie nach 365 Tagen ohne Nutzung, eine nie benutzte nach 30 Tagen. Alte Datensätze im CloudKit (aus der Zeit mit Familiencode)
-werden beim Abschalten des alten Weges gelöscht. Für Play ist die Löschung ohne Konto damit in der App möglich (Data-Safety-Angabe "Löschung anfordern": in der App und per E-Mail).
+werden beim Abschalten des alten Weges gelöscht (Ablauf in `cloud/ABSCHALTEN-V1.md`). Für Play ist die Löschung ohne Konto damit in der App möglich (Data-Safety-Angabe "Löschung anfordern": in der App und per E-Mail).
 
 Offene Prüfungen vor der Veröffentlichung:
 
@@ -115,8 +127,9 @@ Stichworte: Lernen, Grundschule, Mathe, Deutsch, Vorschule, Einmaleins, Hausaufg
 
 ## 6. Noch zu tun im Code und auf der Webseite
 
-- `docs/index.html` im iOS-Repo (`cembot90/YEM1N`): Datenschutz um Android ergänzen
-  (kein Konto, nur Gerätespeicher, Stimmen-Download von GitHub, Mitteilung nur lokal). Das macht Claude im iOS-Repo.
+- `docs/index.html` im iOS-Repo (`cembot90/YEM1N`): Der Datenschutz-Text mit Android-Abschnitt 3a und dem Familien-Dienst steht auf dem
+  Zweig `entwicklung`. Die öffentliche Seite (GitHub Pages) zeigt `main`, also noch den alten Stand. Sie wird erst aktuell, wenn die
+  iPhone-Umstellung nach `main` kommt. Bis dahin passt die Datenschutz-URL nicht zu dieser App und darf nicht im Store-Eintrag stehen.
 - Release-Bau: `app/proguard-rules.pro` hat Keep-Regeln für Sprachausgabe (sherpa-onnx), Unterschriften (eddsa) und
   kotlinx.serialization und ist im Release-Typ eingetragen. **Vor dem Hochladen einmal testen** (nur Cem kann das):
   Android Studio > Build > Generate Signed App Bundle, dann die App aus dem Bundle auf einem echten Gerät starten
@@ -126,3 +139,25 @@ Stichworte: Lernen, Grundschule, Mathe, Deutsch, Vorschule, Einmaleins, Hausaufg
 - Versionsnummer: `versionCode` bei jedem Upload um 1 erhöhen.
 - Lizenzen: Das Projekt steht unter GPL-3.0 (`LICENSE`, `THIRD-PARTY.md`). Der Quellcode ist im öffentlichen
   Repo, im Store-Eintrag den Link nennen.
+
+## 7. Entscheidungen für Cem
+
+Hier muss ein Mensch entscheiden. Claude kann es nicht für dich tun und gibt keinen Rechtsrat.
+
+1. **Altersgruppen in der Play Console.** Google erlaubt mehrere Gruppen nur, wenn die App für alle gedacht und geeignet ist.
+   Apps für Babys, Kleinkinder und Vorschulkinder sollen nur "Bis 5" wählen. YEM1N hat Inhalte für 5 bis 6 Jahre (Vorschule) und für
+   6 bis 10 Jahre (Klasse 1 bis 4). Ich würde alle drei Gruppen ankreuzen (Bis 5, 6 bis 8, 9 bis 12), weil es für jede Inhalte
+   gibt. Google kann die Angabe prüfen. Wer die Vorschule lieber nur als Teil für ältere Kinder sieht, wählt nur 6 bis 8 und 9 bis 12.
+   Die technischen Regeln (keine Werbung, keine Kennungen, Eltern-PIN) erfüllt die App in beiden Fällen.
+2. **Anbieterstatus (EU-Digitaldienstegesetz).** Apple und Google fragen, ob du als Händler (Trader) auftrittst. Bei "Ja" zeigt der Store
+   Anschrift, Telefon und E-Mail öffentlich in den EU-Ländern, bei "Nein" steht dort ein Hinweis, dass Verbraucherrechte aus dem
+   Vertrag mit dir nicht gelten. Apple sagt selbst, dass es das nicht für dich entscheiden kann
+   ([Apple-Hilfe](https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements)).
+   Kostenlos, ohne Werbung und ohne Käufe spricht eher für "kein Händler", die Einschätzung ist aber deine (am besten kurz mit einer
+   Rechtsberatung klären). Dieselbe Angabe muss in beiden Stores zusammenpassen.
+3. **Kontaktadresse im Store.** Die E-Mail-Adresse im Store-Eintrag und in der Datenschutzerklärung ist öffentlich sichtbar. Bei Bedarf
+   eine eigene Adresse nur für YEM1N einrichten und in `daten/InfoTexte.kt`, der Datenschutzseite und der Play Console gleich eintragen.
+4. **Cloudflare und Google als Dienstleister.** Auftragsverarbeitung prüfen und im Verzeichnis der Verarbeitungstätigkeiten eintragen
+   (Cloudflare für den Familien-Dienst, Google für FCM). Die EU-Speicherung gilt erst, wenn `lokal-pruefen.mjs --eu` grün war.
+5. **Zeitpunkt.** Erst veröffentlichen, wenn beide Apps auf Protokoll 2 auf echten Geräten gelaufen sind (`cloud/ABSCHALTEN-V1.md`).
+   Der geschlossene Test mit mindestens 12 Testern über 14 Tage kann vorher starten.

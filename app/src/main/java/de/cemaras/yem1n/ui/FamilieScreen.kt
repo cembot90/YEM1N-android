@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -204,6 +205,8 @@ private fun Verbunden(vm: AppViewModel, z: FamilienZugang) {
     val eltern = z.istEltern
     var verlassenOffen by remember { mutableStateOf(false) }
     var loeschenOffen by remember { mutableStateOf(false) }
+    var kopiert by remember { mutableStateOf(false) }
+    val kontext = LocalContext.current
 
     GlasKarte {
         Text("Dieses Gerät", color = TextSanft, fontSize = 13.sp)
@@ -232,6 +235,17 @@ private fun Verbunden(vm: AppViewModel, z: FamilienZugang) {
             Text("Dieses Gerät aus der Familie nehmen", color = Color.White)
         }
         if (eltern) {
+            OutlinedButton(onClick = {
+                val zwischen = kontext.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                zwischen.setPrimaryClip(android.content.ClipData.newPlainText("Familien-Kennung", z.familie))
+                kopiert = true
+            }) {
+                Text(if (kopiert) "Kennung kopiert" else "Familien-Kennung kopieren", color = Color.White)
+            }
+            Text(
+                "Die Kennung brauchst du nur, wenn du mir wegen einer Löschung schreibst und kein Eltern-Gerät mehr hast. Gib sie sonst niemandem.",
+                color = TextSanft, fontSize = 13.sp,
+            )
             OutlinedButton(onClick = { loeschenOffen = true }, enabled = !fam.beschaeftigt) {
                 Text("Ganze Familie löschen", color = Koralle)
             }

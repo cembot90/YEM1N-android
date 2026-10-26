@@ -9,8 +9,12 @@ preview_urls = false
 crons = ["* * * * *"]
 
 # Protokolle im Cloudflare-Dashboard (Reiter Observability) und für "wrangler tail".
+# Die automatischen Protokolle zu jedem Aufruf (mit Adresse und Pfad) sind aus, im Protokoll
+# stehen nur die Fehlermeldungen, die der Code selbst schreibt (ohne Namen und ohne Inhalte).
 [observability]
 enabled = true
+[observability.logs]
+invocation_logs = false
 
 [vars]
 CK_CONTAINER = "iCloud.de.cemaras.yem1n"

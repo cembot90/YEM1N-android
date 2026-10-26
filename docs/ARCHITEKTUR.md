@@ -59,14 +59,15 @@ Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familienc
 - Neue Geräte kommen nur per QR-Code und müssen von einem Eltern-Gerät bestätigt werden, auch Kinder-Geräte.
 - Mitteilungen sind neutral (kein Name, kein Inhalt). iPhone über APNs direkt aus dem Worker, Android über FCM.
 - Tests: `server/test/v2*.test.js` (Kern mit echtem SQLite über `node:sqlite`, Router, Rechte, Fristen, Mitteilungen, Testvektoren), auf Android `FamilienKryptoTest`, `FamilienClientTest`, `FamilienProtokollTest`, `ElternPinTest`.
-- Stand: Worker und Android-Client fertig. Das iPhone-Gegenstück fehlt noch. Solange läuft `/v1` für iOS weiter, danach wird es abgeschaltet.
+- Stand: Worker und Android-Client fertig. Das iPhone-Gegenstück steht auf dem Zweig `entwicklung` des iPhone-Repos (baut und besteht die Tests auf GitHub, noch nicht auf einem Gerät geprüft). Solange läuft `/v1` für iOS weiter, danach wird es abgeschaltet.
+- Betriebsprotokolle: Der Worker schreibt keine automatischen Protokolle zu jedem Aufruf (`invocation_logs = false` in `server/wrangler.toml`), im Protokoll stehen nur Fehlermeldungen des Codes ohne Namen und Inhalte. Die Adresse nutzt er nur für die Bremse gegen Missbrauch.
 
 ## 5. Datenschutz
 
 - Einwilligung der Eltern vor der Familie (`logik/Einwilligung.kt`, Version 2), widerrufbar. Ohne sie: keine Netzzugriffe der Familienfunktionen.
 - Gesendet wird nur: Geräte-Name, öffentlicher Schlüssel und Push-Kennung des Geräts, Rundenergebnisse (Fach, Übung, Sterne, richtig/falsch), Joker-Texte, Duelle. Kein Klarname.
 - Mitteilungen enthalten weder Namen noch Inhalte, nur feste Sätze.
-- Löschen: Eltern können die ganze Familie löschen, ein Kinder-Gerät kann beim Verlassen seine Einträge mitnehmen. Fristen je Art stehen in `cloud/PROTOKOLL-V2.md`.
+- Löschen: Eltern können die ganze Familie löschen (die Familien-Kennung lässt sich für Löschwünsche per E-Mail kopieren), ein Kinder-Gerät kann beim Verlassen seine Einträge mitnehmen. Fristen je Art stehen in `cloud/PROTOKOLL-V2.md`.
 - Kein Tracking, keine Werbung, kein Firebase außer als Postbote.
 - Natürliche Stimmen werden einmal geladen (GitHub-Release `stimmen-1`, SHA-256 fest im Code) und laufen danach offline.
 

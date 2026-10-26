@@ -4,7 +4,7 @@ import { generateKeyPairSync, createVerify } from "node:crypto";
 import { derAusRoh, nachricht, schluesselLaden, signiere, datumText, pfad, anfrage } from "../src/cloudkit.js";
 import { pruefeCode, pruefeGeraet, pruefeSenden } from "../src/regeln.js";
 import { neueBremse } from "../src/limit.js";
-import { behandle, pruefeNeues } from "../src/index.js";
+import { behandle, pruefeNeues, v1Aus } from "../src/index.js";
 
 const CODE = "ABCDE-23456";
 
@@ -225,4 +225,30 @@ test("Stand der Mitteilungen läuft nach 90 Tagen ab", async () => {
   const staende = gespeichert.filter((x) => x.k.startsWith("stand:"));
   assert.ok(staende.length > 0);
   for (const x of staende) assert.equal(x.opt.expirationTtl, 90 * 24 * 3600);
+});
+
+test("Alter Familienweg: mit V1_AUS antworten Senden und Gerät mit 410, Klassen und Ping bleiben", async () => {
+  const env = { ...(await umgebung()), V1_AUS: "1" };
+  let aufgerufen = false;
+  const holen = async () => { aufgerufen = true; return new Response("{}"); };
+  const senden = await behandle(post("/v1/senden", { code: CODE, art: "frage", daten: { kind: "Y", text: "x" } }, "21.1.1.1"), env, holen);
+  assert.equal(senden.status, 410);
+  const geraet = await behandle(post("/v1/geraet", { code: CODE, rolle: "kind", token: "t".repeat(40) }, "21.1.1.2"), env, holen);
+  assert.equal(geraet.status, 410);
+  assert.equal(aufgerufen, false);
+  const ping = await behandle(new Request("https://x.test/v1/ping"), env, holen);
+  assert.equal(ping.status, 200);
+  assert.equal((await ping.json()).familienWeg, "aus");
+  // Die Klassen laufen weiter (hier fehlt nur der Inhalt, nicht der Weg)
+  const klasse = await behandle(post("/v1/klasse", { art: "schluessel" }, "21.1.1.3"), env, holen);
+  assert.equal(klasse.status, 400);
+});
+
+test("Alter Familienweg: ohne V1_AUS bleibt alles wie bisher", async () => {
+  const env = await umgebung();
+  assert.equal(v1Aus(env), false);
+  assert.equal(v1Aus({ V1_AUS: "0" }), false);
+  assert.equal(v1Aus({ V1_AUS: "1" }), true);
+  const ping = await behandle(new Request("https://x.test/v1/ping"), env, async () => new Response("{}"));
+  assert.equal((await ping.json()).familienWeg, "an");
 });

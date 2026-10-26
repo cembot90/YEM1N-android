@@ -21,6 +21,9 @@ CK_CONTAINER = "iCloud.de.cemaras.yem1n"
 CK_UMGEBUNG = "production"
 # Die Bundle-ID der iPhone-App, für Mitteilungen über Apple (APNs).
 APNS_TOPIC = "de.cemaras.yem1n"
+# Alter Familienweg (Familiencode, CloudKit): erst abschalten, wenn beide Apps auf Protokoll 2 laufen.
+# Dann die nächste Zeile einkommentieren und neu veröffentlichen, siehe cloud/ABSCHALTEN-V1.md.
+# V1_AUS = "1"
 
 # Eine Ablage für die Geräte (Familiencode, Rolle, Push-Kennung).
 # Anlegen mit: npx wrangler kv namespace create GERAETE, dann die ausgegebene id hier eintragen.

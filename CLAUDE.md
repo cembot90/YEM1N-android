@@ -97,8 +97,9 @@ Dokumentation pflegen: bei jeder Funktionsänderung `CLAUDE.md`, `docs/ARCHITEKT
 Entscheidung 25.10.2026 (Cem): ein Cloudflare-Fach je Familie in der EU, Schlüssel je Gerät, neue Geräte nur per QR-Code mit Freigabe durch ein Eltern-Gerät (auch Kinder). Grund: Der Familiencode war Passwort und Suchschlüssel zugleich in einer öffentlich lesbaren Datenbank.
 Stand 25.10.2026: Worker fertig und getestet (`server/src/v2/`, `server/test/v2*.test.js`, Beschreibung `cloud/PROTOKOLL-V2.md`, Prüfwerte `cloud/testvektoren-v2.json`). Android-Client fertig (Keystore, QR-Koppeln, Freigabe, Geräteliste, Eltern-PIN, Familie verlassen und löschen, neutrale Mitteilungen), bisher nur auf `entwicklung`, noch nicht auf einem Gerät getestet.
 Cem muss `npx wrangler@latest deploy` ausführen und später die APNs-Geheimnisse setzen (`server/EINRICHTEN.md`, Abschnitt 3), danach die EU-Jurisdiktion mit `server/scripts/lokal-pruefen.mjs --eu` prüfen.
-Als Nächstes: iPhone-Client (Secure Enclave, gleiche Testvektoren), dann `/v1` für Familien abschalten und CloudKit-Familiendaten löschen. Vor dem Umbau der iPhone-App darf keine der beiden Apps öffentlich erscheinen (Play-Test mit geschlossenem Kreis ist ok).
+Stand 26.10.2026: Der iPhone-Client (Secure Enclave, gleiche Testvektoren) ist im Repo `cembot90/yem1n` auf `entwicklung` fertig, Tests auf GitHub grün, aber noch nicht auf einem Gerät ausprobiert. Als Nächstes: Cem testet beide Apps auf echten Geräten, dann `/v1` für Familien abschalten (`cloud/ABSCHALTEN-V1.md`) und CloudKit-Familiendaten löschen. Bis dahin darf keine der beiden Apps öffentlich erscheinen (Play-Test und TestFlight mit geschlossenem Kreis sind ok).
 Beim Ändern von `server/src/v2/typen.js` die Tabelle in `cloud/PROTOKOLL-V2.md` mitziehen.
+Phase 5: Der alte Familienweg (`/v1/senden`, `/v1/geraet`, Minutenlauf für CloudKit) lässt sich mit `V1_AUS = "1"` in `server/wrangler.toml` abschalten, ohne Codeänderung. Ablauf und Aufräumen (KV-Skript `server/scripts/alte-ablage-leeren.mjs`, CloudKit-Dashboard) stehen in `cloud/ABSCHALTEN-V1.md`.
 
 ## Designüberarbeitung (begonnen)
 

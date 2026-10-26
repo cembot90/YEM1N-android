@@ -51,7 +51,13 @@ Der alte Weg (`/v1/...`) bleibt, bis beide Apps umgestellt sind.
 6. Vor der Veröffentlichung auf den Plan "Workers Paid" (5 US-Dollar im Monat) wechseln. Der kostenlose Plan reicht zum Testen, aber nicht für viele Familien.
    Schreibvorgänge je Familie sind dort das Nadelöhr, deshalb schreibt der Dienst sparsam.
 
+## 4. Später: den alten Familienweg abschalten
+
+Wenn beide Apps (Android und iPhone) mit Protokoll 2 auf den Geräten der Familie laufen, schaltest du den alten Weg ab:
+`V1_AUS = "1"` in `wrangler.toml` einkommentieren und `npx wrangler@latest deploy`. Die Schritte im Einzelnen (alte Ablage leeren,
+CloudKit aufräumen, prüfen) stehen in `cloud/ABSCHALTEN-V1.md`. Klassencodes laufen danach weiter.
+
 ## Offen (macht Claude danach)
 
-- Android-App und iPhone-App auf Protokoll 2 umstellen (Schlüssel im Gerät, Koppeln per QR-Code, Freigabe durch die Eltern).
-- Danach den alten Weg abschalten und die Familiendaten in CloudKit löschen.
+- Beide Apps auf Protokoll 2 sind umgestellt. Offen ist nur noch dein Test auf echten Geräten.
+- Danach den alten Weg abschalten (Abschnitt 4) und die Familiendaten in CloudKit löschen.

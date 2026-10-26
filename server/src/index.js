@@ -41,11 +41,23 @@ export function ersterFehler(text) {
   return null;
 }
 
+/**
+ * Der alte Weg für Familien (Familiencode, CloudKit) ist mit "V1_AUS" = "1" abgeschaltet.
+ * Das geht ohne neuen Code: Wert in wrangler.toml setzen und neu veröffentlichen.
+ * Die Klassen (/v1/klasse) und /v1/ping bleiben.
+ */
+export function v1Aus(env) {
+  return String((env && env.V1_AUS) || "") === "1";
+}
+
 export async function behandle(request, env, holen = fetch) {
   const url = new URL(request.url);
   if (url.pathname.startsWith("/v2/")) return v2Behandle(request, env);
-  if (url.pathname === "/v1/ping") return antwort(200, { ok: true });
+  if (url.pathname === "/v1/ping") return antwort(200, { ok: true, familienWeg: v1Aus(env) ? "aus" : "an" });
   if (request.method !== "POST") return antwort(405, { fehler: "Nur POST" });
+  if (v1Aus(env) && (url.pathname === "/v1/senden" || url.pathname === "/v1/geraet")) {
+    return antwort(410, { fehler: "Dieser Weg gibt es nicht mehr. Bitte die App aktualisieren." });
+  }
 
   const ip = request.headers.get("cf-connecting-ip") || "unbekannt";
   if (!proGeraet(ip)) return antwort(429, { fehler: "Zu viele Anfragen, bitte kurz warten" });
@@ -200,6 +212,8 @@ export async function raeumeAuf(env, holen = fetch, jetzt = Date.now()) {
 export default {
   fetch: (request, env) => behandle(request, env),
   scheduled: (event, env, ctx) => {
+    // Ist der alte Weg aus, gibt es für die Familien nichts mehr nachzuschauen (Protokoll 2 schickt sofort).
+    if (v1Aus(env)) return;
     ctx.waitUntil(pruefeNeues(env).catch((e) => console.log("pruefeNeues", String(e))));
     if (istAufraeumzeit(event.scheduledTime)) ctx.waitUntil(raeumeAuf(env).catch((e) => console.log("raeumeAuf", String(e))));
   },

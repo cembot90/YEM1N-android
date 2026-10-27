@@ -38,13 +38,13 @@ jobs:
             [ -f "$f" ] || continue
             ausr=$(readelf -lW "$f" | awk '/LOAD/{print $NF}' | sort -u | tr '\n' ' ')
             ok=1; for a in $ausr; do [ $((a)) -ge 16384 ] || ok=0; done
-            if [ $ok = 0 ]; then schlecht=1; echo "::warning::Nicht auf 16 KB ausgerichtet: $f (Ausrichtung: $ausr)"; fi
+            if [ $ok = 0 ]; then schlecht=1; echo "::error::Nicht auf 16 KB ausgerichtet: $f (Ausrichtung: $ausr)"; fi
           done
           zip=$(ls -d "$ANDROID_HOME"/build-tools/*/zipalign 2>/dev/null | sort -V | tail -1)
           if [ -n "$zip" ]; then
             "$zip" -c -P 16 -v 4 "$apk" | grep -i "BAD" | head -10 | while IFS= read -r z; do echo "::warning::zipalign: $z"; done
           fi
-          [ $schlecht = 0 ] && echo "Alle Bibliotheken sind auf 16 KB ausgerichtet."
+          if [ $schlecht = 0 ]; then echo "Alle Bibliotheken sind auf 16 KB ausgerichtet."; else exit 1; fi
       - name: Fehler als Hinweise ausgeben
         if: failure()
         run: |

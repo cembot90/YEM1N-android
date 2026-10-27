@@ -61,7 +61,7 @@ Data-Safety-Antworten für Google Play:
 Löschung: Die Eltern löschen die ganze Familie mit allen Einträgen in der App (Familie > Ganze Familie löschen), ein Kind-Gerät kann
 beim Verlassen seine Einträge mitnehmen. Der Dienst löscht Einträge nach ihrer Frist selbst (höchstens 365 Tage, Duelle 14 Tage, Nachschub 90 Tage),
 eine unbenutzte Familie nach 365 Tagen ohne Nutzung, eine nie benutzte nach 30 Tagen. Alte Datensätze im CloudKit (aus der Zeit mit Familiencode)
-werden beim Abschalten des alten Weges gelöscht (Ablauf in `cloud/ABSCHALTEN-V1.md`). Für Play ist die Löschung ohne Konto damit in der App möglich (Data-Safety-Angabe "Löschung anfordern": in der App und per E-Mail).
+sind am 28.10.2026 gelöscht worden (Ablauf in `cloud/ABSCHALTEN-V1.md`). Für Play ist die Löschung ohne Konto damit in der App möglich (Data-Safety-Angabe "Löschung anfordern": in der App und per E-Mail).
 
 Offene Prüfungen vor der Veröffentlichung:
 

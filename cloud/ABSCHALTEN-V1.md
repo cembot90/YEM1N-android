@@ -1,5 +1,7 @@
 # Alten Familienweg abschalten (Phase 5)
 
+Erledigt: `V1_AUS` am 27.10.2026, KV-Ablage geleert am 27.10.2026, CloudKit-Dashboard aufgeräumt am 28.10.2026. In CloudKit lassen sich einige Typen nur über einen Filter auf `familienCode` abfragen (Filter `familienCode ≠ ZZZ-GIBTS-NICHT`), weil `recordName` dort nicht abfragbar ist.
+
 Der alte Weg (Familiencode, CloudKit, `/v1/senden` und `/v1/geraet`) ist unsicher, weil der Familiencode Passwort und
 Suchschlüssel zugleich war und die Einträge in einer öffentlich lesbaren Datenbank lagen. Protokoll 2 löst ihn ab
 (`cloud/PROTOKOLL-V2.md`). Dieses Blatt sagt, wann und wie der alte Weg ausgeschaltet wird.

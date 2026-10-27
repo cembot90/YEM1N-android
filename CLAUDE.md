@@ -49,7 +49,7 @@ Keine Firebase-Datenbank, keine Apple-ID auf Android. Familien laufen seit dem 2
 ein abgetrenntes Fach je Familie bei Cloudflare in der EU, Schlüssel je Gerät im Keystore, neue Geräte nur per QR-Code mit Freigabe der Eltern (`ui/FamilieScreen.kt`, `ui/FamilienModell.kt`, `logik/Familien*.kt`).
 CloudKit wird auf Android nur noch zum Lesen öffentlicher, unterschriebener Klassenpakete benutzt (`speicher/CloudClient.kt`, `logik/JokerCloud.kt`). Es gibt keine Anmeldung bei Apple mehr.
 Mitteilungen auf Android kommen über Googles FCM (nur als Postbote), neutral ohne Namen und Inhalte.
-Plan und Grenzen des alten Wegs: `cloud/SERVER-KONZEPT.md`. Der alte Familiencode-Weg (`/v1`, CloudKit) läuft im Worker nur noch für iOS, bis die iPhone-App umgestellt ist.
+Plan und Grenzen des alten Wegs: `cloud/SERVER-KONZEPT.md`. Der alte Familiencode-Weg (`/v1`, CloudKit) ist seit 27.10.2026 abgeschaltet (`V1_AUS`), `/v1/klasse` für Klassenpakete läuft weiter.
 
 ## Stand und nächste Schritte
 
@@ -99,7 +99,7 @@ Stand 25.10.2026: Worker fertig und getestet (`server/src/v2/`, `server/test/v2*
 Cem muss `npx wrangler@latest deploy` ausführen und später die APNs-Geheimnisse setzen (`server/EINRICHTEN.md`, Abschnitt 3), danach die EU-Jurisdiktion mit `server/scripts/lokal-pruefen.mjs --eu` prüfen.
 Stand 26.10.2026: Der iPhone-Client (Secure Enclave, gleiche Testvektoren) ist im Repo `cembot90/yem1n` auf `entwicklung` fertig, Tests auf GitHub grün, aber noch nicht auf einem Gerät ausprobiert. Als Nächstes: Cem testet beide Apps auf echten Geräten, dann `/v1` für Familien abschalten (`cloud/ABSCHALTEN-V1.md`) und CloudKit-Familiendaten löschen. Bis dahin darf keine der beiden Apps öffentlich erscheinen (Play-Test und TestFlight mit geschlossenem Kreis sind ok).
 Beim Ändern von `server/src/v2/typen.js` die Tabelle in `cloud/PROTOKOLL-V2.md` mitziehen.
-Phase 5: Der alte Familienweg (`/v1/senden`, `/v1/geraet`, Minutenlauf für CloudKit) lässt sich mit `V1_AUS = "1"` in `server/wrangler.toml` abschalten, ohne Codeänderung. Ablauf und Aufräumen (KV-Skript `server/scripts/alte-ablage-leeren.mjs`, CloudKit-Dashboard) stehen in `cloud/ABSCHALTEN-V1.md`.
+Phase 5 ist erledigt (27./28.10.2026): `V1_AUS = "1"` ist in `server/wrangler.toml` gesetzt und veröffentlicht, die alte KV-Ablage ist geleert, die alten Familien-Einträge im CloudKit-Dashboard sind gelöscht. Geräte mit alter App-Version senden nichts mehr in die Cloud, bis sie aktualisiert und neu per QR gekoppelt sind. Der Schalter lässt sich ohne Codeänderung wieder auskommentieren. Ablauf und Aufräumen (KV-Skript `server/scripts/alte-ablage-leeren.mjs`, CloudKit-Dashboard) stehen in `cloud/ABSCHALTEN-V1.md`.
 
 ## Designüberarbeitung (begonnen)
 

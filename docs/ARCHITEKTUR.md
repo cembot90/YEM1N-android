@@ -1,12 +1,11 @@
-# YEM1N Android: Architektur für IT-Leute
+# YEM1N: Architektur für IT-Leute (iPhone und Android)
 
-Stand 22.10.2026 (abends). Zielgruppe: Entwickler und Administratoren, die das Projekt übernehmen, prüfen oder betreiben.
+Stand 28.10.2026. Zielgruppe: Entwickler und Administratoren, die das Projekt übernehmen, prüfen oder betreiben. Dieses Dokument liegt im Android-Repo und beschreibt beide Apps und den gemeinsamen Familien-Dienst. Die Abschnitte 2, 3, 5a und 6 betreffen Android, Abschnitt 11 die iPhone-App.
 
 ## 1. Überblick
 
 Native Android-App (Kotlin, Jetpack Compose, Material3, Paket `de.cemaras.yem1n`) für Grundschul-Übungen.
-Gegenstück zur iOS-App (Repo `cembot90/YEM1N`). Beide Apps teilen ein JSON-Format für Arbeiten und eine
-CloudKit-Datenbank (öffentlich, Container `iCloud.de.cemaras.yem1n`). Lizenz GPL-3.0 (wegen sherpa-onnx, siehe `THIRD-PARTY.md`).
+Gegenstück zur iPhone-App (Repo `cembot90/yem1n`, SwiftUI). Beide Apps teilen ein JSON-Format für Arbeiten, das Protokoll 2 des Familien-Dienstes (Cloudflare, EU) und für Klassenpakete eine öffentliche CloudKit-Datenbank (nur lesen, Container `iCloud.de.cemaras.yem1n`). Lizenz GPL-3.0 (wegen sherpa-onnx, siehe `THIRD-PARTY.md`).
 
 Grundsatz: alles Wesentliche läuft lokal auf dem Gerät. Die Cloud ist optional und nur für Familienfunktionen da
 (Joker, Ergebnisse, Duell). Ohne Einwilligung der Eltern geht nichts hinaus.
@@ -59,7 +58,7 @@ Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familienc
 - Neue Geräte kommen nur per QR-Code und müssen von einem Eltern-Gerät bestätigt werden, auch Kinder-Geräte.
 - Mitteilungen sind neutral (kein Name, kein Inhalt). iPhone über APNs direkt aus dem Worker, Android über FCM.
 - Tests: `server/test/v2*.test.js` (Kern mit echtem SQLite über `node:sqlite`, Router, Rechte, Fristen, Mitteilungen, Testvektoren), auf Android `FamilienKryptoTest`, `FamilienClientTest`, `FamilienProtokollTest`, `ElternPinTest`.
-- Stand: Worker und Android-Client fertig. Das iPhone-Gegenstück steht auf dem Zweig `entwicklung` des iPhone-Repos (baut und besteht die Tests auf GitHub, noch nicht auf einem Gerät geprüft). Solange läuft `/v1` für iOS weiter, danach wird es abgeschaltet.
+- Stand 28.10.2026: Worker, Android-Client und iPhone-Client sind fertig und stehen auf `main`. Der alte Weg `/v1` für Familien ist seit 27.10.2026 abgeschaltet (`V1_AUS = "1"` in `server/wrangler.toml`, Antwort 410), die alte KV-Ablage ist geleert, die alten Familien-Datensätze in CloudKit sind gelöscht (Ablauf: `cloud/ABSCHALTEN-V1.md`). `/v1/klasse` läuft weiter. Offen: Tests auf echten Geräten (gemischtes Koppeln, Joker, Duell, Haustier) und Push über APNs und FCM.
 - Betriebsprotokolle: Der Worker schreibt keine automatischen Protokolle zu jedem Aufruf (`invocation_logs = false` in `server/wrangler.toml`), im Protokoll stehen nur Fehlermeldungen des Codes ohne Namen und Inhalte. Die Adresse nutzt er nur für die Bremse gegen Missbrauch.
 
 ## 5. Datenschutz
@@ -68,7 +67,7 @@ Löst den Weg über die öffentliche CloudKit-Datenbank ab, in der der Familienc
 - Gesendet wird nur: Geräte-Name, öffentlicher Schlüssel und Push-Kennung des Geräts, Rundenergebnisse (Fach, Übung, Sterne, richtig/falsch), Joker-Texte, Duelle. Kein Klarname.
 - Mitteilungen enthalten weder Namen noch Inhalte, nur feste Sätze.
 - Löschen: Eltern können die ganze Familie löschen (die Familien-Kennung lässt sich für Löschwünsche per E-Mail kopieren), ein Kinder-Gerät kann beim Verlassen seine Einträge mitnehmen. Fristen je Art stehen in `cloud/PROTOKOLL-V2.md`.
-- Kein Tracking, keine Werbung, kein Firebase außer als Postbote.
+- Kein Tracking, keine Werbung, kein Firebase außer als Postbote (Android).
 - Natürliche Stimmen werden einmal geladen (GitHub-Release `stimmen-1`, SHA-256 fest im Code) und laufen danach offline.
 
 ## 5a. KI auf dem Gerät
@@ -113,3 +112,17 @@ Editoren: `logik/Editor.kt` (Rechner, `AufgabenBauer` für das Formular, `Entwur
 ## 10. Dokumentation pflegen
 
 Bei jeder Funktionsänderung mitziehen: `CLAUDE.md` (Stand), `docs/ARCHITEKTUR.md` (Technik), `docs/ELTERNANLEITUNG.md` (Bedienung für Eltern), `daten/InfoTexte.kt` (Kurzanleitung und Datenschutz in der App), `store/VEROEFFENTLICHUNG.md` (Data Safety), Testliste im Claude-Projekt. Neue Daten, die ins Netz gehen, brauchen immer eine Anpassung des Datenschutztexts und der Einwilligung.
+
+## 11. iPhone-App (Repo `cembot90/yem1n`)
+
+SwiftUI mit SwiftData lokal, Ziel iOS 27. Etwa 34.300 Zeilen Swift in `YEM1N/` (eine Datei je Themenbereich, der Ordner ist im Projekt synchronisiert), etwa 5.700 Zeilen Tests in `YEM1NTests/`.
+
+- Reine Logik (läuft auch unter Linux, `pruefen/linux-tests.sh`): `Sha256.swift`, `FamilienProtokoll.swift`, `FamilienClient.swift`, `ElternPin.swift`, dazu Antworten, Runde, Generator, Lernwelt, Vorschule, Stimmen.
+- Plattform: `GeraetSchluessel.swift` (P-256 in der Secure Enclave, im Simulator ein Software-Schlüssel), `FamilienNetz.swift` (URLSession), `FamilienModell.swift` (Zustand, `@Observable`), `Cloud.swift` (Joker, Ergebnisse, Sync, Mitteilungen), `CloudPakete.swift` (Pakete der Familie und der Klasse), `DuellCloud.swift`, `HaustierCloud.swift`.
+- Oberfläche: `FamilieAnsicht.swift`, `PinTor.swift`, Familien-Schritt in `ProfilAssistent.swift`.
+- Gleiche Prüfwerte wie Kotlin und Worker: `FamilieKryptoTests.swift` prüft CryptoKit gegen `cloud/testvektoren-v2.json`.
+- Mitteilungen: der Worker sendet über APNs direkt (Geheimnisse siehe `server/EINRICHTEN.md`, Abschnitt 3).
+- Vorlesen: `Sprecher.sprich` nimmt zuerst die Gerätestimme (Piper über sherpa-onnx, Release `stimmen-1`), sonst die iOS-Stimme.
+- Alte CloudKit-Familiendaten räumt `AlterFamilienweg` einmal auf.
+- Prüfung: `logik.yml` (Linux) und `ios-bauen.yml` (macOS, baut im Simulator, alle Tests) bei jedem Push auf `entwicklung`. Auslieferung: Push auf `main` löst Xcode Cloud aus (Build, Tests, Archive, TestFlight).
+- Anleitung, Datenschutzseite und Vorstellungsseite liegen unter `docs/` und werden über GitHub Pages ausgeliefert. Beim Ändern von Datenerhebung müssen `DatenschutzView`, `docs/index.html`, `PrivacyInfo.xcprivacy` und `store/APPSTORE.md` zusammenpassen.

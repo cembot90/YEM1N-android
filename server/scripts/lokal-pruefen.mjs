@@ -9,11 +9,16 @@ const EU_PFLICHT = process.argv.includes("--eu");
 let fehler = 0;
 const ok = (bedingung, text) => { console.log((bedingung ? "OK   " : "FEHLER ") + text); if (!bedingung) fehler += 1; };
 
+const LOKAL = /^http:\/\/(localhost|127\.0\.0\.1)/.test(BASIS);
 async function schicken(req) {
   const kopf = Object.fromEntries(req.headers);
+  // Bei der echten Adresse setzt Cloudflare die Absenderadresse selbst, deshalb schicken wir dort keine mit.
+  if (!LOKAL) delete kopf["cf-connecting-ip"];
   const r = await fetch(BASIS + new URL(req.url).pathname, { method: "POST", headers: kopf, body: await req.text() });
-  let j = null; try { j = await r.json(); } catch { /* keine Antwort */ }
-  return { status: r.status, j };
+  const text = await r.text();
+  let j = null; try { j = JSON.parse(text); } catch { /* keine lesbare Antwort */ }
+  // Kommt keine JSON-Antwort, zeigen wir den Anfang des Textes, damit man sieht, wer geantwortet hat.
+  return j ? { status: r.status, j } : { status: r.status, j: null, text: text.slice(0, 300) };
 }
 async function signiert(g, pfad, body, familie) { uhr.t = Date.now(); return schicken(await g.anfrage(pfad, body, familie)); }
 async function offen(pfad, body, kopf) { const { offeneAnfrage } = await import("../test/v2-hilfen.js"); return schicken(offeneAnfrage(pfad, body, kopf)); }
@@ -22,6 +27,7 @@ const ping = await fetch(BASIS + "/v2/ping"); ok(ping.status === 200, "ping");
 const mama = await neuesGeraet("Mama"), yemin = await neuesGeraet("Yemin");
 const neu = await offen("/v2/familie", { pub: mama.pub, name: "Mama" });
 ok(neu.status === 200 && /^[0-9a-f]{64}$/.test(neu.j.familie), "Familie angelegt " + (neu.j && neu.j.familie ? neu.j.familie.slice(0, 8) + "..." : JSON.stringify(neu)));
+if (!neu.j) { console.log("\nAbbruch: Der Dienst hat keine lesbare Antwort gegeben."); process.exit(1); }
 const fam = neu.j.familie;
 ok(!EU_PFLICHT || neu.j.jurisdiktion === "eu", "Jurisdiktion der neuen Familie: " + neu.j.jurisdiktion + (EU_PFLICHT ? "" : " (nicht geprüft, lokal gibt es keine)"));
 const st = await signiert(mama, "/v2/status", {}, fam);

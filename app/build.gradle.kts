@@ -55,7 +55,6 @@ dependencies {
     implementation(libs.zxing.core)
     implementation(libs.eddsa)
     implementation(libs.mlkit.genai.prompt)
-    implementation(libs.mlkit.digital.ink)
     implementation(libs.code.scanner)
     // Neuere Fassungen für die 16-KB-Seiten (Google Play), siehe gradle/libs.versions.toml
     implementation(libs.androidx.graphics.path)

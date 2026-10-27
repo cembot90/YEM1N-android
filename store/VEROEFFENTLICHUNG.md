@@ -30,7 +30,7 @@ Stand: Entwicklung, noch nichts auf einem Gerät getestet.
   - "Erwachsenen-Aktion" für Elternfunktionen: die Eltern-PIN (Google nennt eine PIN ausdrücklich als Beispiel).
   - Datenschutzerklärung beschreibt die Datenverarbeitung (GitHub-Pages-Seite, Abschnitt 3a für Android).
   - Reine Kinder-Apps dürfen nur Bibliotheken nutzen, die für Kinderdienste zugelassen sind. Die App nutzt Firebase Cloud Messaging
-    (nur als Postbote, Start erst nach Einwilligung), ML Kit (Handschrift, Gemini Nano auf dem Gerät) und den Code-Scanner der
+    (nur als Postbote, Start erst nach Einwilligung), ML Kit (Gemini Nano auf dem Gerät) und den Code-Scanner der
     Play-Dienste. Die Richtlinienseite nennt diese Bibliotheken nicht einzeln. Bitte in der Play Console beim Zielgruppen-Fragebogen
     und im SDK-Index (Eintrag je Bibliothek) nachsehen, ob eine Warnung erscheint. Kommt eine, schreibe mir die Meldung.
   - Eine WebView darf nicht nur eine fremde Webseite zeigen: Die Anleitung ist die eigene Seite (GitHub Pages) mit Offline-Kurzfassung.
@@ -78,7 +78,7 @@ Wofür die App noch ins Internet geht:
 - Klassencode: Pakete der Klasse aus CloudKit lesen. Nur der Klassencode geht über das Netz.
 - Familien-Dienst bei Cloudflare (nur mit Familie und Einwilligung): Ergebnisse, Joker, Duelle, Geräteliste.
 - Gemini Nano (KI auf dem Gerät) lädt sein Modell einmal von Google. Danach läuft die KI ohne Internet.
-- Die Handschrift-Erkennung (ML Kit Digital Ink, freiwillig) lädt ihr Modell (etwa 20 MB) einmal von Google. Die Schrift wird auf dem Gerät gelesen, nicht gespeichert und nicht verschickt. In Data Safety nichts zusätzlich angeben, weil keine Nutzerdaten das Gerät verlassen; nur die Modell-Anfrage geht an Google.
+- Die Handschrift-Erkennung (ML Kit Digital Ink) ist seit 27.10.2026 entfernt. Damit entfallen die Modell-Ladung von Google und ein Baustein, der in der Familienrichtlinie zu prüfen wäre.
 
 Berechtigungen:
 

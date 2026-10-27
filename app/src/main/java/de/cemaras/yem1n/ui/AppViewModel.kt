@@ -218,7 +218,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         altesAufraeumen()
         sprecher.an = fortschritt.vorlesen
         SpielEffekte.ton = fortschritt.spielTon
-        if (fortschritt.stift) stiftPruefen()
         val schwach = (app.getSystemService(android.content.Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true
         // "Animationen entfernen" in den Android-Einstellungen (Bedienungshilfen) wie "Bewegung reduzieren" bei iOS
         val ohneAnimation = runCatching {
@@ -1463,19 +1462,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         behalte(fortschritt.copy(offeneErgebnisse = offen))
         offeneErgebnisseSenden()
     }
-
-    /** Handschrift: Erkennung von Google, das Modell lädt einmal nach Wunsch. */
-    val stiftLeser = de.cemaras.yem1n.speicher.StiftLeser()
-    var stiftStand: de.cemaras.yem1n.speicher.StiftLeser.Stand by mutableStateOf(de.cemaras.yem1n.speicher.StiftLeser.Stand.UNBEKANNT)
-
-    fun setzeStift(an: Boolean) {
-        behalte(fortschritt.copy(stift = an))
-        if (an) stiftPruefen()
-    }
-
-    fun stiftPruefen() = stiftLeser.pruefen { stiftStand = it }
-
-    fun stiftLaden() = stiftLeser.laden { stiftStand = it }
 
     /** Soll der Einrichtungsassistent gezeigt werden? Beim ersten Start, oder wenn er in Technik noch einmal gewünscht ist. */
     var einrichtungNochmal: Boolean by mutableStateOf(false)

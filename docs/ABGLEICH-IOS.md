@@ -9,7 +9,7 @@ Stand 23.10.2026. Grundlage: Dateien und Texte der iOS-App (`cembot90/YEM1N`) ge
 - **Haustier**: auf Android nur auf dem Gerät. iOS legt es in die Cloud, die Eltern füttern es. Grund: Server-Einträge gehören dem Entwickler, iOS kann sie nicht ändern.
 - **Cloud-Pakete in der Familie**: iOS verteilt Pakete über CloudKit. Android nutzt dafür den Klassencode (Familien-Pakete kommen mit der iPhone-Umstellung auf Protokoll 2).
 - **Haustier in 3D**: Android zeichnet das Tier in 2D.
-- **Stift und Handschrift**: seit 23.10. da. Android nutzt die Handschrift-Erkennung von Google (ML Kit), das Modell lädt das Gerät einmal nach Wunsch.
+- **Stift und Handschrift**: seit 27.10. auf beiden Systemen entfernt. Antworten werden getippt.
 
 ## Echte Lücken
 | # | Lücke | Aufwand | Stand |

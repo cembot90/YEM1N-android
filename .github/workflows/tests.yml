@@ -26,6 +26,25 @@ jobs:
           chmod +x gradlew
           set -o pipefail
           ./gradlew testDebugUnitTest assembleDebug --no-daemon --console=plain 2>&1 | tee build.log
+      - name: Prüfung der Bibliotheken auf 16-KB-Seiten (Google Play)
+        if: always()
+        run: |
+          set +e
+          apk="$GITHUB_WORKSPACE/app/build/outputs/apk/debug/app-debug.apk"
+          [ -f "$apk" ] || { echo "::warning::Kein Debug-APK gefunden, 16-KB-Prüfung übersprungen"; exit 0; }
+          mkdir -p /tmp/apkprobe && cd /tmp/apkprobe && unzip -q -o "$apk" 'lib/*'
+          schlecht=0
+          for f in lib/arm64-v8a/*.so lib/x86_64/*.so; do
+            [ -f "$f" ] || continue
+            ausr=$(readelf -lW "$f" | awk '/LOAD/{print $NF}' | sort -u | tr '\n' ' ')
+            ok=1; for a in $ausr; do [ $((a)) -ge 16384 ] || ok=0; done
+            if [ $ok = 0 ]; then schlecht=1; echo "::warning::Nicht auf 16 KB ausgerichtet: $f (Ausrichtung: $ausr)"; fi
+          done
+          zip=$(ls -d "$ANDROID_HOME"/build-tools/*/zipalign 2>/dev/null | sort -V | tail -1)
+          if [ -n "$zip" ]; then
+            "$zip" -c -P 16 -v 4 "$apk" | grep -i "BAD" | head -10 | while IFS= read -r z; do echo "::warning::zipalign: $z"; done
+          fi
+          [ $schlecht = 0 ] && echo "Alle Bibliotheken sind auf 16 KB ausgerichtet."
       - name: Fehler als Hinweise ausgeben
         if: failure()
         run: |

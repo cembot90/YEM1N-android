@@ -65,7 +65,7 @@ sind am 28.10.2026 gelöscht worden (Ablauf in `cloud/ABSCHALTEN-V1.md`). Für P
 
 Offene Prüfungen vor der Veröffentlichung:
 
-- Nach dem Deploy des Workers `node server/scripts/lokal-pruefen.mjs https://<adresse> --eu` ausführen, damit feststeht, dass die EU-Jurisdiktion wirkt. Erst dann darf "EU" in Store-Angaben und Datenschutztext stehen bleiben.
+- Erledigt am 28.10.2026: `node server/scripts/lokal-pruefen.mjs https://yem1n-server.cemaras-yem1n.workers.dev --eu` lief ohne Fehler, die Familien liegen in der EU-Jurisdiktion. "EU" darf in Store-Angaben und Datenschutztext stehen. Nach jedem größeren Deploy erneut ausführen.
 - Auf Cloudflare den Tarif Workers Paid wählen (Free reicht für den Test, nicht für den Betrieb).
 - Auftragsverarbeitungs-Vertrag mit Cloudflare und Google (FCM) prüfen, Verzeichnis der Verarbeitungstätigkeiten ergänzen.
 - Familienrichtlinie von Google: FCM und ML Kit im Kinder-Kontext prüfen, Eltern-Gate ist die Eltern-PIN.

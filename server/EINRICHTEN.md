@@ -49,6 +49,7 @@ Der alte Weg (`/v1/...`) bleibt, bis beide Apps umgestellt sind.
    Die Variable `FAMILIE_JURISDIKTION` darf in der echten Umgebung nie gesetzt werden. Sie gibt es nur für Tests auf dem eigenen Rechner,
    weil die lokale Laufzeit keine Jurisdiktionen kennt.
 6. Vor der Veröffentlichung auf den Plan "Workers Paid" (5 US-Dollar im Monat) wechseln. Der kostenlose Plan reicht zum Testen, aber nicht für viele Familien.
+7. Kosten im Blick: Im Dashboard unter Manage Account, Billing, Billable Usage zwei Budget-Alarme anlegen (1 und 5 US-Dollar Mehrverbrauch). Sie warnen nur per E-Mail, ein hartes Limit gibt es bei Cloudflare nicht. Der Dienst bremst selbst (120 Anfragen pro Gerät und Minute, 20000 pro Familie und Tag). Notausschalter: Worker `yem1n-server`, Einstellungen, Variablen, `NOTAUS` = `1` setzen (stoppt alle Familienanfragen sofort, `0` oder löschen schaltet wieder ein).
    Schreibvorgänge je Familie sind dort das Nadelöhr, deshalb schreibt der Dienst sparsam.
 
 ## 4. Später: den alten Familienweg abschalten

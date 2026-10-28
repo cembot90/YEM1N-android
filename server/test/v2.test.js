@@ -567,3 +567,19 @@ test("Antworten enthalten nie öffentliche Schlüssel oder Push-Kennungen andere
   assert.ok(!alles.includes(FCM_A));
   assert.ok(!alles.includes(f.eltern.pub));
 });
+
+test("Notausschalter: mit NOTAUS = 1 antwortet der Dienst nur noch mit 503, ping geht weiter", async () => {
+  const env = { FAMILIE: falscheFamilien(), NOTAUS: "1" };
+  const g = await neuesGeraet("A");
+  const r = await behandle(offeneAnfrage("/v2/familie", { pub: g.pub, name: "A" }), env);
+  assert.equal(r.status, 503);
+});
+
+test("Tageslimit: eine Familie bekommt am Tag höchstens TAGESLIMIT Anfragen, am nächsten Tag geht es wieder", async () => {
+  const { TAGESLIMIT } = await import("../src/v2/familie.js");
+  const f = await start();
+  for (let i = 0; i < TAGESLIMIT; i++) f.kern.erlaubt("tag", TAGESLIMIT, TAG);
+  assert.equal((await f.senden(f.eltern, "/v2/status", {})).status, 429);
+  uhr.t += TAG + MIN;
+  assert.equal((await f.senden(f.eltern, "/v2/status", {})).status, 200);
+});

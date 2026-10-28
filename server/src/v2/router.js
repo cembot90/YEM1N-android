@@ -33,6 +33,8 @@ export async function v2Behandle(request, env) {
   const url = new URL(request.url);
   if (url.pathname === "/v2/ping") return antwort(200, { ok: true, protokoll: 2 });
   if (request.method !== "POST") return antwort(405, { fehler: "Nur POST" });
+  // Notausschalter: Variable NOTAUS = "1" im Cloudflare-Dashboard (Worker, Einstellungen, Variablen) stoppt alle Familienanfragen sofort.
+  if (env.NOTAUS === "1") return antwort(503, { fehler: "Der Dienst ruht gerade, bitte später wieder versuchen" });
   if (!env.FAMILIE) return antwort(503, { fehler: "Der Dienst ist noch nicht eingerichtet" });
 
   const ip = request.headers.get("cf-connecting-ip") || "unbekannt";

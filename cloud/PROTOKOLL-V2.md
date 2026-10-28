@@ -58,6 +58,8 @@ Der Dienst weist ab:
 - Zeit außerhalb von 5 Minuten (401, die Antwort enthält `serverZeit`, damit das Gerät seine Uhr ausgleichen und einmal neu versuchen kann)
 - dieselbe Unterschrift ein zweites Mal (401, Schutz gegen Mitschneiden und Wiederholen)
 - mehr als 120 Anfragen pro Gerät und Minute (429)
+- mehr als 20000 Anfragen pro Familie und Tag (429, schützt vor Fehlern und Kosten)
+- Notausschalter: ist die Worker-Variable `NOTAUS` auf `1` gesetzt, antwortet der Dienst auf alles außer `/v2/ping` mit 503
 
 Bei einem Wiederholungsversuch immer neu unterschreiben.
 

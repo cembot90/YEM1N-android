@@ -12,6 +12,8 @@ const TAG = 24 * 60 * MINUTE;
 const ZEIT_TOLERANZ = 5 * MINUTE;
 const LEERE_FAMILIE_TAGE = 30;
 const FAMILIE_TAGE = 365;
+/** Höchstens so viele Anfragen je Familie und Tag (bei 4 Geräten und Abfrage jede Minute braucht eine Familie etwa 6000). */
+export const TAGESLIMIT = 20000;
 const EINLADUNG_MIN = 10;
 const MAX_GERAETE = 12;
 const MAX_WARTEND = 3;
@@ -138,6 +140,8 @@ export class FamilieKern {
   async behandle(request) {
     const pfad = new URL(request.url).pathname;
     if (request.method !== "POST") return fehler(405, "Nur POST");
+    // Tageslimit je Familie: schützt vor einem Fehler, der eine Familie mit Anfragen überschwemmt (und damit die Kosten).
+    if (!this.erlaubt("tag", TAGESLIMIT, TAG)) return fehler(429, "Für heute ist das Limit dieser Familie erreicht, morgen geht es weiter");
     const roh = await request.text();
     if (roh.length > 120000) return fehler(413, "Zu groß");
     let body = {};

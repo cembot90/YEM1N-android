@@ -298,7 +298,8 @@ object FamilienProtokoll {
         403 -> "Das darf dieses Gerät nicht, oder die Einladung gilt nicht mehr."
         404 -> "Diese Familie gibt es nicht (mehr)."
         409 -> "Das geht gerade nicht. Vielleicht ist das Gerät schon in der Familie oder die Familie ist voll."
-        429 -> "Das ging zu schnell. Bitte kurz warten."
+        429 -> "Gerade kommen zu viele Anfragen. Bitte etwas später noch einmal versuchen."
+        503 -> "Der Familien-Dienst macht gerade Pause. Bitte später noch einmal versuchen, auf dem Gerät geht nichts verloren."
         else -> "Der Dienst hat nicht geantwortet (Code $status)."
     }
 }

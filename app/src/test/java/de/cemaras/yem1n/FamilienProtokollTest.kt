@@ -182,9 +182,10 @@ class FamilienProtokollTest {
     }
 
     @Test fun fehlertexteSindFreundlich() {
-        for (s in listOf(0, -1, 400, 401, 403, 404, 409, 429, 500)) assertTrue(FamilienProtokoll.fehlertext(s).isNotBlank())
+        for (s in listOf(0, -1, 400, 401, 403, 404, 409, 429, 500, 503)) assertTrue(FamilienProtokoll.fehlertext(s).isNotBlank())
         assertTrue(FamilienProtokoll.fehlertext(500).contains("500"))
-        for (s in listOf(0, 401, 429)) {
+        assertTrue(FamilienProtokoll.fehlertext(503).contains("Pause"))
+        for (s in listOf(0, 401, 429, 503)) {
             val t = FamilienProtokoll.fehlertext(s)
             assertFalse(t.contains("\u2013") || t.contains("\u2014")) // keine Gedankenstriche
         }

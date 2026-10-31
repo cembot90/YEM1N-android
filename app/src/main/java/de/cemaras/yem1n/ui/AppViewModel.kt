@@ -24,6 +24,7 @@ import de.cemaras.yem1n.logik.VorschulEnglisch
 import de.cemaras.yem1n.logik.Fehlerheft
 import de.cemaras.yem1n.logik.Pokal
 import de.cemaras.yem1n.logik.Fortschritt
+import de.cemaras.yem1n.logik.ErgebnisUmzug
 import de.cemaras.yem1n.logik.Haustier
 import de.cemaras.yem1n.speicher.CloudClient
 import de.cemaras.yem1n.speicher.ServerClient
@@ -106,6 +107,7 @@ private const val LERNWELT = -2
 
 private const val DATEI_ENTWURF = "entwurf.json"
 private const val DATEI_THEMEN = "eigene-themen.json"
+private const val DATEI_ARCHIV = "gesendete-ergebnisse.txt"
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val speicher = Speicher(app)
@@ -1502,9 +1504,26 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später. */
+    /** Gesendete Runden der letzten 365 Tage, damit sie an eine neue Familie noch einmal gehen können. */
+    private var archiv: List<String>? = null
+
+    private suspend fun archiv(): List<String> =
+        archiv ?: withContext(Dispatchers.IO) { ErgebnisUmzug.lese(speicher.ladeText(DATEI_ARCHIV)) }.also { archiv = it }
+
+    private suspend fun insArchiv(koerper: String) {
+        val alt = archiv()
+        val neu = ErgebnisUmzug.merke(alt, koerper, System.currentTimeMillis())
+        if (neu === alt) return
+        archiv = neu
+        withContext(Dispatchers.IO) { speicher.speichereText(DATEI_ARCHIV, ErgebnisUmzug.text(neu)) }
+    }
+
+    /**
+     * Schickt alle gemerkten Ergebnisse. Ein Fehler hält die Reihe an, der Rest bleibt für später.
+     * Ist das Kind-Gerät neu in einer Familie, gehen danach die bisherigen Runden noch einmal an diese Familie.
+     */
     fun offeneErgebnisseSenden() {
-        if (ergebnisSendet || fortschritt.offeneErgebnisse.isEmpty() || !familieBereit) return
+        if (ergebnisSendet || !familieBereit) return
         ergebnisSendet = true
         viewModelScope.launch {
             var gesendet = 0
@@ -1524,6 +1543,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 if (r.ok) {
                     gesendet++
                     behalte(fortschritt.copy(offeneErgebnisse = fortschritt.offeneErgebnisse - koerper))
+                    insArchiv(koerper)
                 } else {
                     fehler = r.fehler
                     // Eine abgelehnte Anfrage (400) würde nie ankommen, sie fliegt raus.
@@ -1531,6 +1551,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     else break
                 }
             }
+            if (fehler == null) fehler = bisherigeNachschicken()
             val warten = fortschritt.offeneErgebnisse.size
             ergebnisStatus = when {
                 fehler != null && warten > 0 -> "$warten Runde(n) warten noch auf das Senden. $fehler"
@@ -1540,6 +1561,45 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             }
             ergebnisSendet = false
         }
+    }
+
+    /**
+     * Neue Familie: die bisherigen Runden (letzte 365 Tage) gehen noch einmal hoch, älteste zuerst.
+     * Gibt den Fehlertext zurück, wenn es abbricht. Beim nächsten Mal geht es hinter der letzten angekommenen Runde weiter.
+     */
+    private suspend fun bisherigeNachschicken(): String? {
+        val z = familie.zugang ?: return null
+        if (!z.aktiv || z.rolle != "kind") return null
+        val f0 = fortschritt
+        if (f0.umzugErledigt == z.familie) return null
+        val liste = ErgebnisUmzug.offen(archiv(), z.familie, f0.umzugErledigt, f0.umzugLaeuft, f0.umzugBis, System.currentTimeMillis())
+        val pause = ErgebnisUmzug.pause(liste.size)
+        var bis = if (f0.umzugLaeuft == z.familie) f0.umzugBis else 0L
+        var fehler: String? = null
+        for ((i, koerper) in liste.withIndex()) {
+            val body = try {
+                kotlinx.serialization.json.Json.parseToJsonElement(koerper) as? kotlinx.serialization.json.JsonObject
+            } catch (e: Exception) {
+                null
+            }
+            if (body != null) {
+                val r = familie.senden(body)
+                // Eine abgelehnte Anfrage (400) würde nie ankommen, sie wird übersprungen.
+                if (!r.ok && r.status != 400) {
+                    fehler = r.fehler
+                    break
+                }
+            }
+            bis = ErgebnisUmzug.zeitpunkt(koerper)
+            // Zwischendurch merken, wie weit es ist, damit ein Abbruch nicht von vorn beginnt.
+            if (i % 25 == 24) behalte(fortschritt.copy(umzugLaeuft = z.familie, umzugBis = bis))
+            if (pause != null) kotlinx.coroutines.delay(pause)
+        }
+        behalte(
+            if (fehler == null) fortschritt.copy(umzugErledigt = z.familie, umzugLaeuft = "", umzugBis = 0)
+            else fortschritt.copy(umzugLaeuft = z.familie, umzugBis = bis),
+        )
+        return fehler
     }
 
     /** Wochenbelohnung abholen. Gibt die Münzen zurück, 0 wenn es nichts abzuholen gab. */

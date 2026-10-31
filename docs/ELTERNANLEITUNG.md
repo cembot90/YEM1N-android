@@ -60,6 +60,8 @@ Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 6. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
 7. Duell: Herausforderung gegen die Familie. Zwischen Android und iPhone geht das erst, wenn auch die iPhone-App auf den neuen Weg umgestellt ist.
 
+**Neue Familie:** Kommt ein Kind-Gerät in eine neue Familie, schickt es seine Runden der letzten 365 Tage noch einmal hoch, damit die Eltern ihre Übersicht und den Wochenbericht behalten. Das gilt für Runden ab diesem Update, ältere kennt die Android-App nicht mehr einzeln. Auf dem Gerät selbst geht dabei nichts verloren.
+
 **Gerät entfernen oder verloren:** Unter Familie in der Geräteliste auf **Entfernen** tippen. Das Gerät gehört dann nicht mehr zur Familie. Ein Kind kann beim Verlassen seine Einträge in der Cloud mitnehmen (löschen lassen). Unter Familie lässt sich auch die **ganze Familie löschen**. Wer kein Eltern-Gerät mehr hat und die Familie löschen lassen möchte, schreibt eine E-Mail und nennt die **Familien-Kennung** (Familie > Familien-Kennung kopieren, geht auf einem Eltern-Gerät).
 
 **PIN vergessen:** Das Gerät auf einem anderen Eltern-Gerät aus der Familie nehmen und neu verbinden. Ist es das einzige Eltern-Gerät, hilft nur die Familie neu anzulegen (App-Daten löschen).

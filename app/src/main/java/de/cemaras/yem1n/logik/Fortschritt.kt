@@ -106,6 +106,11 @@ data class Fortschritt(
     val angemeldet: String = "",
     /** Fertige Anfragen an den Server (Rundenergebnisse), die noch nicht angekommen sind. Werden erneut geschickt. */
     val offeneErgebnisse: List<String> = emptyList(),
+    /** Familie, an die die bisherigen Runden schon noch einmal geschickt wurden (siehe [ErgebnisUmzug]). */
+    val umzugErledigt: String = "",
+    /** Familie, an die gerade nachgeschickt wird, und Zeitpunkt der zuletzt angekommenen Runde. */
+    val umzugLaeuft: String = "",
+    val umzugBis: Long = 0,
     /** Tägliche Erinnerung ans Üben, mit Uhrzeit in Minuten seit Mitternacht (Standard 16:00). */
     val lernzeitAn: Boolean = false,
     val lernzeitMinuten: Int = 16 * 60,

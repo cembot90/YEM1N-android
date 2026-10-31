@@ -18,6 +18,13 @@ Danach werden `entwicklung` und `main` per Fast-Forward gleichgezogen.
 Die Historie wird nicht umgeschrieben. Kleine Änderungen (Texte, Farben, kleine
 Korrekturen) legt Claude direkt auf `main` ab, wenn der Code sehr wahrscheinlich baut.
 
+## Gleichstand mit iOS
+
+Zu Beginn jeder Sitzung `docs/ABGLEICH-IOS.md`, Abschnitt "Übergabe zwischen den Chats", lesen und offene Zeilen
+"Von iOS, für Android" mit Cem besprechen. Nach jeder Funktionsänderung hier eine Zeile unter "Von Android, für iOS"
+eintragen (Datum, Commit, was sich für Kinder und Eltern ändert, betroffene Dateien). Das iOS-Repo lässt sich
+im Chat mit `add_repo` dazuholen.
+
 ## Prüfen
 
 GitHub Actions (`.github/workflows/tests.yml`) führt bei jedem Push die Unit-Tests aus

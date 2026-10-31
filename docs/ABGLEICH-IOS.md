@@ -22,5 +22,23 @@ Stand 23.10.2026. Grundlage: Dateien und Texte der iOS-App (`cembot90/YEM1N`) ge
 | 6 | Mathe-Editor und Vokabel-Editor in der App | groß | fertig 23.10. (Plus > Eigene Arbeit bauen, Sprachen > Eigene Wörter) |
 | 7 | Profil-Assistent | mittel | fertig 23.10. (im Einrichtungsassistenten) |
 
+## Übergabe zwischen den Chats
+
+Cem arbeitet mit zwei Claude-Chats: einer für iOS (Repo `cembot90/YEM1N`), einer für Android (dieses Repo).
+Diese Liste ist die gemeinsame Übergabe. Wer eine Funktion ändert, trägt sie hier für die andere Seite ein.
+Wer die Änderung nachgebaut oder bewusst weggelassen hat, setzt den Stand auf "fertig" oder "bewusst anders"
+mit Datum und Commit. Erledigte Zeilen bleiben stehen, damit man den Verlauf sieht.
+
+### Von iOS, für Android
+| Datum | iOS-Commit | Was sich geändert hat | Stand |
+|---|---|---|---|
+| 27.10. | 122e4f9 | Kind-Gerät schickt beim Beitritt zu einer neuen Familie die eigenen Runden der letzten 365 Tage noch einmal an den Dienst (feste Kennung, kein Doppeln, kurze Pause wegen der Bremse). iOS: `ErgebnisUmzug.swift`, `Cloud.swift`, Tests in `FamilieTests.swift` | offen |
+| 27.10. | 07c1589 | Handschrift entfernt | fertig (Android schon am 27.10.) |
+
+### Von Android, für iOS
+| Datum | Android-Commit | Was sich geändert hat | Stand |
+|---|---|---|---|
+| 28.10. | 73fbe3a | Server: Tageslimit je Familie und Notausschalter gegen unerwartete Kosten. iOS prüfen: zeigt die App eine verständliche Meldung, wenn der Dienst das Limit meldet? | offen |
+
 ## Nicht geprüft
 Texte der Lernwelt-Themen und Feinheiten der Spiele wurden nicht Zeile für Zeile verglichen. Fällt dir beim Testen ein Unterschied auf, schick ihn mir, ich trage ihn hier ein.

@@ -47,6 +47,7 @@ import de.cemaras.yem1n.logik.DuellStand
 import de.cemaras.yem1n.logik.DuellStufe
 import de.cemaras.yem1n.logik.JokerNachschub
 import de.cemaras.yem1n.logik.ServerAnfrage
+import de.cemaras.yem1n.logik.FamilienPakete
 import de.cemaras.yem1n.logik.FamilienProtokoll
 import de.cemaras.yem1n.speicher.Erinnerung
 import de.cemaras.yem1n.speicher.Mitteilungen
@@ -227,10 +228,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         Erinnerung.planen(app, fortschritt.haustier, fortschritt.haustierErinnerung)
         Erinnerung.planenLernzeit(app, fortschritt.lernzeitAn, fortschritt.lernzeitMinuten, fortschritt.rundenHeute(Tag.heute()) > 0)
         Erinnerung.planenBericht(app, fortschritt.wochenberichtAn && fortschritt.jokerRolle == "eltern")
-        offeneErgebnisseSenden()
         Mitteilungen.kanalAnlegen(app)
         if (fortschritt.duellGeraet.isEmpty()) behalte(fortschritt.copy(duellGeraet = java.util.UUID.randomUUID().toString()))
-        geraetMelden()
+        // Senden, Melden und Pakete holen stehen im letzten init-Block, weil die Familie erst weiter unten angelegt wird
         SpielEffekte.haptik = fortschritt.spielHaptik
         Farbwelt.rosa = fortschritt.rosa
         sichtbarMachen()
@@ -585,6 +585,75 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // Pakete der Familie: Eltern legen Arbeiten in das Familien-Fach, Kind-Geräte holen sie von selbst
+
+    /** Pakete im Familien-Fach (für die Liste der Eltern). */
+    var familienPakete: List<FamilienPakete.Kopf> by mutableStateOf(emptyList())
+        private set
+    var familienPaketMeldung: String by mutableStateOf("")
+        private set
+    var familienPaketBeschaeftigt: Boolean by mutableStateOf(false)
+        private set
+
+    /** Eltern: schickt eine Arbeit an die Kind-Geräte der Familie. Dieselbe Arbeit noch einmal ersetzt die alte. */
+    fun familienPaketSenden(arbeit: Arbeit) {
+        if (!familieBereit || !familie.istEltern || familienPaketBeschaeftigt) return
+        val json = PaketJson.text(arbeit)
+        FamilienPakete.pruefeGroesse(json)?.let { familienPaketMeldung = it; return }
+        familienPaketBeschaeftigt = true
+        viewModelScope.launch {
+            val e = familie.senden(FamilienProtokoll.paket(FamilienProtokoll.paketKennung(arbeit.klasse, arbeit.fach, arbeit.titel), json))
+            familienPaketMeldung = if (e.ok) "\"${arbeit.titel}\" ist in der Familie. Die Kind-Geräte laden es von selbst." else e.fehler
+            familienPaketBeschaeftigt = false
+            if (e.ok) familienPaketeLaden()
+        }
+    }
+
+    /** Eltern: welche Pakete liegen schon im Familien-Fach? */
+    fun familienPaketeLaden() {
+        if (!familieBereit || !familie.istEltern) return
+        viewModelScope.launch {
+            familie.lesen(FamilienProtokoll.TYP_PAKET)?.let { familienPakete = FamilienPakete.lesen(it) }
+        }
+    }
+
+    /** Kind-Gerät: holt neue Arbeiten aus dem Familien-Fach. Vorhandene bleiben mit Fortschritt unverändert. */
+    fun familienPaketeHolen(still: Boolean = false) {
+        if (!familieBereit || familie.istEltern || familienPaketBeschaeftigt) return
+        familienPaketBeschaeftigt = true
+        viewModelScope.launch {
+            val liste = familie.lesen(FamilienProtokoll.TYP_PAKET)
+            if (liste == null) {
+                if (!still) meldung = "Keine Verbindung. Ist das Internet an?"
+            } else {
+                val neue = FamilienPakete.neue(
+                    FamilienPakete.lesen(liste),
+                    alleArbeiten.map { it.schluessel }.toSet(),
+                    fortschritt.versteckt.toSet(),
+                )
+                var n = 0
+                for (k in neue) if (fuegeArbeitEin(k.json) == null) n++
+                when {
+                    n == 1 -> meldung = "Eine neue Arbeit von deinen Eltern ist da."
+                    n > 1 -> meldung = "$n neue Arbeiten von deinen Eltern sind da."
+                    !still -> meldung = "Keine neuen Arbeiten von deinen Eltern."
+                }
+            }
+            familienPaketBeschaeftigt = false
+        }
+    }
+
+    /** Knopf "Neue Aufgaben holen": fragt bei der Familie und beim Klassencode nach. */
+    fun neueAufgabenHolen() {
+        val familieGeht = familieBereit && !familie.istEltern
+        if (familieGeht) familienPaketeHolen()
+        if (fortschritt.klassencode.isNotEmpty()) klassenPaketeHolen()
+    }
+
+    /** Darf der Knopf "Neue Aufgaben holen" erscheinen? */
+    val kannAufgabenHolen: Boolean
+        get() = fortschritt.klassencode.isNotEmpty() || (familieBereit && !familie.istEltern)
+
     // ---- Familie verbinden (Koppeln per QR-Code, Freigabe durch die Eltern) ----
 
     /** Nach jeder Änderung an der Familie: Rolle des Geräts angleichen, Push anmelden, Wartendes nachschicken. */
@@ -594,9 +663,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (familieBereit) {
             geraetMelden()
             offeneErgebnisseSenden()
+            familienPaketeHolen(still = true)
         } else {
             jokerFragen = emptyList()
             jokerNachschubOffen = null
+            familienPakete = emptyList()
         }
     }
 
@@ -1597,5 +1668,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (alleArbeiten.none { it.schluessel == arbeit.schluessel }) alleArbeiten = alleArbeiten + arbeit
         sichtbarMachen()
         return null
+    }
+
+    // Erst hier ist alles angelegt, auch die Familie. Vorher würde der Zugriff auf `familie` beim Start abstürzen.
+    init {
+        offeneErgebnisseSenden()
+        geraetMelden()
+        familienPaketeHolen(still = true)
     }
 }

@@ -179,8 +179,8 @@ fun StartScreen(vm: AppViewModel) {
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Arbeit einfügen") }, onClick = { menue = false; einfuegen = true })
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Eigene Arbeit bauen") }, onClick = { menue = false; vm.oeffneEditor() })
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Datei öffnen") }, onClick = { menue = false; oeffner.launch(arrayOf("*/*")) })
-                            if (vm.fortschritt.klassencode.isNotEmpty()) {
-                                androidx.compose.material3.DropdownMenuItem(text = { Text("Neue Aufgaben der Klasse holen") }, onClick = { menue = false; vm.klassenPaketeHolen() })
+                            if (vm.kannAufgabenHolen) {
+                                androidx.compose.material3.DropdownMenuItem(text = { Text("Neue Aufgaben holen") }, onClick = { menue = false; vm.neueAufgabenHolen() })
                             }
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Einstellungen") }, onClick = { menue = false; vm.oeffneEinstellungen() })
                         }

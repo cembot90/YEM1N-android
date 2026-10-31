@@ -243,9 +243,28 @@ fun EinstellungenScreen(vm: AppViewModel) {
                 OutlinedButton(onClick = vm::oeffneJoker) { Text("Joker und Ergebnisse öffnen", color = Color.White) }
             }
             Text(
-                "Für Joker, Duelle und Ergebnisse zwischen den Geräten der Familie. Neue Geräte kommen nur mit QR-Code dazu und müssen von den Eltern erlaubt werden. Dafür ist keine Apple-ID nötig.",
+                "Für Joker, Duelle, Ergebnisse und Arbeiten zwischen den Geräten der Familie. Neue Geräte kommen nur mit QR-Code dazu und müssen von den Eltern erlaubt werden. Dafür ist keine Apple-ID nötig.",
                 color = TextSanft, fontSize = 13.sp,
             )
+            if (vm.familieBereit && vm.familie.istEltern) {
+                androidx.compose.runtime.LaunchedEffect(Unit) { vm.familienPaketeLaden() }
+                Text("Arbeiten an die Kinder schicken", color = Gelb, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+                Text("Die Kind-Geräte laden die Arbeit von selbst. Was sie schon haben, bleibt mit Fortschritt unverändert.", color = TextSanft, fontSize = 13.sp)
+                val inFamilie = vm.familienPakete.map { it.schluessel }.toSet()
+                vm.arbeiten.forEach { a ->
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(a.titel, color = Color.White, fontWeight = FontWeight.SemiBold)
+                            Text("${a.klasse} · ${a.fach}" + (if (a.schluessel in inFamilie) " · schon in der Familie" else ""), color = TextSanft, fontSize = 13.sp)
+                        }
+                        TextButton(onClick = { vm.familienPaketSenden(a) }, enabled = !vm.familienPaketBeschaeftigt) {
+                            Text(if (a.schluessel in inFamilie) "Erneut senden" else "Senden", color = Gelb)
+                        }
+                    }
+                }
+                Text("Pakete liegen im Familien-Fach und verschwinden dort nach einem Jahr von selbst. Auf den Kind-Geräten bleiben sie erhalten.", color = TextSanft, fontSize = 13.sp)
+                if (vm.familienPaketMeldung.isNotEmpty()) Text(vm.familienPaketMeldung, color = Color.White, fontSize = 14.sp)
+            }
 
         }
         if (seite == "familie") {

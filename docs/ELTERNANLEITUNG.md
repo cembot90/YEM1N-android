@@ -58,7 +58,8 @@ Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 4. Das Kind-Gerät zeigt jetzt einen **Prüfcode** aus sechs Zeichen und wartet. Auf dem Eltern-Gerät steht dasselbe Gerät in der Liste, ebenfalls mit Prüfcode. Nur wenn beide gleich sind, tippen Sie auf **Erlauben**. Weitere Eltern-Geräte kommen genauso dazu.
 5. Das Kind stellt Fragen (Joker), die Eltern antworten, das Kind gibt einen Daumen. Es gibt ein Tageslimit, bei Bedarf bittet das Kind um Nachschub und die Eltern geben ihn frei.
 6. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
-7. Duell: Herausforderung gegen die Familie. Zwischen Android und iPhone geht das erst, wenn auch die iPhone-App auf den neuen Weg umgestellt ist.
+7. **Arbeiten schicken:** Auf dem Eltern-Gerät unter Einstellungen > Familie und Cloud bei einer Arbeit auf **Senden** tippen. Die Kind-Geräte laden sie beim nächsten Start von selbst (oder über ＋ > Neue Aufgaben holen). Was ein Kind schon hat, bleibt mit Fortschritt unverändert. Das geht auch zwischen iPhone und Android.
+8. Duell: Herausforderung gegen die Familie. Zwischen Android und iPhone geht das erst, wenn auch die iPhone-App auf den neuen Weg umgestellt ist.
 
 **Gerät entfernen oder verloren:** Unter Familie in der Geräteliste auf **Entfernen** tippen. Das Gerät gehört dann nicht mehr zur Familie. Ein Kind kann beim Verlassen seine Einträge in der Cloud mitnehmen (löschen lassen). Unter Familie lässt sich auch die **ganze Familie löschen**. Wer kein Eltern-Gerät mehr hat und die Familie löschen lassen möchte, schreibt eine E-Mail und nennt die **Familien-Kennung** (Familie > Familien-Kennung kopieren, geht auf einem Eltern-Gerät).
 

@@ -49,7 +49,7 @@ Data-Safety-Antworten für Google Play:
 | --- | --- |
 | Erhebt oder teilt die App Nutzerdaten? | Ja, nur wenn Eltern eine Familie anlegen oder beitreten und einwilligen |
 | Welche Daten? | Geräte- oder Nutzer-IDs (Geräte-Kennung aus dem öffentlichen Schlüssel, Push-Kennung), App-Aktivität (Rundenergebnisse), Nachrichten in der App (Joker-Fragen und Antworten), Name des Kindes und Name des Geräts (freiwillig) |
-| Zweck | App-Funktionen (Joker, Ergebnisse für Eltern, Duell, Mitteilungen) |
+| Zweck | App-Funktionen (Joker, Ergebnisse für Eltern, Duell, Arbeiten der Eltern für die Kinder, Mitteilungen) |
 | Teilen mit Dritten? | Verarbeiter: Cloudflare (Dienst der Familie, EU-Speicherung), Google (FCM, bekommt die Push-Kennung und eine Mitteilung mit festem Text ohne Namen und Inhalte). Apple CloudKit nur zum Lesen öffentlicher Klassenpakete, ohne Daten des Kindes. Keine Weitergabe zu Werbung oder Analyse |
 | Daten verschlüsselt übertragen? | Ja (nur HTTPS) |
 | Können Nutzer die Löschung verlangen? | Ja, in der App unter Familie (ganze Familie löschen, oder als Kind beim Verlassen die eigenen Einträge) und per E-Mail an cembot@icloud.com. Daten auf dem Gerät löscht die Deinstallation |
@@ -76,7 +76,7 @@ Wofür die App noch ins Internet geht:
 - Bedienungsanleitung von GitHub Pages (`cembot90.github.io`), mit Offline-Kurzfassung.
 - Download der natürlichen Stimmen aus dem GitHub-Release `stimmen-1`, nur wenn Eltern es auslösen. Größe und Prüfsumme werden geprüft.
 - Klassencode: Pakete der Klasse aus CloudKit lesen. Nur der Klassencode geht über das Netz.
-- Familien-Dienst bei Cloudflare (nur mit Familie und Einwilligung): Ergebnisse, Joker, Duelle, Geräteliste.
+- Familien-Dienst bei Cloudflare (nur mit Familie und Einwilligung): Ergebnisse, Joker, Duelle, Arbeiten der Eltern, Geräteliste.
 - Gemini Nano (KI auf dem Gerät) lädt sein Modell einmal von Google. Danach läuft die KI ohne Internet.
 - Die Handschrift-Erkennung (ML Kit Digital Ink) ist seit 27.10.2026 entfernt. Damit entfallen die Modell-Ladung von Google und ein Baustein, der in der Familienrichtlinie zu prüfen wäre.
 

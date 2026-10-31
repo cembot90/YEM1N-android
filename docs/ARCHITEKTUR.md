@@ -47,7 +47,8 @@ Android --Lesen von Klassenpaketen (API-Token)--> CloudKit (öffentliche DB)
 - Seitenabfrage: `JokerCloud.alleSeiten` folgt dem `continuationMarker` von CloudKit (bis zu 10 Seiten à 200 Ergebnisse).
 - Der alte Familiencode (`xxxxx-xxxxx` in der öffentlichen Datenbank) ist abgelöst. Beim Start vergisst die App ihn und wartende Ergebnisse im alten Format (`altesAufraeumen` im ViewModel). Das Format `Familiencode` bleibt nur für den Klassencode.
 - Schema: `cloud/schema.ckdb`. Details: `cloud/SERVER-KONZEPT.md`, `cloud/CLOUDKIT-ANDROID.md`.
-- Haustier und Pakete bleiben je System getrennt.
+- Haustier bleibt je System getrennt.
+- Pakete der Familie (Typ `paket`, seit 31.10.2026 auch auf Android): Eltern senden unter Einstellungen > Familie und Cloud eine Arbeit als JSON (`logik/FamilienPakete.kt`, Kennung `p-` plus 20 Zeichen SHA-256 über `klasse|fach|titel`, gleich wie iOS). Kind-Geräte holen beim Start, nach Änderungen an der Familie und über "Neue Aufgaben holen" nur Arbeiten, die sie noch nicht haben. Gelöschte Arbeiten kommen nicht von selbst zurück.
 
 ### 4a. Protokoll 2 (Familien-Dienst)
 

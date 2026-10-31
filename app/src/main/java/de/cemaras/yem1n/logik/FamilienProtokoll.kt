@@ -94,6 +94,10 @@ object FamilienProtokoll {
     const val TYP_ERGEBNIS = "ergebnis"
     const val TYP_DUELL = "duell"
     const val TYP_DUELLANTWORT = "duellantwort"
+    const val TYP_PAKET = "paket"
+
+    /** So viele Zeichen nimmt der Familien-Dienst pro Paket. */
+    const val MAX_PAKET = 80000
 
     private val FAMILIE = Regex("^[0-9a-f]{64}$")
     private val TOKEN = Regex("^[A-Za-z0-9_-]{16,64}$")
@@ -188,6 +192,16 @@ object FamilienProtokoll {
 
     fun duellAntwort(duellId: String, json: String): JsonObject =
         senden(TYP_DUELLANTWORT, buildJsonObject { put("duellId", duellId); put("json", json) })
+
+    /** Eine Arbeit für die Kind-Geräte der Familie. Nur Eltern dürfen das senden. */
+    fun paket(id: String, json: String): JsonObject = senden(TYP_PAKET, buildJsonObject { put("id", id); put("json", json) })
+
+    /**
+     * Kennung eines Pakets beim Familien-Dienst, gleich wie `PaketJSON.familienKennung` bei iOS.
+     * Dasselbe Paket bekommt immer dieselbe Kennung, damit erneutes Senden ersetzt statt zu verdoppeln.
+     */
+    fun paketKennung(klasse: String, fach: String, titel: String): String =
+        "p-" + FamilienKrypto.sha256Hex("$klasse|$fach|$titel").take(20)
 
     fun lesen(typ: String, seit: Long = 0, limit: Int = 100): JsonObject = buildJsonObject {
         put("typ", typ)

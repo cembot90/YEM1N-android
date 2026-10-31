@@ -24,8 +24,8 @@ Stand 23.10.2026. Grundlage: Dateien und Texte der iOS-App (`cembot90/YEM1N`) ge
 
 ## Übergabe zwischen den Chats
 
-Cem arbeitet mit zwei Claude-Chats: einer für iOS (Repo `cembot90/YEM1N`), einer für Android (dieses Repo).
-Diese Liste ist die gemeinsame Übergabe. Wer eine Funktion ändert, trägt sie hier für die andere Seite ein.
+Meistens werden beide Apps in derselben Sitzung zusammen geändert. Hier steht nur, was dabei für eine Seite
+offen bleibt oder bewusst nur eine Seite betrifft, egal ob im iOS- oder im Android-Chat entstanden.
 Wer die Änderung nachgebaut oder bewusst weggelassen hat, setzt den Stand auf "fertig" oder "bewusst anders"
 mit Datum und Commit. Erledigte Zeilen bleiben stehen, damit man den Verlauf sieht.
 

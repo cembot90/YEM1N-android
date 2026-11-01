@@ -460,14 +460,9 @@ object LehrplanKunst {
         if (Lern.wahr(0.5)) {
             val f = Lern.eins(namen.keys.toList())
             val name = namen[f].orEmpty()
-            // Ein Quadrat ist auch ein Rechteck: die beiden nie zusammen anbieten
-            val falsch = namen.values.filter {
-                when (f) {
-                    "quadrat" -> it != "Rechteck"
-                    "rechteck" -> it != "Quadrat"
-                    else -> true
-                }
-            }
+            // Ein Quadrat ist auch ein Rechteck: die beiden nie zusammen anbieten.
+            // Als falsche Antwort kommt deshalb nur eins von beiden vor, das Rechteck nur, wenn es die Lösung ist.
+            val falsch = namen.values.filter { if (f == "rechteck") it != "Quadrat" else it != "Rechteck" }
             return Lern.wahl("Wie heißt die Form?", richtig = name, falsch = falsch,
                 bild = "form:$f", erklaerung = "Das ist ein $name.")
         }

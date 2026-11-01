@@ -1,33 +1,63 @@
 # Testplan: iOS und Android gegeneinander
 
-Im Code sind Feldnamen, Duell-Format (JSON, Datum in Sekunden seit 2001) und die Unterschrift beim Klassencode
-(`K-XXXXX-XXXXX|json`, Ed25519) auf beiden Seiten gleich. Das ersetzt keinen Test mit echten Geräten.
-Vorher: Server neu veröffentlichen (`cd server`, `npx wrangler deploy`), damit die Mitteilung zur Anmeldung stimmt.
+Stand 01.11.2026, Familien-Dienst (Protokoll 2). Im Code sind Feldnamen, Duell-Format und die Unterschriften auf beiden
+Seiten gleich und mit denselben Prüfwerten getestet (`cloud/testvektoren-v2.json`). Das ersetzt keinen Test mit echten Geräten.
 
-Geräte: iPhone der Eltern (Rolle Eltern), Android-Tablet bei Yemin (Rolle Kind), beide mit demselben Familiencode.
+**Geräte:** iPhone (Eltern), Android-Tablet (Kind Yemin). Für Teil 6 zusätzlich ein zweites Kind-Gerät oder das iPhone als Kind.
+**Vorher:** Beide Apps auf dem neuesten Stand (TestFlight und `entwicklung` aus Android Studio). Auf beiden Geräten stimmt die Uhrzeit
+(automatisch), sonst lehnt der Dienst Anfragen ab.
 
-## 1. Anmeldung
-1. Android: Einrichtung als Kind mit Name, dann Familiencode samt Einwilligung.
-2. iPhone: Übersicht öffnen, nach unten ziehen. Unter "Kinder in der Familie" steht der Name mit "angemeldet ..., noch keine Runde".
-3. Eine Runde auf Android spielen, iPhone neu laden: jetzt "1 Runde", Wochenbericht zählt sie.
+Jeden Punkt abhaken. Wenn etwas nicht klappt: Bildschirmfoto der Meldung machen und unter Einstellungen > Technik den
+Verbindungstest laufen lassen. Beides an Claude schicken.
 
-## 2. Joker
-1. Android (Kind): bei einer Aufgabe Joker, Frage an die Eltern schicken.
-2. iPhone: Mitteilung kommt, Frage ist da. Antwort mit Emoji senden.
-3. Android: Antwort erscheint, Daumen geben. iPhone: Daumen sichtbar.
-4. Joker aufbrauchen, Nachschub erbitten. iPhone: Mitteilung, Freigabe. Android: Joker wieder da.
-5. Dasselbe in umgekehrter Richtung mit einem iPhone als Kind (iOS schickt, Android liest als Eltern).
+## 1. Familie anlegen und koppeln
+- [ ] iPhone: Einstellungen > Familie, Einwilligung geben, Gerätename "Papa", **Neue Familie anlegen**, Eltern-PIN festlegen.
+- [ ] iPhone: unter Familie **Kind-Gerät** antippen, QR-Code erscheint.
+- [ ] Android: Einrichtung als Kind "Yemin", dann Einstellungen > Familie und Cloud, Einwilligung, **QR-Code scannen**.
+- [ ] Android zeigt einen Prüfcode und wartet. iPhone zeigt das Gerät mit demselben Prüfcode. Codes vergleichen, **Erlauben**.
+- [ ] Android: Familie zeigt "gehört zur Familie (Kind)". Einstellungen > Technik > Verbindungstest: alles grün.
+- [ ] iPhone: Unter den Kindern steht "Yemin", noch ohne Runde.
+- [ ] Gegenprobe: Den gleichen QR-Code ein zweites Mal scannen. Es muss eine Meldung kommen (QR gilt nur einmal).
 
-## 3. Duell
-1. iPhone fordert heraus (Stufe Klasse 3). Android: Herausforderung erscheint, annehmen und spielen.
-2. iPhone: Ergebnis der Antwort sichtbar, Sieger stimmt.
-3. Umgekehrt: Android fordert heraus, iPhone nimmt an.
+## 2. Eltern-PIN
+- [ ] iPhone: App schließen und öffnen, Familie antippen. Die PIN wird verlangt.
+- [ ] Dreimal falsche PIN: Wartezeit erscheint, Text ohne Fachbegriffe.
+- [ ] Android (Kind): Familien-Einstellungen sind hinter der PIN der Eltern (oder für das Kind gesperrt).
 
-## 4. Klassencode
-1. iPhone legt als Admin eine Klasse an und lädt ein Paket hoch (mit Unterschrift).
-2. Android: Klassencode eingeben, Paket holen. Die Unterschrift muss "gültig" sein, das Paket erscheint unter den Arbeiten.
-3. Umgekehrt: Android als Admin (Einstellungen > Familie und Cloud) sendet ein Paket, iPhone holt es.
+## 3. Ergebnisse
+- [ ] Android: eine Runde Mathe spielen, eine mit "Lösung zeigen". Joker-Seite zeigt "Letzte Runde an die Eltern gesendet."
+- [ ] iPhone: Ergebnisse neu laden. Beide Runden sind da, die Runde mit "Lösung zeigen" zählt nicht als richtig.
+- [ ] iPhone: Details einer Runde öffnen, Wochenbericht und Radar zeigen die Runde.
+- [ ] Flugmodus auf Android an, eine Runde spielen. Technik zeigt "Noch nicht gesendet: 1". Flugmodus aus, App öffnen:
+      die Runde kommt nach, iPhone zeigt sie.
 
-## Wenn etwas fehlt
-Auf dem Tablet unter Mehr > Joker steht der Status zum Senden. Unter Einstellungen > Technik gibt es den Verbindungstest.
-Schick mir die Meldung, dann finde ich die Ursache.
+## 4. Joker
+- [ ] Android: bei einer Aufgabe Joker, Frage an die Eltern schicken.
+- [ ] iPhone: Mitteilung kommt (ohne Namen und Inhalt), Frage ist in der App. Antwort mit Emoji senden.
+- [ ] Android: Antwort erscheint, Daumen geben. iPhone: Daumen ist sichtbar.
+- [ ] Joker aufbrauchen, Nachschub erbitten. iPhone: Mitteilung, Freigabe. Android: Joker wieder da.
+
+## 5. Duell
+- [ ] iPhone fordert heraus (Klasse 3). Android: Herausforderung erscheint, annehmen und spielen.
+- [ ] iPhone: Ergebnis sichtbar, Sieger stimmt.
+- [ ] Umgekehrt: Android fordert heraus, iPhone nimmt an.
+
+## 6. Neue Familie (Runden ziehen mit um)
+- [ ] Android: ein paar Runden spielen, alle gesendet.
+- [ ] iPhone: Familie löschen (Nachfrage erscheint), neue Familie anlegen, Android neu koppeln und erlauben.
+- [ ] iPhone: Nach ein bis zwei Minuten sind die Runden von vorher wieder da (Android merkt sich Runden ab dem Update vom 31.10.).
+- [ ] Android: Sterne, Münzen und Haustier sind unverändert.
+- [ ] Dasselbe mit dem iPhone als Kind-Gerät: Dort kommen alle Runden der letzten 365 Tage mit.
+
+## 7. Klassencode
+- [ ] iPhone legt als Admin eine Klasse an und sendet ein Paket.
+- [ ] Android: Klassencode eingeben, Paket holen, die Unterschrift ist gültig, das Paket erscheint unter den Arbeiten.
+- [ ] Umgekehrt: Android als Admin sendet ein Paket, iPhone holt es.
+
+## 8. Störungen (optional, mit Cem am Cloudflare-Dashboard)
+- [ ] Im Dashboard des Workers die Variable `NOTAUS = 1` setzen. Beide Apps zeigen beim Senden "Der Familien-Dienst macht gerade
+      Pause ...". Runden bleiben gemerkt. Variable wieder entfernen, die Runden kommen nach.
+
+## 9. Gerät entfernen
+- [ ] iPhone: Android-Gerät in der Geräteliste entfernen (Nachfrage erscheint).
+- [ ] Android: Familie zeigt, dass das Gerät nicht mehr dazugehört. Übungen, Sterne und Haustier sind noch da.

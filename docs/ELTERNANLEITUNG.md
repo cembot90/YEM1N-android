@@ -58,7 +58,7 @@ Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 4. Das Kind-Gerät zeigt jetzt einen **Prüfcode** aus sechs Zeichen und wartet. Auf dem Eltern-Gerät steht dasselbe Gerät in der Liste, ebenfalls mit Prüfcode. Nur wenn beide gleich sind, tippen Sie auf **Erlauben**. Weitere Eltern-Geräte kommen genauso dazu.
 5. Das Kind stellt Fragen (Joker), die Eltern antworten, das Kind gibt einen Daumen. Es gibt ein Tageslimit, bei Bedarf bittet das Kind um Nachschub und die Eltern geben ihn frei.
 6. Die Eltern sehen Ergebnisse jeder Runde mit Details, einen Wochenbericht in Worten und ein Radar der Bereiche. Am Sonntag um 18 Uhr kann die App an den Wochenbericht erinnern.
-7. Duell: Herausforderung gegen die Familie. Zwischen Android und iPhone geht das erst, wenn auch die iPhone-App auf den neuen Weg umgestellt ist.
+7. Duell: Herausforderung gegen die Familie, auch zwischen Android und iPhone.
 
 **Neue Familie:** Kommt ein Kind-Gerät in eine neue Familie, schickt es seine Runden der letzten 365 Tage noch einmal hoch, damit die Eltern ihre Übersicht und den Wochenbericht behalten. Das gilt für Runden ab diesem Update, ältere kennt die Android-App nicht mehr einzeln. Auf dem Gerät selbst geht dabei nichts verloren.
 

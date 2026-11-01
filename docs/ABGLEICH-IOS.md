@@ -32,6 +32,16 @@ mit Datum und Commit. Erledigte Zeilen bleiben stehen, damit man den Verlauf sie
 ### Von iOS, für Android
 | Datum | iOS-Commit | Was sich geändert hat | Stand |
 |---|---|---|---|
+| 01.11. | 0764281 / 8e29c54 | Erwachsenen-Tor (Malaufgabe oder PIN) vor Einstellungen, Links, Mail, Teilen. Beide Apps gleichzeitig | fertig auf `entwicklung`, wartet auf Test am Gerät |
+| 01.11. | a6cb8d8 / 48b90f1 | Mehrdeutige Aufgaben korrigiert (Großschreiben, I/l, Satzzeichen, Quader, Formen, Porträt, Zählfragen). Beide Apps | fertig auf `entwicklung` |
+| 01.11. | 712602d | Android an iOS angeglichen: Sprachen zuerst aus, Englisch immer in der Lernwelt, Tagesziel 2 bis 10 | fertig auf `entwicklung` |
+| 01.11. | Prüfung | Angefangene Lernwelt-Runde geht nur auf iOS weiter, Android würfelt neu (`ui/AppViewModel.kt` ~1248) | offen, mittel |
+| 01.11. | Prüfung | Android spricht beim Üben kein Lob (iOS: Serien-Lob und Schlusssatz, `MatheUeben.swift` 963, 1031) | offen, klein |
+| 01.11. | Prüfung | Vorschul-Lob auf Türkisch und Englisch fehlt auf Android (iOS `Lob.swift`, `LobText`) | offen, mittel |
+| 01.11. | Prüfung | Memory bringt auf Android Münzen und schaltet Spiele frei, auf iOS nicht | offen, klein: Entscheidung Cem |
+| 01.11. | Prüfung | Sprach-Runden zählen auf Android nicht für Haustier, Tagesziel und Eltern (iOS `Sprachen.swift` 818) | offen, mittel |
+| 01.11. | Prüfung | Spiele auf dem Eltern-Gerät zum Ausprobieren gratis nur auf iOS | offen, klein |
+| 01.11. | Prüfung | Türkisch und Italienisch als Fächer in der Lernwelt nur auf Android (sind mit dem Sprachen-Schalter versteckt) | bewusst anders, bis Cem entscheidet |
 | 27.10. | 122e4f9 | Kind-Gerät schickt beim Beitritt zu einer neuen Familie die eigenen Runden der letzten 365 Tage noch einmal an den Dienst (feste Kennung, kein Doppeln, kurze Pause wegen der Bremse). iOS: `ErgebnisUmzug.swift`, `Cloud.swift`, Tests in `FamilieTests.swift` | Android auf `entwicklung` 31.10. (`logik/ErgebnisUmzug.kt`), wartet auf Test am Gerät. Android merkt sich gesendete Runden erst ab diesem Update |
 | 27.10. | 07c1589 | Handschrift entfernt | fertig (Android schon am 27.10.) |
 

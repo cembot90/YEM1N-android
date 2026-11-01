@@ -50,6 +50,10 @@ Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 - **Familie und Cloud:** Einwilligung, Familie, Klassencode.
 - **Info und Arbeiten:** Anleitung, Datenschutz, Feedback, Arbeiten löschen.
 
+## Nur für Erwachsene
+
+Die Einstellungen und alles, was aus der App hinausführt (Browser, Feedback per Mail, Teilen), stehen hinter einem Tor. Es fragt eine Malaufgabe wie 14 · 17, die Kinder bis Klasse 4 nicht im Kopf rechnen. Ist eine Eltern-PIN festgelegt, reicht auch die PIN. Danach bleibt das Tor fünf Minuten offen. Das gilt auf jedem Gerät, auch ohne Familie.
+
 ## Familie: Joker, Ergebnisse, Duell
 
 1. Einstellungen > Familie und Cloud (oder Joker auf dem Startbildschirm) und die Einwilligung geben. Ohne sie geht nichts in die Cloud.

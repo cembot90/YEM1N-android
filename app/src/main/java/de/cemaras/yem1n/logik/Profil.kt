@@ -23,7 +23,7 @@ object Profil {
             vorschulAn = if (klasse == "Vorschule") true else if (klasse.isNotEmpty()) false else f.vorschulAn,
             sprachenAn = sprachen,
             rosa = rosa,
-            tagesziel = tagesziel.coerceIn(1, 5),
+            tagesziel = tagesziel.coerceIn(1, 10),
             autoVorlesen = autoVorlesen,
             profilFertig = true,
         )

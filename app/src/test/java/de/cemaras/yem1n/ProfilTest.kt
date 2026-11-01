@@ -31,7 +31,7 @@ class ProfilTest {
         assertFalse(f.vorschulAn)
         assertTrue(f.sprachenAn)
         assertTrue(f.rosa)
-        assertEquals(5, f.tagesziel)
+        assertEquals(9, f.tagesziel)
         assertTrue(f.autoVorlesen)
         assertTrue(f.profilFertig)
     }

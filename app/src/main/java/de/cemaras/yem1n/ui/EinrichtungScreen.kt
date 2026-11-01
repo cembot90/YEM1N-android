@@ -105,7 +105,7 @@ fun EinrichtungScreen(vm: AppViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Tagesziel: $ziel ${if (ziel == 1) "Runde" else "Runden"}", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f))
                         TextButton(onClick = { ziel = (ziel - 1).coerceAtLeast(1) }) { Text("-", color = Gelb, fontSize = 22.sp) }
-                        TextButton(onClick = { ziel = (ziel + 1).coerceAtMost(5) }) { Text("+", color = Gelb, fontSize = 22.sp) }
+                        TextButton(onClick = { ziel = (ziel + 1).coerceAtMost(10) }) { Text("+", color = Gelb, fontSize = 22.sp) }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Aufgaben automatisch vorlesen", color = Color.White, fontSize = 16.sp, modifier = Modifier.weight(1f).padding(end = 12.dp))

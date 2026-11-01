@@ -1632,7 +1632,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         behalte(fortschritt.copy(rosa = rosa))
     }
 
-    fun setzeTagesziel(ziel: Int) = behalte(fortschritt.copy(tagesziel = ziel.coerceIn(1, 5)))
+    fun setzeTagesziel(ziel: Int) = behalte(fortschritt.copy(tagesziel = ziel.coerceIn(1, 10)))
 
     /** Blendet eine Arbeit aus und löscht ihre Datei, falls sie eingefügt wurde. */
     fun loescheArbeit(arbeit: Arbeit) {

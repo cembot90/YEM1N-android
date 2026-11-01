@@ -38,8 +38,8 @@ enum class LehrFach(val anzeige: String, val emoji: String) {
     TUERKISCH("Türkisch", "🇹🇷"),
     ITALIENISCH("Italienisch", "🇮🇹");
 
-    /** Fremdsprachen lassen sich unter Bereiche ausblenden. */
-    val istSprache: Boolean get() = this == ENGLISCH || this == TUERKISCH || this == ITALIENISCH
+    /** Extra-Sprachen lassen sich unter Bereiche ausblenden. Englisch gehört zum Lehrplan und bleibt immer da, wie bei iOS. */
+    val istSprache: Boolean get() = this == TUERKISCH || this == ITALIENISCH
 }
 
 /** Eine Aufgabe, bevor sie in die Übung kommt. */

@@ -37,7 +37,7 @@ data class Fortschritt(
     val letzterTag: Long = 0,
     val rundenAmLetztenTag: Int = 0,
     val name: String = "",
-    val tagesziel: Int = 1,
+    val tagesziel: Int = 2,
     /** Arbeiten, die das Kind nicht mehr sehen soll (mitgelieferte lassen sich nicht löschen). */
     val versteckt: List<String> = emptyList(),
     /** Richtig und gesamt je Übungsname (zum Beispiel "Einmaleins"), über alle Runden. */
@@ -81,7 +81,8 @@ data class Fortschritt(
     val wochenberichtAn: Boolean = false,
     /** Bereiche, die Eltern ausblenden können. */
     val vorschulAn: Boolean = true,
-    val sprachenAn: Boolean = true,
+    /** Sprachen sind noch ein Versuch und zuerst aus, wie bei iOS. */
+    val sprachenAn: Boolean = false,
     /** Olli hat dem Kind das Haustier schon erklärt. */
     val euleEinfuehrung: Boolean = false,
     /** Welche Sprachen das Kind lernt (en, tr, it). */

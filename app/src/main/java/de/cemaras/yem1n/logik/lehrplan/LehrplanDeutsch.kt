@@ -362,9 +362,18 @@ object LehrplanDeutsch {
         return if (i < 0) 99 else i
     }
 
+    /**
+     * Ablenker für "Ein Wort schreibt man groß": Wörter, die nie ein Nomen sein können
+     * (Verben in der er-Form und Adjektive ohne gleichnamiges Nomen).
+     */
+    val grossAblenker = listOf(
+        "läuft", "spielt", "lacht", "singt", "springt", "schläft", "trinkt", "schwimmt", "tanzt", "liest",
+        "schnell", "langsam", "lustig", "traurig", "müde", "frech", "mutig", "leise", "nett", "weich",
+    )
+
     fun gross(): LernAufgabe {
         val n = Lern.eins(nomen)
-        val andere = (adjektive + verben.map { it.infinitiv }).shuffled(Lern.zufall).take(2)
+        val andere = grossAblenker.shuffled(Lern.zufall).take(2)
         val optionen = (listOf(n.wort.lowercase()) + andere).shuffled(Lern.zufall)
         return LernAufgabe(
             art = "wahl", frage = "Ein Wort schreibt man groß. Welches?",

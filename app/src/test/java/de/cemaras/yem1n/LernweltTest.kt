@@ -5,8 +5,12 @@ import de.cemaras.yem1n.logik.Lern
 import de.cemaras.yem1n.logik.LehrFach
 import de.cemaras.yem1n.logik.Lernwelt
 import de.cemaras.yem1n.logik.Schuljahr
+import de.cemaras.yem1n.logik.lehrplan.LehrplanDeutsch
+import de.cemaras.yem1n.logik.lehrplan.LehrplanDeutschMehr
+import de.cemaras.yem1n.logik.lehrplan.LehrplanKunst
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -190,6 +194,49 @@ class LernweltSprachenTest {
         repeat(30) {
             val a = liste.first().erzeuge()
             if (a.bild.startsWith("sprich:")) org.junit.Assert.assertTrue(a.bild.startsWith("sprich:tr|"))
+        }
+    }
+}
+
+class LernweltInhaltTest {
+    @Before
+    fun feststehenderZufall() {
+        Lern.zufall = Random(7)
+    }
+
+    @Test
+    fun beimGrossschreibenIstNurEinWortEinNomen() {
+        val nomen = LehrplanDeutsch.nomen.map { it.wort.lowercase() }.toSet()
+        for (w in LehrplanDeutsch.grossAblenker) assertFalse("$w ist ein Nomen", w in nomen)
+        repeat(50) {
+            val a = LehrplanDeutsch.gross()
+            assertEquals(3, a.optionen.size)
+            assertEquals("${a.optionen}", listOf(a.antwort), a.optionen.filter { it in nomen })
+        }
+    }
+
+    @Test
+    fun grossesIUndKleinesLStehenNieZusammen() {
+        repeat(200) {
+            val a = LehrplanDeutschMehr.buchstabenPaare()
+            val alle = listOf(a.rechnung) + a.optionen
+            assertFalse("$alle", "I" in alle && "l" in alle)
+        }
+    }
+
+    @Test
+    fun satzzeichenAmEndeSindEindeutig() {
+        for ((satz, zeichen) in LehrplanDeutschMehr.saetzeOhneZeichen) {
+            if (zeichen == "!") assertFalse("$satz: hier ginge auch ein Punkt", "bitte" in satz)
+        }
+    }
+
+    @Test
+    fun quadratUndRechteckNieZusammenBeiDenFormen() {
+        repeat(100) {
+            val a = LehrplanKunst.formen()
+            assertFalse("${a.optionen}", "Quadrat" in a.optionen && "Rechteck" in a.optionen)
+            assertFalse(a.erklaerung, a.erklaerung.startsWith("Richtig sind"))
         }
     }
 }

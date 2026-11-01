@@ -119,7 +119,7 @@ object LehrplanDeutschMehr {
     val aehnlich: Map<String, List<String>> = mapOf(
         "a" to listOf("o", "e"), "b" to listOf("d", "p"), "c" to listOf("e", "o"), "d" to listOf("b", "q"),
         "e" to listOf("a", "c"), "f" to listOf("t", "k"), "g" to listOf("q", "j"), "h" to listOf("n", "k"),
-        "i" to listOf("l", "j"), "j" to listOf("i", "g"), "k" to listOf("h", "x"), "l" to listOf("i", "t"),
+        "i" to listOf("j", "t"), "j" to listOf("i", "g"), "k" to listOf("h", "x"), "l" to listOf("t", "k"),
         "m" to listOf("n", "w"), "n" to listOf("m", "h"), "o" to listOf("a", "c"), "p" to listOf("q", "b"),
         "q" to listOf("p", "g"), "r" to listOf("n", "v"), "s" to listOf("z", "c"), "t" to listOf("f", "l"),
         "u" to listOf("n", "v"), "v" to listOf("w", "u"), "w" to listOf("m", "v"), "x" to listOf("k", "z"),
@@ -148,10 +148,10 @@ object LehrplanDeutschMehr {
     val saetzeOhneZeichen: List<Pair<String, String>> = listOf(
         "Wie heißt du" to "?", "Ich gehe in die Schule" to ".", "Pass auf" to "!", "Hast du einen Hund" to "?",
         "Der Ball ist rot" to ".", "Komm schnell her" to "!", "Wo wohnst du" to "?", "Heute scheint die Sonne" to ".",
-        "Magst du Eis" to "?", "Mia malt ein Bild" to ".", "Sei bitte leise" to "!", "Wann beginnt die Pause" to "?",
+        "Magst du Eis" to "?", "Mia malt ein Bild" to ".", "Hilfe, ich falle" to "!", "Wann beginnt die Pause" to "?",
         "Mein Bruder ist sieben Jahre alt" to ".", "Kannst du schwimmen" to "?", "Wir spielen im Garten" to ".",
-        "Räum bitte dein Zimmer auf" to "!", "Was isst du gern" to "?", "Die Katze schläft auf dem Sofa" to ".",
-        "Halt, stopp" to "!", "Gib mir bitte den Stift" to "!",
+        "Achtung, ein Auto" to "!", "Was isst du gern" to "?", "Die Katze schläft auf dem Sofa" to ".",
+        "Halt, stopp" to "!", "Hurra, wir haben gewonnen" to "!",
     )
 
     fun satzzeichen(): LernAufgabe {

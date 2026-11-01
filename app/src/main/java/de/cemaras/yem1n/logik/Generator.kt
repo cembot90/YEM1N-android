@@ -54,7 +54,7 @@ class MatheGenerator(private val zufall: Random = Random.Default) {
         }
         val text = if (zufall.nextBoolean()) "Subtrahiere von $a die Zahl $b."
         else "Wie heißt die Differenz der Zahlen $a und $b?"
-        return zahl("Notiere die passende Rechnung.", text, a - b, erklaerung = "$a - $b = ${a - b}")
+        return zahl("Rechne aus.", text, a - b, erklaerung = "$a - $b = ${a - b}")
     }
 
     fun malWort(): Aufgabe {
@@ -67,12 +67,12 @@ class MatheGenerator(private val zufall: Random = Random.Default) {
             val d = aus(listOf(2, 5))
             val e = 10
             return zahl(
-                "Notiere die passende Rechnung.",
+                "Rechne aus.",
                 "Wie heißt das Produkt der Zahlen $d, $c und $e?",
                 d * c * e, erklaerung = "$d · $c · $e = ${d * c * e}",
             )
         }
-        return zahl("Notiere die passende Rechnung.", text, a * b, erklaerung = "$a · $b = ${a * b}")
+        return zahl("Rechne aus.", text, a * b, erklaerung = "$a · $b = ${a * b}")
     }
 
     fun kern(): Aufgabe {

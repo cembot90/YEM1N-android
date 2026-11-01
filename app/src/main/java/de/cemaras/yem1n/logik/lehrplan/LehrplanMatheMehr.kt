@@ -372,7 +372,7 @@ object LehrplanMatheMehr {
 
     val koerperListe: List<Triple<String, String, String>> = listOf(
         Triple("Würfel", "der", "6 gleich große Quadrate als Flächen"),
-        Triple("Quader", "der", "6 Rechtecke als Flächen, wie ein Schuhkarton"),
+        Triple("Quader", "der", "6 Rechtecke als Flächen, nicht alle gleich groß, wie ein Schuhkarton"),
         Triple("Kugel", "die", "ganz rund, ohne Ecken und Kanten"),
         Triple("Zylinder", "der", "2 Kreise als Flächen, wie eine Dose"),
         Triple("Kegel", "der", "unten ein Kreis, oben eine Spitze, wie eine Eiswaffel"),
@@ -383,13 +383,19 @@ object LehrplanMatheMehr {
         if (Lern.wahr(0.4)) {
             val f = Lern.eins(
                 listOf(
-                    "Wie viele Ecken hat ein Würfel?" to 8, "Wie viele Kanten hat ein Würfel?" to 12,
-                    "Wie viele Flächen hat ein Würfel?" to 6, "Wie viele Ecken hat ein Quader?" to 8,
-                    "Wie viele Flächen hat ein Quader?" to 6, "Wie viele Ecken hat eine Kugel?" to 0,
-                    "Wie viele Ecken hat eine Pyramide mit quadratischem Boden?" to 5,
+                    Triple("Wie viele Ecken hat ein Würfel?", 8, "Ein Würfel hat 4 Ecken unten und 4 Ecken oben: 8 Ecken."),
+                    Triple("Wie viele Kanten hat ein Würfel?", 12, "Ein Würfel hat 4 Kanten unten, 4 oben und 4 an den Seiten: 12 Kanten."),
+                    Triple("Wie viele Flächen hat ein Würfel?", 6, "Ein Würfel hat 6 Flächen: unten, oben, vorne, hinten, links und rechts."),
+                    Triple("Wie viele Ecken hat ein Quader?", 8, "Ein Quader hat 4 Ecken unten und 4 Ecken oben: 8 Ecken."),
+                    Triple("Wie viele Flächen hat ein Quader?", 6, "Ein Quader hat 6 Flächen: unten, oben, vorne, hinten, links und rechts."),
+                    Triple("Wie viele Ecken hat eine Kugel?", 0, "Eine Kugel ist ganz rund. Sie hat keine einzige Ecke, also 0."),
+                    Triple(
+                        "Wie viele Ecken hat eine Pyramide mit quadratischem Boden?", 5,
+                        "Unten hat sie 4 Ecken, dazu kommt die Spitze oben: 5 Ecken.",
+                    ),
                 ),
             )
-            return Lern.zahl(f.first, "", f.second, erklaerung = "Richtig sind ${f.second}.")
+            return Lern.zahl(f.first, "", f.second, erklaerung = f.third)
         }
         val (name, artikel, text) = Lern.eins(koerperListe)
         return Lern.wahl(
@@ -418,14 +424,19 @@ object LehrplanMatheMehr {
     fun kombinieren2(): LernAufgabe {
         val a = z(2..4)
         val b = z(2..4)
+        // Satzanfang, erste Sache, zweite Sache, Frage
         val f = Lern.eins(
             listOf(
-                Triple("T-Shirts", "Hosen", "anziehen"), Triple("Sorten Eis", "Waffeln", "aussuchen"),
-                Triple("Mützen", "Schals", "anziehen"),
+                listOf("Im Schrank liegen", "T-Shirts", "Hosen", "Wie viele verschiedene Paare kannst du anziehen?"),
+                listOf(
+                    "In der Eisdiele gibt es", "Sorten Eis", "Sorten Waffeln",
+                    "Du nimmst eine Kugel Eis in einer Waffel. Wie viele verschiedene Eistüten kannst du aussuchen?",
+                ),
+                listOf("Im Schrank liegen", "Mützen", "Schals", "Wie viele verschiedene Paare kannst du anziehen?"),
             ),
         )
         return Lern.zahl(
-            LIES, "Im Schrank liegen $a ${f.first} und $b ${f.second}. Wie viele verschiedene Paare kannst du ${f.third}?",
+            LIES, "${f[0]} $a ${f[1]} und $b ${f[2]}. ${f[3]}",
             a * b, erklaerung = "Zu jedem der $a passen alle $b: $a · $b = ${a * b}",
         )
     }

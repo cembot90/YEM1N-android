@@ -460,19 +460,29 @@ object LehrplanKunst {
         if (Lern.wahr(0.5)) {
             val f = Lern.eins(namen.keys.toList())
             val name = namen[f].orEmpty()
-            return Lern.wahl("Wie heißt die Form?", richtig = name, falsch = namen.values.toList(),
+            // Ein Quadrat ist auch ein Rechteck: die beiden nie zusammen anbieten
+            val falsch = namen.values.filter {
+                when (f) {
+                    "quadrat" -> it != "Rechteck"
+                    "rechteck" -> it != "Quadrat"
+                    else -> true
+                }
+            }
+            return Lern.wahl("Wie heißt die Form?", richtig = name, falsch = falsch,
                 bild = "form:$f", erklaerung = "Das ist ein $name.")
         }
+        // Frage, Antwort, Bild, Erklärung
+        class Zaehl(val frage: String, val zahl: Int, val bild: String, val erklaerung: String)
         val f = Lern.eins(listOf(
-            Triple("Wie viele Ecken hat ein Dreieck?", 3, "dreieck"),
-            Triple("Wie viele Ecken hat ein Quadrat?", 4, "quadrat"),
-            Triple("Wie viele Ecken hat ein Rechteck?", 4, "rechteck"),
-            Triple("Wie viele Ecken hat ein Kreis?", 0, "kreis"),
-            Triple("Wie viele Seiten hat ein Dreieck?", 3, "dreieck"),
-            Triple("Wie viele Seiten hat ein Quadrat?", 4, "quadrat"),
-            Triple("Wie viele Zacken hat der Stern?", 5, "stern"),
+            Zaehl("Wie viele Ecken hat ein Dreieck?", 3, "dreieck", "Ein Dreieck hat 3 Ecken. Daher kommt sein Name."),
+            Zaehl("Wie viele Ecken hat ein Quadrat?", 4, "quadrat", "Ein Quadrat hat 4 Ecken."),
+            Zaehl("Wie viele Ecken hat ein Rechteck?", 4, "rechteck", "Ein Rechteck hat 4 Ecken."),
+            Zaehl("Wie viele Ecken hat ein Kreis?", 0, "kreis", "Ein Kreis ist ganz rund. Er hat keine einzige Ecke, also 0."),
+            Zaehl("Wie viele Seiten hat ein Dreieck?", 3, "dreieck", "Ein Dreieck hat 3 gerade Seiten."),
+            Zaehl("Wie viele Seiten hat ein Quadrat?", 4, "quadrat", "Ein Quadrat hat 4 gleich lange Seiten."),
+            Zaehl("Wie viele Zacken hat der Stern?", 5, "stern", "Zähl die Spitzen nacheinander: Der Stern hat 5 Zacken."),
         ))
-        return Lern.zahl(f.first, "", f.second, erklaerung = "Richtig sind ${f.second}.").mit("form:${f.third}")
+        return Lern.zahl(f.frage, "", f.zahl, erklaerung = f.erklaerung).mit("form:${f.bild}")
     }
 
     val mischungen = listOf(
@@ -515,7 +525,7 @@ object LehrplanKunst {
         "Frottage" to "Eine Struktur mit dem Stift durchreiben",
         "Druck" to "Farbe mit einem Stempel aufs Papier bringen",
         "Skulptur" to "Eine Figur aus Stein, Holz oder Ton",
-        "Porträt" to "Ein Bild von einem Menschen",
+        "Porträt" to "Ein Bild, auf dem man einen anderen Menschen malt",
         "Selbstporträt" to "Ein Bild, auf dem man sich selbst malt",
         "Stillleben" to "Ein Bild von Dingen wie Obst und Vasen",
         "Landschaftsbild" to "Ein Bild von Wiesen, Bergen und Himmel",

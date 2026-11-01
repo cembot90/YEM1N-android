@@ -60,6 +60,8 @@ fun EinstellungenScreen(vm: AppViewModel) {
             gruppen.firstOrNull { it.id == seite }?.let { "${it.symbol} ${it.titel}" } ?: "Einstellungen",
             fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White,
         )
+        // Die Einstellungen sind kindersicher: erst das Erwachsenen-Tor (Malaufgabe oder Eltern-PIN).
+        if (!ErwachsenenTor(vm)) return@Column
         // Die Familien-Einstellungen (Einwilligung widerrufen, Klassencode) sind nur für Eltern: mit PIN, sobald das Gerät zur Familie gehört.
         if (seite == "familie" && !PinTor(vm)) return@Column
         if (seite == null) {

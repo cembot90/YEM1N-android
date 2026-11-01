@@ -159,6 +159,7 @@ private fun Anfang(vm: AppViewModel) {
 @Composable
 private fun ArbeitEbene(vm: AppViewModel, e: Arbeit) {
     val kontext = LocalContext.current
+    val tor = mitTor(vm)
     var vorlagen by remember { mutableStateOf(false) }
     var befunde by remember { mutableStateOf<List<String>?>(null) }
     var meldung by remember { mutableStateOf<String?>(null) }
@@ -200,12 +201,14 @@ private fun ArbeitEbene(vm: AppViewModel, e: Arbeit) {
         meldung = f ?: "Die Arbeit ist gespeichert und steht jetzt auf dem Startbildschirm."
     }
     EdKnopf("📤 JSON teilen") {
-        val absicht = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, e.titel)
-            putExtra(Intent.EXTRA_TEXT, PaketJson.text(e))
+        tor {
+            val absicht = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, e.titel)
+                putExtra(Intent.EXTRA_TEXT, PaketJson.text(e))
+            }
+            kontext.startActivity(Intent.createChooser(absicht, "Arbeit teilen"))
         }
-        kontext.startActivity(Intent.createChooser(absicht, "Arbeit teilen"))
     }
     EdKnopf("🗑 Entwurf verwerfen") { verwerfen = true }
 

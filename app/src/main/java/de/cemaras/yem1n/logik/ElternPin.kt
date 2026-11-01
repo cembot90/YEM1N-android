@@ -68,3 +68,21 @@ object ElternPin {
         }
     }
 }
+
+/**
+ * Frage für das Erwachsenen-Tor ohne Eltern-PIN: zwei Zahlen zwischen 12 und 19 malnehmen.
+ * Das rechnet ein Kind bis Klasse 4 nicht im Kopf, Erwachsene schaffen es kurz. Wie iOS (`ElternFrage` in `ElternPin.swift`).
+ */
+data class ElternFrage(val a: Int, val b: Int) {
+    val ergebnis: Int get() = a * b
+    val text: String get() = "Wie viel ist $a · $b?"
+
+    fun stimmt(eingabe: String): Boolean = eingabe.trim().toIntOrNull() == ergebnis
+
+    companion object {
+        val BEREICH = 12..19
+
+        fun neu(zufall: kotlin.random.Random = kotlin.random.Random.Default): ElternFrage =
+            ElternFrage(BEREICH.random(zufall), BEREICH.random(zufall))
+    }
+}

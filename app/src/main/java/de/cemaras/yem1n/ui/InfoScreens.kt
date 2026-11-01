@@ -72,6 +72,7 @@ fun InfoScreen(vm: AppViewModel) {
     val kontext = LocalContext.current
     val version = remember { versionsName(kontext) }
     var kopiert by remember { mutableStateOf(false) }
+    val tor = mitTor(vm)
     val infoText = "YEM1N $version, ${geraet()}"
     Column(
         Modifier
@@ -90,7 +91,7 @@ fun InfoScreen(vm: AppViewModel) {
         InfoZeile("🤚", "Datenschutzhinweise") { vm.oeffneInfoSeite(InfoSeite.DATENSCHUTZ) }
         InfoZeile("🪪", "Impressum") { vm.oeffneInfoSeite(InfoSeite.IMPRESSUM) }
         InfoZeile("⚠️", "Beta und Haftung") { vm.oeffneInfoSeite(InfoSeite.BETA) }
-        InfoZeile("✉️", "Feedback an den Admin") { feedback(kontext, infoText) }
+        InfoZeile("✉️", "Feedback an den Admin") { tor { feedback(kontext, infoText) } }
         InfoZeile(if (kopiert) "✅" else "📋", if (kopiert) "Kopiert" else "Versionsinfo kopieren") {
             val zwischen = kontext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             zwischen.setPrimaryClip(ClipData.newPlainText("YEM1N", infoText))
@@ -150,6 +151,7 @@ fun InfoSeiteScreen(vm: AppViewModel, seite: InfoSeite) {
 @Composable
 private fun TextSeite(vm: AppViewModel, titel: String, abschnitte: List<Pair<String, String>>, webAdresse: String) {
     val kontext = LocalContext.current
+    val tor = mitTor(vm)
     Column(
         Modifier
             .fillMaxSize()
@@ -170,7 +172,7 @@ private fun TextSeite(vm: AppViewModel, titel: String, abschnitte: List<Pair<Str
             }
         }
         Button(
-            onClick = { oeffneImBrowser(kontext, webAdresse) },
+            onClick = { tor { oeffneImBrowser(kontext, webAdresse) } },
             modifier = Modifier.fillMaxWidth().height(50.dp),
         ) { Text("Im Browser öffnen", fontWeight = FontWeight.Bold) }
         Spacer(Modifier.height(24.dp))
@@ -192,6 +194,7 @@ private fun AnleitungScreen(vm: AppViewModel) {
     var laedt by remember { mutableStateOf(true) }
     var fehler by remember { mutableStateOf(false) }
     val adresse = InfoTexte.anleitungAdresse(vm.fortschritt.rosa)
+    val tor = mitTor(vm)
     Column(Modifier.fillMaxSize().systemBarsPadding()) {
         TextButton(onClick = vm::zurueck, modifier = Modifier.padding(horizontal = 16.dp)) {
             Text("‹ Zurück", color = Gelb, fontSize = 16.sp)
@@ -225,7 +228,7 @@ private fun AnleitungScreen(vm: AppViewModel) {
                                 ): Boolean {
                                     val ziel = request?.url ?: return false
                                     if (ziel.host == InfoTexte.HOST) return false
-                                    oeffneImBrowser(ctx, ziel.toString())
+                                    tor { oeffneImBrowser(ctx, ziel.toString()) }
                                     return true
                                 }
                             }

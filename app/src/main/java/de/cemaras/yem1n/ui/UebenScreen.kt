@@ -126,8 +126,8 @@ private fun ProbeUhr(start: Long) {
 @Composable
 private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
     val a = s.aktuell ?: return
-    var e1 by remember(s.index, s.mauerSchritt) { mutableStateOf("") }
-    var e2 by remember(s.index) { mutableStateOf("") }
+    var e1 by remember(s.index, s.mauerSchritt, s.zweiterVersuch) { mutableStateOf("") }
+    var e2 by remember(s.index, s.zweiterVersuch) { mutableStateOf("") }
     var tippSichtbar by remember(s.index) { mutableStateOf(false) }
     var notizOffen by remember(s.index) { mutableStateOf(false) }
     val notiz = remember(s.index) { androidx.compose.runtime.mutableStateListOf<List<androidx.compose.ui.geometry.Offset>>() }
@@ -205,7 +205,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
             Spacer(Modifier.height(8.dp))
         }
         if (s.kurzerHinweis.isNotEmpty() && !s.bewertet) {
-            Text(s.kurzerHinweis, color = Mint, fontWeight = FontWeight.SemiBold)
+            Text(s.kurzerHinweis, color = if (s.zweiterVersuch) Gelb else Mint, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(8.dp))
         }
 
@@ -376,7 +376,7 @@ private fun Rueckmeldung(s: RundenStand, name: String, vm: AppViewModel) {
     }
     val titel = remember(s.index, stand) {
         when (stand) {
-            Stand.RICHTIG -> Lob.fuerRichtig(s.serie, false, name)
+            Stand.RICHTIG -> Lob.fuerRichtig(s.serie, s.nachFehler, name)
             Stand.FALSCH -> Lob.titelDaneben()
             else -> "Hier ist die Lösung"
         }

@@ -17,6 +17,10 @@ data class RundenStand(
     val mauerSchritt: Int = 0,
     val erklaerung: String = "",
     val kurzerHinweis: String = "",
+    /** Die aktuelle Aufgabe war einmal falsch, jetzt kommt der zweite Versuch (siehe [ZweiterVersuch]). */
+    val zweiterVersuch: Boolean = false,
+    /** Die zuletzt bewertete Aufgabe wurde erst im zweiten Versuch beantwortet. */
+    val nachFehler: Boolean = false,
 ) {
     val aktuell: Aufgabe? get() = aufgaben.getOrNull(index)
     val fertig: Boolean get() = index >= aufgaben.size
@@ -44,19 +48,31 @@ object Runde {
     private fun vorbereitet(s: RundenStand): RundenStand {
         val a = s.aktuell
         return if (a != null && a.istMauer) {
-            s.copy(mauerWerte = Mauer.start(a.reihen), mauerSchritt = 0, kurzerHinweis = "")
+            s.copy(mauerWerte = Mauer.start(a.reihen), mauerSchritt = 0, kurzerHinweis = "", zweiterVersuch = false, nachFehler = false)
         } else {
-            s.copy(mauerWerte = emptyList(), mauerSchritt = 0, kurzerHinweis = "")
+            s.copy(mauerWerte = emptyList(), mauerSchritt = 0, kurzerHinweis = "", zweiterVersuch = false, nachFehler = false)
         }
     }
 
-    /** Das Kind gibt eine Antwort ab. Unvollständige Eingaben ändern nichts. */
-    fun antworte(s: RundenStand, eingabe: String, eingabe2: String = ""): RundenStand {
+    /**
+     * Das Kind gibt eine Antwort ab. Unvollständige Eingaben ändern nichts.
+     * Mit [zweiterVersuch] gibt es beim ersten Fehler einen Hinweis und einen zweiten Versuch, wenn
+     * [ZweiterVersuch.erlaubt] (in der Probearbeit nicht). [nr] wählt den Satz für den Hinweis (Abwechslung).
+     */
+    fun antworte(
+        s: RundenStand, eingabe: String, eingabe2: String = "", zweiterVersuch: Boolean = false, nr: Int = 0,
+    ): RundenStand {
         val a = s.aktuell ?: return s
         if (s.bewertet) return s
         if (a.istMauer) return mauerAntwort(s, a, eingabe)
         val ok = Pruefer.pruefe(a, eingabe, eingabe2) ?: return s
-        return bewertet(s, a, ok, a.erklaerung, Pruefer.gegebenText(a, eingabe, eingabe2))
+        if (!ok && !s.zweiterVersuch && ZweiterVersuch.erlaubt(a.art, a.optionen.size, probe = !zweiterVersuch)) {
+            return s.copy(zweiterVersuch = true, nachFehler = false, kurzerHinweis = ZweiterVersuch.text(a.hinweis, nr))
+        }
+        return bewertet(
+            s.copy(zweiterVersuch = false, nachFehler = s.zweiterVersuch), a, ok, a.erklaerung,
+            Pruefer.gegebenText(a, eingabe, eingabe2),
+        )
     }
 
     private fun mauerAntwort(s: RundenStand, a: Aufgabe, eingabe: String): RundenStand {
@@ -120,6 +136,7 @@ object Runde {
             mauerWerte = werte,
             erklaerung = text,
             kurzerHinweis = "",
+            zweiterVersuch = false,
         )
     }
 

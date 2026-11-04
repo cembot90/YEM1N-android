@@ -32,6 +32,8 @@ mit Datum und Commit. Erledigte Zeilen bleiben stehen, damit man den Verlauf sie
 ### Von iOS, für Android
 | Datum | iOS-Commit | Was sich geändert hat | Stand |
 |---|---|---|---|
+| 04.11. | Android | Richtig erst im zweiten Versuch: Android merkt die Aufgabe im Fehlerheft, iOS nur bei Aufgaben, die schon aus dem Fehlerheft kommen (iOS braucht dafür eine Änderung am Datenmodell, vorsichtig wegen Yemins Fortschritt) | offen für iOS, mittel |
+| 04.11. | beide | Zweiter Versuch vor der Lösung (iOS `Lob.swift` `ZweiterVersuch`, `MatheUeben.swift`; Android `logik/ZweiterVersuch.kt`, `logik/Runde.kt`). Beide Apps gleichzeitig | fertig auf `entwicklung`, wartet auf Test am Gerät |
 | 01.11. | 0764281 / 8e29c54 | Erwachsenen-Tor (Malaufgabe oder PIN) vor Einstellungen, Links, Mail, Teilen. Beide Apps gleichzeitig | fertig auf `entwicklung`, wartet auf Test am Gerät |
 | 01.11. | a6cb8d8 / 48b90f1 | Mehrdeutige Aufgaben korrigiert (Großschreiben, I/l, Satzzeichen, Quader, Formen, Porträt, Zählfragen). Beide Apps | fertig auf `entwicklung` |
 | 01.11. | 712602d | Android an iOS angeglichen: Sprachen zuerst aus, Englisch immer in der Lernwelt, Tagesziel 2 bis 10 | fertig auf `entwicklung` |

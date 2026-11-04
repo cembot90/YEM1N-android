@@ -37,6 +37,7 @@ Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 
 ## Hilfen und Erklären
 
+- Zweiter Versuch: Ist eine Antwort falsch, kommt erst ein Hinweis (mit dem Tipp der Aufgabe) und das Kind probiert es noch einmal. Danach kommen Lösung und Erklärung. Richtig im zweiten Versuch zählt als richtig, die Aufgabe kommt aber ins Fehlerheft und gilt dort erst als geschafft, wenn sie gleich beim ersten Mal klappt. Nicht in der Probearbeit, bei der Zahlenmauer, beim Vergleichen und bei Auswahl mit weniger als vier Knöpfen.
 - Tipp und Lösung zeigen: Die Lösung zählt weder als richtig noch als falsch und bringt keine Münzen.
 - Nach einer falschen Antwort kann das Kind "Warum war das falsch?" tippen. Die Eule erklärt den Fehler. Auf Geräten mit Gemini Nano formuliert die KI auf dem Gerät den Satz um, sonst gibt es feste Sätze.
 - "Zeig es mir als Bild" zeigt den Rechenweg.

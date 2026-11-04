@@ -1388,7 +1388,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun antworte(eingabe: String, eingabe2: String = "") {
         val alt = runde ?: return
-        val neu = Runde.antworte(alt, eingabe, eingabe2)
+        val neu = Runde.antworte(alt, eingabe, eingabe2, zweiterVersuch = !istProbe, nr = kotlin.random.Random.nextInt(1000))
         runde = neu
         vermerke(alt, neu)
     }
@@ -1402,10 +1402,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val i = alt.index
         val vorher = alt.staende.getOrNull(i) ?: return
         val nachher = neu.staende.getOrNull(i) ?: return
-        if (vorher != Stand.OFFEN || (nachher != Stand.RICHTIG && nachher != Stand.FALSCH)) return
+        // Erster Fehler mit zweitem Versuch: der Fehler zählt fürs Fehlerheft schon jetzt.
+        val ersterFehler = !alt.zweiterVersuch && neu.zweiterVersuch
+        val beendet = vorher == Stand.OFFEN && (nachher == Stand.RICHTIG || nachher == Stand.FALSCH)
+        // Nach dem ersten Fehler ist er schon vermerkt. Erst im zweiten Versuch richtig zählt nicht als gemeistert.
+        if (!ersterFehler && (!beendet || neu.nachFehler)) return
         if ((ansicht as? Ansicht.Ueben)?.arbeit == LERNWELT) return
         val key = schluesselVon(neu, i) ?: return
-        behalte(fortschritt.nachAntwort(istFehlerheft, key, nachher, Tag.heute()))
+        behalte(fortschritt.nachAntwort(istFehlerheft, key, if (ersterFehler) Stand.FALSCH else nachher, Tag.heute()))
     }
 
     private fun schluesselVon(s: RundenStand, i: Int): String? {

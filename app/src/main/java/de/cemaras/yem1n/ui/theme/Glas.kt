@@ -19,6 +19,16 @@ import androidx.compose.ui.composed
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -136,4 +146,41 @@ fun Modifier.federKarte(radius: Dp = 20.dp, onClick: () -> Unit): Modifier = com
         .feder(quelle)
         .glas(radius)
         .clickable(interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
+}
+
+/** Kleinste Tippfläche: 48 dp, wie Android es empfiehlt. Kinderfinger treffen kleine Knöpfe schlecht. */
+val Tippziel: Dp = 48.dp
+
+/**
+ * Text zum Antippen (Vorlesen, Nochmal). Die Tippfläche ist mindestens 48 dp hoch,
+ * der Text steht in der Mitte und sieht so klein aus wie vorher.
+ */
+fun Modifier.tippText(onClick: () -> Unit): Modifier = this
+    .heightIn(min = Tippziel)
+    .clip(RoundedCornerShape(50))
+    .clickable(role = Role.Button, onClick = onClick)
+    .wrapContentHeight(Alignment.CenterVertically)
+    .padding(horizontal = 8.dp)
+
+/** Runder Knopf mit einem Zeichen (Vorlesen, Schließen). [name] ist der Text für die Sprachausgabe TalkBack. */
+@Composable
+fun RundKnopf(
+    symbol: String,
+    modifier: Modifier = Modifier,
+    betont: Boolean = false,
+    name: String = symbol,
+    groesse: Dp = Tippziel,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier
+            .size(groesse)
+            .clip(CircleShape)
+            .background(if (betont) Gelb else Color.White.copy(alpha = 0.14f))
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = name },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(symbol, fontSize = 20.sp, color = if (betont) Navy else Color.White, fontWeight = FontWeight.Black)
+    }
 }

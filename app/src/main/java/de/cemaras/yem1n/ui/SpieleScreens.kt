@@ -129,10 +129,7 @@ fun SpielScreen(vm: AppViewModel, art: SpielArt) {
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box(
-                Modifier.size(44.dp).clip(CircleShape).background(Gelb).clickable(onClick = vm::zurueck),
-                contentAlignment = Alignment.Center,
-            ) { Text("✕", color = Navy, fontWeight = FontWeight.Black, fontSize = 18.sp) }
+            de.cemaras.yem1n.ui.theme.RundKnopf("✕", betont = true, name = "Schließen", onClick = vm::zurueck)
             if (bestwert > 0) {
                 Text(
                     if (vm.rekord) "Neuer Rekord: $bestwert" else "Bestwert: $bestwert",

@@ -56,6 +56,7 @@ import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Navy
+import de.cemaras.yem1n.ui.theme.RundKnopf
 import de.cemaras.yem1n.ui.theme.TextSanft
 import de.cemaras.yem1n.ui.theme.TiefNavy
 import de.cemaras.yem1n.ui.theme.feder
@@ -170,11 +171,11 @@ fun StartScreen(vm: AppViewModel) {
                     Text(gruss, color = TextSanft, fontSize = 16.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RundKnopf("🎮") { vm.oeffneSpiele() }
-                    RundKnopf("⚙️") { vm.oeffneEinstellungen() }
-                    RundKnopf("🏆") { vm.oeffneErfolge() }
+                    RundKnopf("🎮", name = "Spiele", groesse = 44.dp) { vm.oeffneSpiele() }
+                    RundKnopf("⚙️", name = "Einstellungen", groesse = 44.dp) { vm.oeffneEinstellungen() }
+                    RundKnopf("🏆", name = "Erfolge", groesse = 44.dp) { vm.oeffneErfolge() }
                     Box {
-                        RundKnopf("＋", betont = true) { menue = true }
+                        RundKnopf("＋", betont = true, name = "Hinzufügen", groesse = 44.dp) { menue = true }
                         androidx.compose.material3.DropdownMenu(expanded = menue, onDismissRequest = { menue = false }) {
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Arbeit einfügen") }, onClick = { menue = false; einfuegen = true })
                             androidx.compose.material3.DropdownMenuItem(text = { Text("Eigene Arbeit bauen") }, onClick = { menue = false; vm.oeffneEditor() })
@@ -480,18 +481,4 @@ private fun UebungZeile(vm: AppViewModel, arbeit: Arbeit, i: Int) {
 @Composable
 private fun Titel(text: String) {
     Text(text, fontSize = 15.sp, fontWeight = FontWeight.Black, color = Gelb, modifier = Modifier.padding(top = 6.dp))
-}
-
-@Composable
-private fun RundKnopf(symbol: String, betont: Boolean = false, onClick: () -> Unit) {
-    Box(
-        Modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(if (betont) Gelb else Color.White.copy(alpha = 0.14f))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(symbol, fontSize = 20.sp, color = if (betont) Navy else Color.White, fontWeight = FontWeight.Black)
-    }
 }

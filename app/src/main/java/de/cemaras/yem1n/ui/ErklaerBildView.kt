@@ -47,6 +47,7 @@ import de.cemaras.yem1n.ui.theme.Gelb
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
+import de.cemaras.yem1n.ui.theme.tippText
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
@@ -107,11 +108,11 @@ private fun ErklaerBildView(bild: ErklaerBild, ruhig: Boolean, vorlesen: (String
                 for (satz in bild.saetze) {
                     Text(satz, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(top = 2.dp)) {
-                    Text("🔊 Vorlesen", color = Gelb, fontSize = 13.sp, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { vorlesen(Eule.sprechbar(sprechText(bild))) })
-                    Text("↺ Nochmal", color = Gelb, fontSize = 13.sp, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { nochmal++ })
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("🔊 Vorlesen", color = Gelb, fontSize = 14.sp, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.tippText { vorlesen(Eule.sprechbar(sprechText(bild))) })
+                    Text("↺ Nochmal", color = Gelb, fontSize = 14.sp, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.tippText { nochmal++ })
                 }
             }
         }

@@ -65,10 +65,6 @@ import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
-import de.cemaras.yem1n.ui.theme.RundKnopf
-import de.cemaras.yem1n.ui.theme.Tippziel
-import de.cemaras.yem1n.ui.theme.tippText
-import androidx.compose.foundation.layout.wrapContentHeight
 
 @Composable
 fun UebenScreen(vm: AppViewModel) {
@@ -84,10 +80,7 @@ fun UebenScreen(vm: AppViewModel) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = vm::zurueck) { Text("‹ Zurück", color = Gelb, fontSize = 16.sp) }
             Spacer(Modifier.weight(1f))
-            Text(
-                uebung.titel, color = TextSanft, fontWeight = FontWeight.SemiBold,
-                maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-            )
+            Text(uebung.titel, color = TextSanft, fontWeight = FontWeight.SemiBold)
         }
         if (s.fertig) {
             Ergebnis(
@@ -155,27 +148,21 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Die Arbeitsanweisung steht groß in der Mitte, der Vorlese-Knopf rechts daneben (wie iOS).
-        val mitVorlesen = vm.fortschritt.vorlesen && de.cemaras.yem1n.logik.VorleseText.vorlesbar(a.art)
-        Box(Modifier.fillMaxWidth()) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = if (mitVorlesen) Tippziel else 0.dp)
-                    .padding(horizontal = if (mitVorlesen) Tippziel + 6.dp else 0.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                if (a.frage.isNotEmpty()) {
-                    Text(a.frage, fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold, color = Color.White, textAlign = TextAlign.Center)
-                }
-                if (a.tr.isNotEmpty()) {
-                    Text(a.tr, fontSize = 15.sp, color = Himmel, textAlign = TextAlign.Center)
-                }
-            }
-            if (mitVorlesen) {
-                RundKnopf("🔊", Modifier.align(Alignment.TopEnd), betont = true, name = "Vorlesen") { vm.aufgabeVorlesen(a) }
-            }
+        if (a.frage.isNotEmpty()) {
+            Text(a.frage, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White, textAlign = TextAlign.Center)
+        }
+        if (a.tr.isNotEmpty()) {
+            Text(a.tr, fontSize = 15.sp, color = Himmel, textAlign = TextAlign.Center)
+        }
+        if (vm.fortschritt.vorlesen && de.cemaras.yem1n.logik.VorleseText.vorlesbar(a.art)) {
+            Text(
+                "🔊 Vorlesen", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Gelb,
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .heightIn(min = 44.dp)
+                    .clickable { vm.aufgabeVorlesen(a) }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            )
         }
         Spacer(Modifier.height(14.dp))
 
@@ -235,7 +222,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         val letzte = s.index == s.aufgaben.size - 1
         Button(
             onClick = vm::weiter,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
         ) { Text(if (letzte) "Fertig" else "Weiter", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
     } else {
         val gewaehlt = a.art == Aufgabe.ART_WAHL || a.art == Aufgabe.ART_VERGLEICH
@@ -243,7 +230,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
             Button(
                 onClick = { vm.antworte(e1, e2) },
                 enabled = e1.isNotBlank() && (a.art != Aufgabe.ART_REST || e2.isNotBlank()),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
             ) { Text("Prüfen", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
         }
         TextButton(onClick = vm::zeigeLoesung, modifier = Modifier.fillMaxWidth()) {
@@ -448,12 +435,10 @@ private fun EuleErklaert(aufgabe: de.cemaras.yem1n.daten.Aufgabe, gegeben: Strin
         Text(
             "🦉 Warum war das falsch?", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Gelb,
             modifier = Modifier
-                .heightIn(min = Tippziel)
                 .clip(RoundedCornerShape(50))
                 .background(Gelb.copy(alpha = 0.15f))
                 .clickable { offen = true }
-                .wrapContentHeight(Alignment.CenterVertically)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 14.dp, vertical = 8.dp),
         )
     } else {
         Row(verticalAlignment = Alignment.Top) {
@@ -465,10 +450,11 @@ private fun EuleErklaert(aufgabe: de.cemaras.yem1n.daten.Aufgabe, gegeben: Strin
                     Text("Die Eule denkt nach ...", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 } else {
                     Text(t, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
-                            "🔊 Vorlesen", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Gelb,
-                            modifier = Modifier.tippText { vorlesen(t) },
+                            "🔊 Vorlesen", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Gelb,
+                            modifier = Modifier.clickable { vorlesen(t) },
                         )
                         if (vonKi) Text("✨ von der KI auf diesem Gerät", fontSize = 12.sp, color = TextSanft)
                     }
@@ -524,7 +510,7 @@ private fun Ergebnis(
         }
         Spacer(Modifier.height(28.dp))
         if (naechsteTitel != null) {
-            Button(onClick = onNaechste, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+            Button(onClick = onNaechste, modifier = Modifier.fillMaxWidth().height(56.dp)) {
                 Text("Nächste Übung: $naechsteTitel", fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             }
             Spacer(Modifier.height(10.dp))
@@ -533,11 +519,11 @@ private fun Ergebnis(
             if (naechsteTitel != null) {
                 OutlinedButton(
                     onClick = onNochmal,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
                     border = BorderStroke(1.dp, Gelb),
                 ) { Text("Nochmal", fontSize = 18.sp, color = Gelb) }
             } else {
-                Button(onClick = onNochmal, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                Button(onClick = onNochmal, modifier = Modifier.fillMaxWidth().height(56.dp)) {
                     Text("Nochmal", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
             }
@@ -545,7 +531,7 @@ private fun Ergebnis(
         }
         OutlinedButton(
             onClick = onFertig,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             border = BorderStroke(1.dp, Gelb),
         ) { Text("Zur Übersicht", fontSize = 18.sp, color = Gelb) }
     }

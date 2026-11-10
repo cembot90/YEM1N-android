@@ -61,7 +61,6 @@ import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
-import de.cemaras.yem1n.ui.theme.tippText
 
 /** Gibt eine Funktion zurück, die (ab Android 13) einmal um die Erlaubnis für Mitteilungen bittet. */
 @Composable
@@ -327,9 +326,10 @@ private fun OlliBlase(vm: AppViewModel, tier: Haustier, muenzen: Int, heute: Lon
             Spacer(Modifier.width(10.dp))
             Column {
                 Text(text, color = Color.White, fontSize = 16.sp)
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    "🔊 Vorlesen", color = Gelb, fontSize = 14.sp, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.tippText { vm.sprecher.sprich(Eule.sprechbar(text)) },
+                    "🔊 Vorlesen", color = Gelb, fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { vm.sprecher.sprich(Eule.sprechbar(text)) },
                 )
             }
         }

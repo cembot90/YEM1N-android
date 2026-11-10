@@ -67,6 +67,7 @@ import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
 import de.cemaras.yem1n.ui.theme.VorleseKnopf
 import de.cemaras.yem1n.ui.theme.glas
+import de.cemaras.yem1n.ui.theme.federKarte
 import de.cemaras.yem1n.ui.theme.Tippziel
 import de.cemaras.yem1n.ui.theme.tippText
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -157,6 +158,8 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // Die Arbeitsanweisung steht groß in der Mitte, der Vorlese-Knopf rechts daneben (wie iOS).
+        // Auf dem Tablet ist viel Platz, dort sind Anweisung und Rechnung größer (wie auf dem iPad)
+        val tablet = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp >= 600
         val mitVorlesen = vm.fortschritt.vorlesen && de.cemaras.yem1n.logik.VorleseText.vorlesbar(a.art)
         Box(Modifier.fillMaxWidth()) {
             Column(
@@ -168,7 +171,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
                 verticalArrangement = Arrangement.Center,
             ) {
                 if (a.frage.isNotEmpty()) {
-                    Text(a.frage, fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold, color = Color.White, textAlign = TextAlign.Center)
+                    Text(a.frage, fontSize = if (tablet) 26.sp else 20.sp, lineHeight = if (tablet) 34.sp else 26.sp, fontWeight = FontWeight.SemiBold, color = Color.White, textAlign = TextAlign.Center)
                 }
                 if (a.tr.isNotEmpty()) {
                     Text(a.tr, fontSize = 15.sp, color = Himmel, textAlign = TextAlign.Center)
@@ -199,11 +202,13 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
                 fontSize = when {
                     a.rechnung.length > 24 || a.rechnung.contains('\n') -> 22.sp
                     a.rechnung.length > 14 -> 30.sp
+                    tablet -> 60.sp
                     else -> 42.sp
                 },
                 lineHeight = when {
                     a.rechnung.length > 24 || a.rechnung.contains('\n') -> 30.sp
                     a.rechnung.length > 14 -> 38.sp
+                    tablet -> 70.sp
                     else -> 50.sp
                 },
                 fontWeight = if (a.rechnung.length > 14) FontWeight.Bold else FontWeight.Black,
@@ -257,9 +262,19 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             ) { Text("Prüfen", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
         }
-        TextButton(onClick = vm::zeigeLoesung, modifier = Modifier.fillMaxWidth()) {
-            Text("Lösung zeigen", color = TextSanft)
-        }
+        Spacer(Modifier.height(6.dp))
+        // Blaue Pille wie bei iOS, damit man sie als Knopf erkennt
+        Text(
+            "👁 Lösung zeigen", color = Himmel, fontWeight = FontWeight.Bold, fontSize = 15.sp,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .heightIn(min = Tippziel)
+                .clip(RoundedCornerShape(50))
+                .background(Himmel.copy(alpha = 0.14f))
+                .clickable(onClick = vm::zeigeLoesung)
+                .wrapContentHeight(Alignment.CenterVertically)
+                .padding(horizontal = 18.dp),
+        )
     }
     Spacer(Modifier.height(8.dp))
 }
@@ -346,14 +361,18 @@ private fun Zahlenfeld(
     )
 }
 
+/** Antwort zum Antippen: helle Glas-Karte mit weißer Schrift, wie bei iOS und in der Vorschule. */
 @Composable
 private fun AuswahlKnopf(text: String, modifier: Modifier, onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier.height(72.dp),
-        border = BorderStroke(2.dp, Gelb),
-        shape = RoundedCornerShape(18.dp),
-    ) { Text(text, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Gelb) }
+    Box(
+        modifier.heightIn(min = 68.dp).federKarte(22.dp, onClick).padding(horizontal = 10.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text, fontSize = if (text.length <= 3) 30.sp else 22.sp, fontWeight = FontWeight.Black,
+            color = Color.White, textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @Composable

@@ -250,12 +250,7 @@ private fun Sprechblase(text: String) {
 
 @Composable
 private fun Balken(anteil: Float, farbe: Color) {
-    LinearProgressIndicator(
-        progress = { anteil.coerceIn(0f, 1f) },
-        modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
-        color = farbe,
-        trackColor = Color.White.copy(alpha = 0.15f),
-    )
+    de.cemaras.yem1n.ui.theme.Fortschrittsbalken(anteil, hoehe = 10.dp, farbe = farbe)
 }
 
 @Composable

@@ -65,7 +65,8 @@ import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
-import de.cemaras.yem1n.ui.theme.RundKnopf
+import de.cemaras.yem1n.ui.theme.VorleseKnopf
+import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Tippziel
 import de.cemaras.yem1n.ui.theme.tippText
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -99,12 +100,7 @@ fun UebenScreen(vm: AppViewModel) {
         } else {
             if (vm.istProbe) ProbeUhr(vm.probeStart)
             val anteil = s.index.toFloat() / s.aufgaben.size
-            LinearProgressIndicator(
-                progress = { anteil },
-                modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                color = Gelb,
-                trackColor = Color.White.copy(alpha = 0.15f),
-            )
+            de.cemaras.yem1n.ui.theme.Fortschrittsbalken(anteil)
             Text(
                 "Aufgabe ${s.index + 1} von ${s.aufgaben.size}",
                 color = TextSanft,
@@ -149,10 +145,15 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         if (brauchtTastatur) runCatching { fokus.requestFocus() }
     }
 
+    // Die Aufgabe steht auf einer Karte wie bei iOS, darunter bleibt Platz für die Tastatur
     Column(
         Modifier
             .weight(1f)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .wrapContentHeight(Alignment.Top)
+            .padding(bottom = 12.dp)
+            .glas(28.dp)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // Die Arbeitsanweisung steht groß in der Mitte, der Vorlese-Knopf rechts daneben (wie iOS).
@@ -174,7 +175,7 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
                 }
             }
             if (mitVorlesen) {
-                RundKnopf("🔊", Modifier.align(Alignment.TopEnd), betont = true, name = "Vorlesen") { vm.aufgabeVorlesen(a) }
+                VorleseKnopf(Modifier.align(Alignment.TopEnd)) { vm.aufgabeVorlesen(a) }
             }
         }
         Spacer(Modifier.height(14.dp))
@@ -194,8 +195,18 @@ private fun ColumnScope.Aufgabenansicht(s: RundenStand, vm: AppViewModel) {
         } else if (a.rechnung.isNotEmpty()) {
             Text(
                 a.rechnung,
-                fontSize = if (a.rechnung.length > 24 || a.rechnung.contains('\n')) 22.sp else 34.sp,
-                fontWeight = FontWeight.Bold,
+                // Kurze Rechnungen groß wie bei iOS, lange Texte kleiner
+                fontSize = when {
+                    a.rechnung.length > 24 || a.rechnung.contains('\n') -> 22.sp
+                    a.rechnung.length > 14 -> 30.sp
+                    else -> 42.sp
+                },
+                lineHeight = when {
+                    a.rechnung.length > 24 || a.rechnung.contains('\n') -> 30.sp
+                    a.rechnung.length > 14 -> 38.sp
+                    else -> 50.sp
+                },
+                fontWeight = if (a.rechnung.length > 14) FontWeight.Bold else FontWeight.Black,
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),

@@ -383,12 +383,7 @@ private fun FragenSpiel(vm: AppViewModel, s: VorschulStand) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        LinearProgressIndicator(
-            progress = { s.nr.toFloat() / s.fragen.size },
-            modifier = Modifier.fillMaxWidth(),
-            color = Gelb,
-            trackColor = Color.White.copy(alpha = 0.15f),
-        )
+        de.cemaras.yem1n.ui.theme.Fortschrittsbalken(s.nr.toFloat() / s.fragen.size)
         Row(
             Modifier
                 .fillMaxWidth()

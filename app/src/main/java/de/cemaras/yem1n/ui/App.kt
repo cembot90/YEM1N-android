@@ -52,6 +52,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import de.cemaras.yem1n.daten.Arbeit
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxHeight
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Koralle
@@ -83,6 +85,11 @@ fun App(vm: AppViewModel) {
                 confirmButton = { TextButton(onClick = vm::meldungGelesen) { Text("OK") } },
             )
         }
+        // Auf Tablets und im Querformat bleibt der Inhalt in der Mitte und wird nicht endlos breit (wie iOS).
+        // Die Spiele nutzen weiter den ganzen Bildschirm.
+        val ganzeBreite = !vm.zeigeEinrichtung && vm.ansicht is Ansicht.Spiel
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Box(if (ganzeBreite) Modifier.fillMaxSize() else Modifier.fillMaxHeight().widthIn(max = 760.dp)) {
         if (vm.zeigeEinrichtung) {
             EinrichtungScreen(vm)
             return@Box
@@ -110,6 +117,8 @@ fun App(vm: AppViewModel) {
             is Ansicht.VorschulSpiel -> VorschulSpielScreen(vm, (vm.ansicht as Ansicht.VorschulSpiel).art)
             is Ansicht.Englisch -> EnglischScreen(vm, (vm.ansicht as Ansicht.Englisch).thema)
             is Ansicht.InfoSeite -> InfoSeiteScreen(vm, (vm.ansicht as Ansicht.InfoSeite).seite)
+        }
+        }
         }
     }
 }
@@ -322,7 +331,11 @@ private fun SonderKnopf(symbol: String, titel: String, untertitel: String, modif
         Text(symbol, fontSize = 24.sp)
         Spacer(Modifier.size(10.dp))
         Column {
-            Text(titel, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+            // Lange Wörter wie "Probearbeit" werden bei großer Schrift kleiner, statt mitten im Wort umzubrechen
+            Text(
+                titel, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1,
+                autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 16.sp, stepSize = 1.sp),
+            )
             Text(untertitel, fontSize = 13.sp, color = TextSanft)
         }
     }
@@ -378,12 +391,7 @@ private fun ArbeitKarte(vm: AppViewModel, arbeit: Arbeit, onClick: () -> Unit) {
             Text(arbeit.titel, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Text("${arbeit.klasse} · ${arbeit.fach}", color = TextSanft)
             Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(
-                progress = { anteil },
-                modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
-                color = Gelb,
-                trackColor = Color.White.copy(alpha = 0.15f),
-            )
+            de.cemaras.yem1n.ui.theme.Fortschrittsbalken(anteil, hoehe = 6.dp)
         }
         Spacer(Modifier.size(12.dp))
         Text("★ $sterne / ${arbeit.maxSterne}", color = Gelb, fontWeight = FontWeight.Bold)

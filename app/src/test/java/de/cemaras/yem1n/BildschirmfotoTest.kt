@@ -53,6 +53,7 @@ class BildschirmfotoTest {
         regel.setContent { YEM1NTheme { App(vm) } }
         foto("$vorne-00-einrichtung")
         vm.einrichtungAbschliessen("kind", "Yemin", "3", false, rosa, 2, false)
+        vm.setzeFarbwelt(rosa)
         vm.setzeVorlesen(true)
         vm.fuegeArbeitEin(beispiel)
         foto("$vorne-01-start")

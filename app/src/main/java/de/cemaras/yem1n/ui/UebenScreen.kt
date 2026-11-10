@@ -532,7 +532,7 @@ private fun Ergebnis(
             )
         }
         if (s.angeschaut > 0) {
-            Text("${s.angeschaut} Lösungen angeschaut", fontSize = 16.sp, color = Himmel)
+            Text(if (s.angeschaut == 1) "1 Lösung angeschaut" else "${s.angeschaut} Lösungen angeschaut", fontSize = 16.sp, color = Himmel)
         }
         Spacer(Modifier.height(12.dp))
         Text(

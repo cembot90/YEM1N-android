@@ -106,7 +106,10 @@ object Runde {
     ): RundenStand {
         val text = erklaerung.ifEmpty {
             when (a.art) {
-                Aufgabe.ART_ZAHL -> a.rechnung.replace("\n", " ") + " " + a.antwort
+                // Nur eine Rechnung mit "=" lässt sich mit der Antwort fortsetzen, sonst stünde dort "67 60".
+                Aufgabe.ART_ZAHL -> a.rechnung.replace("\n", " ").trim().let {
+                    if (it.endsWith("=")) "$it ${a.antwort}" else "Richtig: ${a.antwort}"
+                }
                 Aufgabe.ART_TEXT -> "Richtig: ${a.antwort}"
                 else -> ""
             }

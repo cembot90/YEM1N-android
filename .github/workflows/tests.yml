@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main, entwicklung, design-fable]
+    branches: [main, entwicklung]
   pull_request:
 
 # Die Läufe brauchen nur Lesezugriff auf den Code.

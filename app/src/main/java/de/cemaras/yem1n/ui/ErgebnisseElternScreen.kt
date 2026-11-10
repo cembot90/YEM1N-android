@@ -236,7 +236,7 @@ private fun SchwaecheZeile(e: Schwaeche) {
             )
         }
         var t = "${e.runden} ${if (e.runden == 1) "Runde" else "Runden"}"
-        if (e.angesehen > 0) t += ", ${e.angesehen} Lösungen angeschaut"
+        if (e.angesehen > 0) t += if (e.angesehen == 1) ", 1 Lösung angeschaut" else ", ${e.angesehen} Lösungen angeschaut"
         if (e.trend > 0) t += ", wird besser"
         if (e.trend < 0) t += ", zuletzt schlechter"
         Text(t, color = TextSanft, fontSize = 12.sp)

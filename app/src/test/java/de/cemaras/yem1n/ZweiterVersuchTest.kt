@@ -75,3 +75,11 @@ class ZweiterVersuchTest {
         assertEquals(Stand.FALSCH, s.staende[0])
     }
 }
+
+class RueckmeldungOhneErklaerungTest {
+    @Test fun rechnungOhneGleichZeigtNurDieAntwort() {
+        var s = Runde.start(listOf(aufgabe(rechnung = "67", antwort = "60")))
+        s = Runde.antworte(s, "70")
+        assertEquals("Richtig: 60", s.erklaerung)
+    }
+}

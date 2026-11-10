@@ -37,6 +37,20 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            // Für die Bildschirmfotos (BildschirmfotoTest). Sie laufen nur mit -Pfotos, sonst bleibt alles wie bisher.
+            isIncludeAndroidResources = true
+            all {
+                if (project.hasProperty("fotos")) {
+                    it.systemProperty("roborazzi.test.record", "true")
+                    it.maxHeapSize = "3g"
+                } else {
+                    it.exclude("**/BildschirmfotoTest*")
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -60,6 +74,13 @@ dependencies {
     implementation(libs.androidx.graphics.path)
     implementation(libs.androidx.datastore.core)
     testImplementation(libs.junit)
+    // Nur für Bildschirmfotos im Test, nicht Teil der App
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

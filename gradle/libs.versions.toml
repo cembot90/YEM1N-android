@@ -13,6 +13,11 @@ firebaseBom = "34.0.0"
 googleServices = "4.4.3"
 
 [libraries]
+# Nur für Bildschirmfotos im Test (design-fable), nicht Teil der App
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.17" }
+roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version = "1.78.0" }
+roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version = "1.78.0" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.6.1" }
 mlkit-genai-prompt = { group = "com.google.mlkit", name = "genai-prompt", version = "1.0.0-beta4" }
 eddsa = { group = "net.i2p.crypto", name = "eddsa", version = "0.3.0" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

@@ -55,6 +55,10 @@ import de.cemaras.yem1n.logik.HaustierStufe
 import de.cemaras.yem1n.logik.HaustierZeit
 import de.cemaras.yem1n.logik.Tag
 import de.cemaras.yem1n.ui.theme.Gelb
+import de.cemaras.yem1n.ui.theme.Tippziel
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.heightIn
+import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.auswahl
 import de.cemaras.yem1n.ui.theme.glas
@@ -337,13 +341,15 @@ private fun OlliBlase(vm: AppViewModel, tier: Haustier, muenzen: Int, heute: Lon
             Spacer(Modifier.height(8.dp))
             Text(
                 if (schritt < einfuehrung.lastIndex) "Weiter (${schritt + 1} von ${einfuehrung.size})" else "Los geht's!",
-                color = Color(0xFF00205B), fontWeight = FontWeight.Black,
+                color = Navy, fontWeight = FontWeight.Black,
                 modifier = Modifier
+                    .heightIn(min = Tippziel)
                     .clip(RoundedCornerShape(50)).background(Gelb)
                     .clickable {
                         if (schritt < einfuehrung.lastIndex) schritt++
                         else { schritt = -1; vm.euleEinfuehrungGesehen() }
                     }
+                    .wrapContentHeight(Alignment.CenterVertically)
                     .padding(horizontal = 18.dp, vertical = 8.dp),
             )
         }

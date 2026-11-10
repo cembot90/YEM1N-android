@@ -37,6 +37,7 @@ import de.cemaras.yem1n.logik.Karteikasten
 import de.cemaras.yem1n.logik.Sprachen
 import de.cemaras.yem1n.logik.lehrplan.Vokabel
 import de.cemaras.yem1n.ui.theme.Gelb
+import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.glas
 import de.cemaras.yem1n.ui.theme.Karte
 import de.cemaras.yem1n.ui.theme.Mint
@@ -143,7 +144,7 @@ fun SprachenScreen(vm: AppViewModel) {
 @Composable
 private fun KnopfChip(text: String, aktiv: Boolean, klick: () -> Unit) {
     Text(
-        text, color = if (aktiv) Color(0xFF00205B) else Color.White, fontWeight = FontWeight.Bold,
+        text, color = if (aktiv) Navy else Color.White, fontWeight = FontWeight.Bold,
         modifier = Modifier.clip(RoundedCornerShape(50)).background(if (aktiv) Gelb else Karte)
             .clickable(onClick = klick).padding(horizontal = 14.dp, vertical = 8.dp),
     )

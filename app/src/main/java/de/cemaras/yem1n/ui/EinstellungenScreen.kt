@@ -59,6 +59,7 @@ fun EinstellungenScreen(vm: AppViewModel) {
         Text(
             gruppen.firstOrNull { it.id == seite }?.let { "${it.symbol} ${it.titel}" } ?: "Einstellungen",
             fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White,
+            modifier = Modifier.padding(bottom = 10.dp),
         )
         // Die Einstellungen sind kindersicher: erst das Erwachsenen-Tor (Malaufgabe oder Eltern-PIN).
         if (!ErwachsenenTor(vm)) return@Column

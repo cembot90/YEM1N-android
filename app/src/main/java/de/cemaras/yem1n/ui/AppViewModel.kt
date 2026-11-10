@@ -1475,6 +1475,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun einrichtungAbschliessen(rolle: String, name: String, klasse: String, sprachen: Boolean, rosa: Boolean, ziel: Int, auto: Boolean) {
         behalte(Profil.uebernehmen(fortschritt, rolle, name, klasse, sprachen, rosa, ziel, auto))
+        // Die gewählte Farbwelt gilt sofort, nicht erst nach dem nächsten Start der App
+        Farbwelt.rosa = fortschritt.rosa
         einrichtungNochmal = false
         offeneErgebnisseSenden()
     }

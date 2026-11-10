@@ -48,6 +48,7 @@ import de.cemaras.yem1n.logik.FormEingabe
 import de.cemaras.yem1n.logik.MatheGenerator
 import de.cemaras.yem1n.logik.PaketJson
 import de.cemaras.yem1n.ui.theme.Gelb
+import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
@@ -102,7 +103,7 @@ internal fun EdFeld(
 internal fun EdKnopf(text: String, betont: Boolean = false, aktiv: Boolean = true, klick: () -> Unit) {
     Text(
         text,
-        color = if (!aktiv) Color.White.copy(alpha = 0.4f) else if (betont) Color(0xFF00205B) else Color.White,
+        color = if (!aktiv) Color.White.copy(alpha = 0.4f) else if (betont) Navy else Color.White,
         fontWeight = FontWeight.Bold, fontSize = 16.sp,
         modifier = Modifier.fillMaxWidth()
             .then(if (betont && aktiv) Modifier.background(Gelb, RoundedCornerShape(16.dp)) else Modifier.glas(16.dp))
@@ -127,7 +128,7 @@ private fun EdFehler(text: String) = Text(text, color = Koralle, fontSize = 14.s
 @Composable
 private fun EdWahl(text: String, an: Boolean, klick: () -> Unit) {
     Text(
-        text, color = if (an) Color(0xFF00205B) else Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp,
+        text, color = if (an) Navy else Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp,
         modifier = Modifier
             .then(if (an) Modifier.background(Gelb, RoundedCornerShape(50)) else Modifier.border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50)))
             .clickable(onClick = klick).padding(horizontal = 12.dp, vertical = 8.dp),

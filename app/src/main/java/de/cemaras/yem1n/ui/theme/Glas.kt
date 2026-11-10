@@ -19,6 +19,11 @@ import androidx.compose.ui.composed
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.progressSemantics
+import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -182,5 +187,57 @@ fun RundKnopf(
         contentAlignment = Alignment.Center,
     ) {
         Text(symbol, fontSize = 20.sp, color = if (betont) Navy else Color.White, fontWeight = FontWeight.Black)
+    }
+}
+
+/**
+ * Der runde gelbe Vorlese-Knopf. Der Lautsprecher ist gezeichnet (Navy auf Gelb, wie bei iOS),
+ * denn das Emoji ist auf Gelb kaum zu erkennen.
+ */
+@Composable
+fun VorleseKnopf(modifier: Modifier = Modifier, groesse: Dp = Tippziel, onClick: () -> Unit) {
+    val farbe = Navy
+    Box(
+        modifier
+            .size(groesse)
+            .clip(CircleShape)
+            .background(Gelb)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = "Vorlesen" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.size(groesse * 0.5f)) {
+            // Gezeichnet auf einem Raster von 24 mal 24
+            val e = size.minDimension / 24f
+            val box = Path().apply {
+                moveTo(3f * e, 9f * e); lineTo(7.5f * e, 9f * e); lineTo(13f * e, 4f * e)
+                lineTo(13f * e, 20f * e); lineTo(7.5f * e, 15f * e); lineTo(3f * e, 15f * e); close()
+            }
+            drawPath(box, farbe)
+            val strich = Stroke(2.2f * e, cap = StrokeCap.Round)
+            for (r in listOf(4.2f, 8f)) {
+                drawArc(
+                    farbe, -45f, 90f, false,
+                    topLeft = Offset((13.5f - r) * e, (12f - r) * e), size = Size(2 * r * e, 2 * r * e), style = strich,
+                )
+            }
+        }
+    }
+}
+
+/** Fortschrittsbalken mit runden Enden, überall gleich. [anteil] geht von 0 bis 1. */
+@Composable
+fun Fortschrittsbalken(anteil: Float, modifier: Modifier = Modifier, hoehe: Dp = 8.dp, farbe: Color = Gelb) {
+    val ziel = if (anteil.isNaN()) 0f else anteil.coerceIn(0f, 1f)
+    val gezeigt by animateFloatAsState(ziel, tween(if (Sparmodus.an) 0 else 400), label = "balken")
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(hoehe)
+            .progressSemantics(ziel)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.15f)),
+    ) {
+        Box(Modifier.fillMaxWidth(gezeigt).fillMaxHeight().clip(CircleShape).background(farbe))
     }
 }

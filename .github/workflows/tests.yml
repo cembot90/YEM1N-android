@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main, entwicklung]
+    branches: [main, entwicklung, design-fable]
   pull_request:
 
 # Die Läufe brauchen nur Lesezugriff auf den Code.
@@ -57,6 +57,63 @@ jobs:
         with:
           name: testbericht
           path: app/build/reports/tests/
+
+  # Nur für die Design-Arbeit: Bildschirmfotos der wichtigsten Seiten (Robolectric und Roborazzi, ohne Emulator).
+  # "vorher" nimmt den App-Code vor der Design-Arbeit, damit sich beide Stände vergleichen lassen.
+  fotos:
+    if: github.ref_name == 'design-fable'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stand: [nachher, vorher]
+    env:
+      VORHER: "b002356"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Lizenzen annehmen
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - name: Alten Stand der App holen
+        if: matrix.stand == 'vorher'
+        run: |
+          git rm -rq app/src/main
+          git checkout "$VORHER" -- app/src/main
+      - name: Fotos machen
+        run: |
+          chmod +x gradlew
+          set +e
+          ./gradlew testDebugUnitTest -Pfotos --tests "*BildschirmfotoTest" --no-daemon --console=plain > fotos.log 2>&1
+          rc=$?
+          tail -n 40 fotos.log
+          if [ $rc -ne 0 ]; then
+            grep -E "^e: |FAILED|Exception|Error|What went wrong|Caused by" -A3 fotos.log | head -60 | cut -c1-300 | while IFS= read -r zeile; do
+              echo "::error::${zeile}"
+            done
+            for f in app/build/test-results/testDebugUnitTest/*.xml; do
+              [ -f "$f" ] || continue
+              grep -E "Exception|Error|Caused by" "$f" | head -25 | cut -c1-300 | while IFS= read -r zeile; do
+                echo "::error::${zeile}"
+              done
+            done
+          fi
+          ls -la app/build/fotos 2>/dev/null | head -80
+          exit $rc
+      - name: Fotos hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fotos-${{ matrix.stand }}
+          path: |
+            app/build/fotos/
+            fotos.log
+          if-no-files-found: warn
 
   server:
     runs-on: ubuntu-latest

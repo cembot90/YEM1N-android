@@ -44,6 +44,10 @@ import de.cemaras.yem1n.logik.ErklaerBild
 import de.cemaras.yem1n.logik.ErklaerBildPlan
 import de.cemaras.yem1n.logik.Eule
 import de.cemaras.yem1n.ui.theme.Gelb
+import de.cemaras.yem1n.ui.theme.Tippziel
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.heightIn
+import de.cemaras.yem1n.ui.theme.Navy
 import de.cemaras.yem1n.ui.theme.Koralle
 import de.cemaras.yem1n.ui.theme.Mint
 import de.cemaras.yem1n.ui.theme.TextSanft
@@ -59,10 +63,12 @@ fun ErklaerBildKnopf(bild: ErklaerBild, ruhig: Boolean, vorlesen: (String) -> Un
     var offen by remember(bild) { mutableStateOf(false) }
     if (!offen) {
         Text(
-            "🦉 Zeig es mir als Bild", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF00205B),
+            "🦉 Zeig es mir als Bild", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Navy,
             modifier = Modifier
+                .heightIn(min = Tippziel)
                 .clip(RoundedCornerShape(50)).background(Gelb)
                 .clickable { offen = true }
+                .wrapContentHeight(Alignment.CenterVertically)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         )
     } else {

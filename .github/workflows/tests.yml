@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, entwicklung]
   pull_request:
+  # Von Hand: macht zusätzlich Bildschirmfotos der wichtigsten Seiten.
+  workflow_dispatch:
 
 # Die Läufe brauchen nur Lesezugriff auf den Code.
 permissions:
@@ -58,15 +60,15 @@ jobs:
           name: testbericht
           path: app/build/reports/tests/
 
-  # Nur für die Design-Arbeit: Bildschirmfotos der wichtigsten Seiten (Robolectric und Roborazzi, ohne Emulator).
+  # Nur von Hand: Bildschirmfotos der wichtigsten Seiten (Robolectric und Roborazzi, ohne Emulator).
   # "vorher" nimmt den App-Code vor der Design-Arbeit, damit sich beide Stände vergleichen lassen.
   fotos:
-    if: github.ref_name == 'design-fable'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        stand: [nachher, vorher]
+        stand: [nachher]
     env:
       VORHER: "b002356"
     steps:

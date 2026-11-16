@@ -26,8 +26,7 @@ Stand 25.10.2026. Diese Anleitung beschreibt die Android-App. Die ausführliche 
 - Kopf: Serie, Münzen und Tagesziel. Oben rechts Spiele, Erfolge und das Plus-Menü.
 - **Lernwelt:** fertige Aufgaben nach dem Lehrplan (Hessen, Bayern, Nordrhein-Westfalen, Klassen 1 bis 4). Bundesland und Klasse stellen Sie in der Lernwelt ein.
 - **Sprachen:** Karten, Paare, Tippen und Fragen in Englisch, Türkisch und Italienisch, dazu Wiederholen und ein Bericht für Eltern.
-- **Extra:** Fehlerheft, Probearbeit (30 Minuten mit Note) und Training (die zwei schwächsten Bereiche).
-- **Mehr:** Haustier, Joker, Duell und Vorschule.
+- **Reihe unter der Lernwelt (zur Seite wischen):** Fehlerheft, Training (die zwei schwächsten Bereiche), Probearbeit (30 Minuten mit Note), Haustier, Joker, Duell und Vorschule. Direkt darunter stehen die Arbeiten.
 - Darunter die Arbeiten, geordnet nach Klasse und Fach.
 
 ## Eigene Arbeiten und Wörter bauen

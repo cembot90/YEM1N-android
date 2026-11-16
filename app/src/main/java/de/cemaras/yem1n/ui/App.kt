@@ -169,15 +169,16 @@ fun StartScreen(vm: AppViewModel) {
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // Der Kopf bleibt flach, damit die Aufgaben schon ohne Scrollen zu sehen sind.
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("YEM1N", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Gelb, letterSpacing = 3.sp)
-                    Text("Schule", fontSize = 38.sp, fontWeight = FontWeight.Black, color = Color.White)
-                    val gruss = vm.fortschritt.name.trim().let {
-                        if (it.isEmpty()) "Such dir eine Übung aus" else "Hallo $it! Such dir eine Übung aus"
+                    Text("YEM1N", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Gelb, letterSpacing = 3.sp)
+                    Text("Schule", fontSize = 30.sp, fontWeight = FontWeight.Black, color = Color.White, maxLines = 1)
+                    val name = vm.fortschritt.name.trim()
+                    if (name.isNotEmpty()) {
+                        Text("Hallo $name!", color = TextSanft, fontSize = 14.sp, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
-                    Text(gruss, color = TextSanft, fontSize = 16.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     RundKnopf("🎮", name = "Spiele", groesse = 44.dp) { vm.oeffneSpiele() }
@@ -202,74 +203,58 @@ fun StartScreen(vm: AppViewModel) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .glas(18.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .glas(16.dp)
                     .clickable(onClick = vm::oeffneErfolge)
-                    .padding(14.dp),
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")
                 Kennzahl("🪙", "${vm.fortschritt.muenzen}", "Münzen")
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     de.cemaras.yem1n.ui.theme.Fortschrittsring(
                         anteil = if (ziel > 0) minOf(runden, ziel).toFloat() / ziel else 1f,
-                        groesse = 52.dp, strich = 6.dp,
-                    ) { Text("🎯", fontSize = 18.sp) }
-                    Text("${minOf(runden, ziel)} / $ziel heute", color = TextSanft, fontSize = 13.sp)
+                        groesse = 26.dp, strich = 4.dp,
+                    ) {}
+                    Text("${minOf(runden, ziel)} / $ziel heute", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
                 }
             }
         }
         item {
             KartenZeile(onClick = vm::oeffneLernwelt) {
-                Text("🌍", fontSize = 32.sp)
+                Text("🌍", fontSize = 28.sp)
                 Spacer(Modifier.size(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("Lernwelt", fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color.White)
-                    Text("Fertige Aufgaben nach dem Lehrplan", fontSize = 14.sp, color = TextSanft)
+                    Text("Lernwelt", fontWeight = FontWeight.Black, fontSize = 19.sp, color = Color.White)
+                    Text("Fertige Aufgaben nach dem Lehrplan", fontSize = 13.sp, color = TextSanft, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
                 Text("›", color = Gelb, fontSize = 26.sp)
             }
         }
-        if (vm.fortschritt.sprachenAn) {
-            item {
-                KartenZeile(onClick = vm::oeffneSprachen) {
-                    Text("🗣️", fontSize = 32.sp)
-                    Spacer(Modifier.size(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text("Sprachen", fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color.White)
-                        Text("Englisch, Türkisch, Italienisch", fontSize = 14.sp, color = TextSanft)
-                    }
-                    Text("›", color = Gelb, fontSize = 26.sp)
-                }
-            }
-        }
-        item { Titel("Extra") }
-        item { FehlerheftKnopf(faellig, wartend) { vm.startFehlerheft() } }
+        // Alles Weitere in einer Reihe zum Wischen, wie die Extra-Zeile bei iOS.
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SonderKnopf("📝", "Probearbeit", "30 Minuten", Modifier.weight(1f)) { vm.startProbe() }
-                SonderKnopf("🎯", "Training", "deine Schwächen", Modifier.weight(1f)) { vm.startTraining() }
-            }
-        }
-        item { Titel("Mehr") }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Kachel(
+                    "📓", "Fehlerheft",
+                    when {
+                        faellig > 0 -> "$faellig dran"
+                        wartend > 0 -> "kommt wieder"
+                        else -> "keine Fehler"
+                    },
+                    betont = faellig > 0, aktiv = faellig > 0,
+                ) { vm.startFehlerheft() }
+                Kachel("🎯", "Training", "deine Schwächen") { vm.startTraining() }
+                Kachel("📝", "Probearbeit", "30 Minuten") { vm.startProbe() }
                 val tier = vm.haustier
-                SonderKnopf(
-                    tier?.emoji ?: "🥚", if (tier == null) "Haustier" else tier.name,
-                    if (tier == null) "such dir eins aus" else tier.stufe.titel, Modifier.weight(1f),
-                ) { vm.oeffneHaustier() }
-                SonderKnopf("🆘", "Joker", "Frag deine Eltern", Modifier.weight(1f)) { vm.oeffneJoker() }
-            }
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SonderKnopf("⚔️", "Duell", "Gegen die Familie", Modifier.weight(1f)) { vm.oeffneDuell() }
-                if (vm.fortschritt.vorschulAn) {
-                    SonderKnopf("🧸", "Vorschule", "für die Kleinen", Modifier.weight(1f)) { vm.oeffneVorschule() }
-                } else {
-                    Spacer(Modifier.weight(1f))
-                }
+                Kachel(tier?.emoji ?: "🥚", tier?.name ?: "Haustier", tier?.stufe?.titel ?: "such dir eins aus") { vm.oeffneHaustier() }
+                Kachel("🆘", "Joker", "Frag deine Eltern") { vm.oeffneJoker() }
+                Kachel("⚔️", "Duell", "Gegen die Familie") { vm.oeffneDuell() }
+                if (vm.fortschritt.sprachenAn) Kachel("🗣️", "Sprachen", "Wörter lernen") { vm.oeffneSprachen() }
+                if (vm.fortschritt.vorschulAn) Kachel("🧸", "Vorschule", "für die Kleinen") { vm.oeffneVorschule() }
             }
         }
         val faecher = vm.faecher
@@ -317,27 +302,33 @@ fun StartScreen(vm: AppViewModel) {
     }
 }
 
+/** Kleine Kachel für die Reihe unter der Lernwelt. Feste Breite, damit große Schrift die Reihe nicht höher macht. */
 @Composable
-private fun SonderKnopf(symbol: String, titel: String, untertitel: String, modifier: Modifier, onClick: () -> Unit) {
+private fun Kachel(
+    symbol: String, titel: String, untertitel: String,
+    betont: Boolean = false, aktiv: Boolean = true, onClick: () -> Unit,
+) {
     val quelle = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-    Row(
-        modifier
+    val form = RoundedCornerShape(16.dp)
+    Column(
+        Modifier
+            .size(width = 104.dp, height = 84.dp)
             .feder(quelle)
-            .glas(18.dp)
-            .clickable(interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .then(if (betont) Modifier.clip(form).background(Gelb) else Modifier.glas(16.dp))
+            .clickable(enabled = aktiv, interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Text(symbol, fontSize = 24.sp)
-        Spacer(Modifier.size(10.dp))
-        Column {
-            // Lange Wörter wie "Probearbeit" werden bei großer Schrift kleiner, statt mitten im Wort umzubrechen
-            Text(
-                titel, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1,
-                autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 16.sp, stepSize = 1.sp),
-            )
-            Text(untertitel, fontSize = 13.sp, color = TextSanft)
-        }
+        Text(symbol, fontSize = 22.sp, maxLines = 1)
+        Text(
+            titel, fontWeight = FontWeight.Bold, color = if (betont) Navy else Color.White, maxLines = 1,
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = 14.sp, stepSize = 1.sp),
+        )
+        Text(
+            untertitel, color = if (betont) Navy else TextSanft, maxLines = 1,
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 11.sp, stepSize = 1.sp),
+        )
     }
 }
 
@@ -350,36 +341,7 @@ private fun chipFarben() = FilterChipDefaults.filterChipColors(
 
 @Composable
 private fun Kennzahl(symbol: String, wert: String, text: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("$symbol $wert", color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
-        Text(text, color = TextSanft, fontSize = 13.sp)
-    }
-}
-
-@Composable
-private fun FehlerheftKnopf(faellig: Int, wartend: Int, onClick: () -> Unit) {
-    val untertitel = when {
-        faellig > 0 -> "$faellig ${if (faellig == 1) "Fehler ist" else "Fehler sind"} dran"
-        wartend > 0 -> "Alles erledigt, $wartend kommen in ein paar Tagen wieder"
-        else -> "Noch keine Fehler. Super!"
-    }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (faellig > 0) Gelb else Karte)
-            .clickable(enabled = faellig > 0, onClick = onClick)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text("📓", fontSize = 26.sp)
-        Spacer(Modifier.size(12.dp))
-        Column {
-            val farbe = if (faellig > 0) Navy else Color.White
-            Text("Fehlerheft", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = farbe)
-            Text(untertitel, fontSize = 14.sp, color = if (faellig > 0) Navy else TextSanft)
-        }
-    }
+    Text("$symbol $wert $text", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
 }
 
 @Composable

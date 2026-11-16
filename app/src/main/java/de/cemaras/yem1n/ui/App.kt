@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
@@ -211,7 +212,7 @@ fun StartScreen(vm: AppViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Kennzahl("🔥", "$serie", if (serie == 1) "Tag" else "Tage")
-                Kennzahl("🪙", "${vm.fortschritt.muenzen}", "Münzen")
+                Kennzahl("🪙", "${vm.fortschritt.muenzen}", "")
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     de.cemaras.yem1n.ui.theme.Fortschrittsring(
                         anteil = if (ziel > 0) minOf(runden, ziel).toFloat() / ziel else 1f,
@@ -302,7 +303,7 @@ fun StartScreen(vm: AppViewModel) {
     }
 }
 
-/** Kleine Kachel für die Reihe unter der Lernwelt. Feste Breite, damit große Schrift die Reihe nicht höher macht. */
+/** Kleine Kachel für die Reihe unter der Lernwelt. Feste Breite, lange Wörter werden gekürzt. */
 @Composable
 private fun Kachel(
     symbol: String, titel: String, untertitel: String,
@@ -312,7 +313,7 @@ private fun Kachel(
     val form = RoundedCornerShape(16.dp)
     Column(
         Modifier
-            .size(width = 104.dp, height = 84.dp)
+            .width(108.dp)
             .feder(quelle)
             .then(if (betont) Modifier.clip(form).background(Gelb) else Modifier.glas(16.dp))
             .clickable(enabled = aktiv, interactionSource = quelle, indication = androidx.compose.foundation.LocalIndication.current, onClick = onClick)
@@ -321,14 +322,9 @@ private fun Kachel(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(symbol, fontSize = 22.sp, maxLines = 1)
-        Text(
-            titel, fontWeight = FontWeight.Bold, color = if (betont) Navy else Color.White, maxLines = 1,
-            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = 14.sp, stepSize = 1.sp),
-        )
-        Text(
-            untertitel, color = if (betont) Navy else TextSanft, maxLines = 1,
-            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 11.sp, stepSize = 1.sp),
-        )
+        val kurz = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+        Text(titel, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = if (betont) Navy else Color.White, maxLines = 1, overflow = kurz)
+        Text(untertitel, fontSize = 11.sp, color = if (betont) Navy else TextSanft, maxLines = 1, overflow = kurz)
     }
 }
 
@@ -341,7 +337,7 @@ private fun chipFarben() = FilterChipDefaults.filterChipColors(
 
 @Composable
 private fun Kennzahl(symbol: String, wert: String, text: String) {
-    Text("$symbol $wert $text", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
+    Text("$symbol $wert $text".trim(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
 }
 
 @Composable
